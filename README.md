@@ -70,7 +70,7 @@ src/
 ## Saavutettavuus
 
 - Toiminnot käytettävissä näppäimistöllä, näkyvä fokuskorostus
-- Ruudunlukijalle tarkoitetut tekstit animoiduille otsikoille ja koristeille
+- Ruudunlukija lukee animoidut otsikot kokonaisina sanoina, ja koristeet on piilotettu siltä
 - "Vähennä liikettä" -käyttöjärjestelmäasetus pysäyttää animaatiot
 - Automaattisesti vaihtuvat esittelyteksti ja projektit voi pysäyttää napista
 - Pääpainikkeiden kosketusalueet vähintään 44 × 44 px
