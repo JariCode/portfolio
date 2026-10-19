@@ -208,6 +208,15 @@
   resize: vertical;
 }
 
+/* iOS/WebKitin autofill-tyyli ei saa vaihtaa kentän neon-teemaa keltaiseksi */
+.field-input:-webkit-autofill,
+.field-input:-webkit-autofill:hover,
+.field-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px rgb(25 18 63 / 0.6) inset;
+  caret-color: var(--text);
+}
+
 .field-label {
   position: absolute;
   top: 1.25rem;
