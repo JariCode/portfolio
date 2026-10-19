@@ -1,0 +1,102 @@
+/* ═══ Osioiden yhteinen asettelu ═══ */
+.section {
+  position: relative;
+  max-width: var(--max-w);
+  margin-inline: auto;
+  /* Yläpadding erikseen pienempänä: scroll-padding-top (index.css) hoitaa
+     jo tilan navin alle, joten otsikko ei saa jäädä ison tyhjän tilan taakse */
+  padding: var(--section-pad-top) var(--gutter) clamp(5rem, 12vw, 8rem);
+}
+
+/* Mobiilissa alapadding pienemmäksi jaetulla muuttujalla (index.css), jotta
+   osiot ovat tiiviimpiä pienellä näytöllä. Desktopin clamp() yllä pysyy
+   ennallaan. */
+@media (max-width: 760px) {
+  .section {
+    padding-bottom: var(--section-pad-bottom-mobile);
+  }
+}
+
+.section-title {
+  display: inline-block;
+  margin-bottom: 3rem;
+}
+
+/* Otsikon alle lyhyt neonputki */
+.section-title::after {
+  content: '';
+  display: block;
+  width: 3.5rem;
+  height: 3px;
+  margin-top: 0.9rem;
+  border-radius: 3px;
+  background: var(--cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+/* ═══ Napit ═══ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.6rem;
+  border: 1.5px solid var(--magenta);
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+}
+
+.btn:hover {
+  background: var(--magenta);
+  color: var(--ink);
+  box-shadow: var(--glow-magenta);
+}
+
+.btn--cyan {
+  border-color: var(--cyan);
+}
+
+.btn--cyan:hover {
+  background: var(--cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ═══ Pienet tunnisteet (teknologiat, taidot) ═══ */
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ═══ HUD-kulmahakaset (esittelyn kuva, projektit) ═══ */
+.hud-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--cyan);
+  filter: drop-shadow(0 0 4px var(--cyan));
+}
+
+.hud-corner--tl { top: 12px; left: 12px; border-right: 0; border-bottom: 0; }
+.hud-corner--tr { top: 12px; right: 12px; border-left: 0; border-bottom: 0; }
+.hud-corner--bl { bottom: 12px; left: 12px; border-right: 0; border-top: 0; }
+.hud-corner--br { bottom: 12px; right: 12px; border-left: 0; border-top: 0; }

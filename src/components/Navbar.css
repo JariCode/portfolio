@@ -1,0 +1,166 @@
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem var(--gutter);
+  transition: padding 0.3s, border-color 0.3s;
+  border-bottom: 1px solid transparent;
+}
+
+/* Rullatessa navista tulee himmennetty lasipaneeli */
+.nav--solid {
+  padding-block: 0.7rem;
+  border-bottom-color: var(--line);
+}
+
+/* Lasiefekti (tausta + sumennus) omalla kerroksellaan .nav:n taakse.
+   Juurisyykorjaus: jos backdrop-filter olisi suoraan .nav:ssa (position:
+   fixed -elementissä, jonka sisällä mobiilivalikko sijaitsee), siitä tulisi
+   containing block kaikille sen position: fixed -lapsille — myös
+   kokoruudun mobiilivalikolle (.nav-links). Silloin valikko rajautuisi
+   navin kokoiseksi koko näytön sijaan heti kun sivua on rullattu
+   (.nav--solid aktivoituu). Pseudoelementti on aina olemassa (ei vain
+   .nav--solidissa), jotta background-siirtymä animoituu molempiin
+   suuntiin kuten ennenkin. */
+.nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: transparent;
+  transition: background 0.3s;
+}
+
+.nav--solid::before {
+  background: rgb(14 10 38 / 0.75);
+  backdrop-filter: blur(12px);
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  text-decoration: none;
+  color: var(--text);
+  text-shadow: var(--glow-magenta);
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-links a {
+  position: relative;
+  padding-block: 0.3rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.is-active {
+  color: var(--text);
+}
+
+/* Aktiivisen linkin alla syttyvä neonviiva */
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--cyan);
+  box-shadow: var(--glow-cyan);
+  transform: scaleX(0);
+  transition: transform 0.3s;
+}
+
+.nav-links a.is-active::after {
+  transform: scaleX(1);
+}
+
+/* Hampurilaisnappi: piilossa isolla näytöllä. Kiinteä 44×44px kosketusalue,
+   vaikka itse kolme-viivainen kuvake on pienempi */
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.nav-burger span {
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--text);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+/* Kolmesta viivasta tulee X */
+.nav-burger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.is-open span:nth-child(2) { opacity: 0; }
+.nav-burger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ═══ Mobiili ═══ */
+@media (max-width: 760px) {
+  /* .nav:ssa on kolme flex-lasta (logo, nappi, <nav>-kääre). <nav>-kääreen
+     ainoa lapsi (ul.nav-links) on position: fixed eli pois flex-rivin
+     tilanjaosta, mutta kääre itse vie silti oman (tyhjän) kohtansa, joten
+     justify-content: space-between jätti napin kahden pisteen väliin eikä
+     reunaan. margin-left: auto imee kaiken vapaan tilan napin vasemmalle
+     puolelle, jolloin se asettuu aina ihan oikeaan reunaan tyhjästä
+     kääreestä riippumatta. */
+  .nav-burger {
+    display: flex;
+    position: relative;
+    z-index: 2; /* pysyy valikon päällä */
+    margin-left: auto;
+  }
+
+  /* Pienempi oikea välistys mobiilissa: napin oma 44px:n kosketusalue antaa
+     jo riittävästi tilaa sormelle, joten erillistä isoa gutter-väliä navin
+     reunaan ei tarvita yhtä paljon kuin desktopilla */
+  .nav {
+    padding-right: 0.75rem;
+  }
+
+  .nav-links {
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.2rem;
+    background: rgb(14 10 38 / 0.96);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+
+  .nav-links.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .nav-links a {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+  }
+}

@@ -1,0 +1,349 @@
+.contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: start;
+  gap: clamp(2.5rem, 6vw, 5rem);
+}
+
+/* Viimeinen osio: pieni alapadding, jotta footer mahtuu samaan näkymään lomakkeen kanssa */
+.section.contact {
+  padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.contact-intro .section-title {
+  margin-bottom: 1.5rem;
+}
+
+.contact-lead {
+  max-width: 40ch;
+  margin-bottom: 2.2rem;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+/* ═══ Somekortit ═══ */
+.social-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.social-card {
+  --c: var(--cyan);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgb(25 18 63 / 0.55);
+  text-decoration: none;
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+}
+
+/* Jokaisella palvelulla oma neonväri */
+.social-card--github    { --c: var(--violet); }
+.social-card--instagram { --c: var(--magenta); }
+.social-card--facebook  { --c: #6e8bff; }
+
+.social-card:hover,
+.social-card:focus-visible {
+  border-color: var(--c);
+  background: rgb(25 18 63 / 0.85);
+  box-shadow: 0 0 26px -6px var(--c), inset 0 0 20px -12px var(--c);
+}
+
+/* Ikoni värjätään CSS:llä: SVG toimii maskina, väri tulee taustasta */
+.social-icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  background: var(--c);
+  /* kuva tulee JSX:stä (maskImage), tässä vain sijoittelu */
+  mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  filter: drop-shadow(0 0 6px var(--c));
+  transition: transform 0.3s;
+}
+
+.social-card:hover .social-icon {
+  transform: scale(1.15) rotate(-6deg);
+}
+
+.social-text {
+  display: grid;
+  min-width: 0;
+}
+
+.social-name {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.social-handle {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Vino nuoli oikeassa reunassa */
+.social-arrow {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-left: auto;
+  border-top: 2px solid var(--muted);
+  border-right: 2px solid var(--muted);
+  transition: border-color 0.3s, translate 0.3s;
+}
+
+.social-card:hover .social-arrow {
+  border-color: var(--c);
+  translate: 3px -3px;
+}
+
+/* ═══ Lomake ═══ */
+.contact-form {
+  position: relative;
+  display: grid;
+  gap: 1.2rem;
+  padding: clamp(1.5rem, 4vw, 2.2rem);
+  padding-top: 2.6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgb(25 18 63 / 0.6);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+
+.contact-form--typing,
+.contact-form--sending {
+  border-color: rgb(41 224 255 / 0.5);
+  box-shadow: 0 0 50px -16px var(--cyan);
+}
+
+.contact-form--sent {
+  border-color: var(--magenta);
+  box-shadow: 0 0 50px -12px var(--magenta);
+}
+
+/* ═══ Neonkyltti lomakkeen yläreunassa ═══ */
+.contact-sign {
+  position: absolute;
+  top: -1.4rem;
+  left: 50%;
+  translate: -50% 0;
+  padding: 0.35rem 1.4rem;
+  border: 2px solid rgb(255 61 200 / 0.25);
+  border-radius: 10px;
+  background: var(--ink);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.contact-form:not(.contact-form--idle) .contact-sign {
+  border-color: var(--magenta);
+  box-shadow: var(--glow-magenta);
+}
+
+.contact-sign-text {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  color: rgb(255 61 200 / 0.25); /* sammunut */
+}
+
+/* Syttyy välkkyen, kun kävijä alkaa kirjoittaa */
+.contact-sign-text.is-lit {
+  animation: sign-on 0.8s forwards;
+}
+
+@keyframes sign-on {
+  0%, 20%, 40% { color: rgb(255 61 200 / 0.25); text-shadow: none; }
+  10%, 30%, 60%, 100% { color: #ffe1f6; text-shadow: var(--glow-magenta); }
+}
+
+/* Lähetyksen aikana kyltti sykkii */
+.contact-form--sending .contact-sign-text {
+  animation: sign-pulse 0.9s ease-in-out infinite;
+  color: #ffe1f6;
+}
+
+@keyframes sign-pulse {
+  50% { opacity: 0.45; }
+}
+
+.contact-form.contact-form--error .contact-sign {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 18px -2px #ff6b6b;
+}
+
+.contact-form--error .contact-sign-text {
+  color: #ffd1d1;
+  text-shadow: 0 0 10px #ff6b6b;
+  animation: none;
+}
+
+/* ═══ Kentät: kelluva otsikko ja syttyvä alaviiva ═══ */
+.field {
+  position: relative;
+}
+
+.field-input {
+  width: 100%;
+  padding: 1.4rem 0 0.5rem;
+  border: 0;
+  border-bottom: 1.5px solid var(--line);
+  background: transparent;
+  font-size: 1.05rem;
+  outline: none;
+  resize: vertical;
+}
+
+.field-label {
+  position: absolute;
+  top: 1.25rem;
+  left: 0;
+  color: var(--muted);
+  pointer-events: none;
+  transform-origin: left top;
+  transition: transform 0.25s, color 0.25s;
+}
+
+/* Kun kentässä on fokus tai tekstiä, otsikko nousee pieneksi yläpuolelle */
+.field-input:focus + .field-label,
+.field-input:not(:placeholder-shown) + .field-label {
+  transform: translateY(-1.2rem) scale(0.8);
+  color: var(--cyan);
+}
+
+/* Neonviiva piirtyy keskeltä reunoille fokuksessa */
+.field-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--cyan);
+  box-shadow: var(--glow-cyan);
+  transform: scaleX(0);
+  transition: transform 0.35s ease;
+}
+
+.field-input:focus ~ .field-line {
+  transform: scaleX(1);
+}
+
+.field textarea.field-input {
+  min-height: 5.5rem;
+  line-height: 1.6;
+}
+
+.field--error .field-input {
+  border-bottom-color: #ff6b6b;
+}
+
+.field--error .field-label {
+  color: #ff9d9d;
+}
+
+.field-error {
+  margin-top: 0.4rem;
+  color: #ff9d9d;
+  font-size: 0.85rem;
+}
+
+.field-count {
+  margin-top: -1.1rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: right;
+  max-width: none;
+}
+
+/* Hunajapurkki pois näkyvistä (ei display:none, jota botit osaavat ohittaa) */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ═══ Lähetysnappi ja palaute ═══ */
+.contact-submit {
+  justify-self: start;
+}
+
+/* Nuoli, joka lähtee lentoon */
+.send-icon {
+  width: 0;
+  height: 0;
+  border-left: 12px solid currentColor;
+  border-block: 6px solid transparent;
+  transition: translate 0.3s;
+}
+
+.contact-submit:hover .send-icon {
+  translate: 4px -2px;
+}
+
+.contact-form--sending .send-icon {
+  animation: fly 0.9s ease-in infinite;
+}
+
+@keyframes fly {
+  0%   { translate: 0 0; opacity: 1; }
+  70%  { translate: 18px -8px; opacity: 0; }
+  71%  { translate: -10px 4px; opacity: 0; }
+  100% { translate: 0 0; opacity: 1; }
+}
+
+.contact-feedback {
+  min-height: 1.5em;
+  margin-top: -0.6rem;
+  font-weight: 600;
+}
+
+.contact-feedback--sent  { color: var(--magenta); text-shadow: 0 0 10px rgb(255 61 200 / 0.6); }
+.contact-feedback--error { color: #ff9d9d; }
+
+/* Tietosuojamaininta lähetysnapin alla */
+.contact-consent {
+  margin-top: -0.4rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.contact-privacy {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cyan);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ═══ Kapea näyttö ═══ */
+@media (max-width: 860px) {
+  .contact {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 4rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .social-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

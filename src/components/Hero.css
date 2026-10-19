@@ -1,0 +1,197 @@
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(2.5rem, 5vw, 5rem);
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: 7rem clamp(1.5rem, 6vw, 5rem) 6rem;
+}
+
+.hero-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+/* ═══ "Avoin työtarjouksille" -kyltti ═══ */
+.hero-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  align-self: flex-start;
+  padding: 0.4rem 1rem;
+  border: 1.5px solid var(--cyan);
+  border-radius: 999px;
+  color: var(--cyan);
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 0 16px -4px var(--cyan), inset 0 0 12px -6px var(--cyan);
+}
+
+.hero-open-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: var(--glow-cyan);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% { opacity: 0.25; transform: scale(0.7); }
+}
+
+/* ═══ Nimi neonputkina ═══ */
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.hero-name {
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(3.4rem, 9vw, 7.5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+
+/* Sukunimi porrastettuna oikealle kuin julisteessa */
+.hero-line:nth-child(2) {
+  padding-left: clamp(1.5rem, 7vw, 6rem);
+}
+
+.hero-letter-wrap {
+  display: inline-block;
+}
+
+.hero-letter {
+  display: inline-block;
+  color: rgb(255 61 200 / 0.15); /* sammunut putki */
+  animation: letter-on 0.9s calc(0.3s + var(--i) * 0.09s) forwards;
+}
+
+/* Välkkyy pari kertaa ennen kuin jää palamaan */
+@keyframes letter-on {
+  0%, 22%, 40% {
+    color: rgb(255 61 200 / 0.15);
+    text-shadow: none;
+  }
+  15%, 35%, 60%, 100% {
+    color: #ffe1f6;
+    text-shadow: var(--glow-magenta);
+  }
+}
+
+/* Sukunimi syaanina */
+.hero-line:nth-child(2) .hero-letter {
+  color: rgb(41 224 255 / 0.15);
+  animation-name: letter-on-cyan;
+}
+
+@keyframes letter-on-cyan {
+  0%, 22%, 40% {
+    color: rgb(41 224 255 / 0.15);
+    text-shadow: none;
+  }
+  15%, 35%, 60%, 100% {
+    color: #e3fbff;
+    text-shadow: var(--glow-cyan);
+  }
+}
+
+/* ═══ Ammatti: oma neonputkensa, syttyy nimen jälkeen ═══ */
+.hero-role {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: clamp(1.15rem, 2.4vw, 1.9rem);
+  font-weight: 500;
+  color: rgb(241 236 255 / 0.15);
+  animation: role-on 1s 1.2s forwards;
+}
+
+/* Viiva ammatin edessä */
+.hero-role::before {
+  content: '';
+  flex: none;
+  width: clamp(1.5rem, 5vw, 3.5rem);
+  height: 3px;
+  border-radius: 3px;
+  background: var(--magenta);
+  box-shadow: var(--glow-magenta);
+}
+
+@keyframes role-on {
+  0%, 25%, 45% {
+    color: rgb(241 236 255 / 0.15);
+    text-shadow: none;
+  }
+  20%, 40%, 70%, 100% {
+    color: var(--text);
+    text-shadow: 0 0 18px rgb(178 140 255 / 0.7);
+  }
+}
+
+.hero-text {
+  max-width: 44ch;
+  color: var(--muted);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.4rem;
+}
+
+/* ═══ Koodi-ikkuna ═══ */
+.hero-code {
+  display: flex;
+  justify-content: center;
+  min-width: 0; /* estää pitkää koodiriviä venyttämästä palstaa */
+}
+
+/* ═══ Rullausvihje: neonviiva, jota pitkin valo valuu alas ═══ */
+.hero-scroll {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  width: 2px;
+  height: 56px;
+  overflow: hidden;
+  background: rgb(41 224 255 / 0.2);
+}
+
+.hero-scroll span {
+  position: absolute;
+  inset: 0;
+  background: var(--cyan);
+  box-shadow: var(--glow-cyan);
+  animation: drip 2s ease-in-out infinite;
+}
+
+@keyframes drip {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* ═══ Kapea näyttö: koodi-ikkuna tekstin alle ═══ */
+@media (max-width: 960px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    /* Kiinteän 6.5rem:n sijaan sidottu navin korkeuteen (index.css --nav-h),
+       jotta väli navin ja sisällön välissä on vain sen verran kuin tarvitaan
+       eikä sivu ala turhan alhaalta pienellä näytöllä */
+    padding-top: calc(var(--nav-h) + 1rem);
+  }
+
+  .hero-scroll {
+    display: none;
+  }
+}

@@ -1,0 +1,107 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: rgb(8 5 24 / 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.modal {
+  position: relative;
+  width: min(100%, 1000px);
+  border: 1px solid rgb(41 224 255 / 0.4);
+  border-radius: var(--radius);
+  background: var(--ink-2);
+  box-shadow: 0 0 60px -10px rgb(41 224 255 / 0.5), 0 0 0 1px rgb(255 61 200 / 0.15);
+  overflow: hidden;
+}
+
+/* ═══ Video-modaali (traileri, video-CV) ═══ */
+/* Juurisyykorjaus: aiemmin .modal pysyi aina min(100%, 1000px) levyisenä,
+   ja video (.video-frame, Projects.css) kapeni OMAAN tilaansa modaalin
+   SISÄLLÄ mahtuakseen korkeussuuntaan — video jäi siis kapeaksi keskelle
+   ja sivuille jäi tyhjät kaistat. Nyt modaalin leveys itse lasketaan
+   videon 16:9-suhteesta käytettävissä olevan korkeuden mukaan (min-arvoista
+   pienin voittaa: 1000px, käytettävissä oleva leveys, tai korkeuden sallima
+   leveys), joten video täyttää aina koko modaalin eikä tyhjiä kaistoja jää.
+   100dvh toisena varmistaa oikean korkeuden myös mobiiliselaimien
+   työkalupalkkien kanssa; 100vh ensin on varamuoto vanhoille selaimille. */
+.modal--video {
+  width: min(100%, 1000px, calc((100vh - 2 * var(--gutter)) * 16 / 9));
+  width: min(100%, 1000px, calc((100dvh - 2 * var(--gutter)) * 16 / 9));
+  /* .modalin overflow: hidden korvataan .video-framen omalla pyöristyksellä
+     (Projects.css), jotta sulkunappi voi tarvittaessa (ks. media-kysely
+     alempana) siirtyä osittain modaalin ulkopuolelle leikkautumatta pois
+     näkyvistä. */
+  overflow: visible;
+}
+
+/* Rullaava sisältökääre: matalalla näytöllä (esim. puhelin vaakatilassa) traileri
+   tai sertifikaattikuva voi olla korkeampi kuin näyttö, jolloin se rullautuu
+   tämän sisällä sen sijaan, että jäisi .modalin overflow:hiddenin taakse */
+.modal-scroll {
+  max-height: calc(100vh - 2 * var(--gutter));
+  max-height: calc(100dvh - 2 * var(--gutter));
+  overflow-y: auto;
+}
+
+/* CV-asiakirjalla on oma sisäinen rullauksensa (CvDocument.css .cvd-scroll),
+   joten kääre ei saa rajata sitä toistamiseen */
+.modal--doc .modal-scroll {
+  max-height: none;
+  overflow: visible;
+}
+
+/* Sulkunappi: X kahdesta viivasta. 44×44px, jotta kosketusalue riittää */
+.modal-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--magenta);
+  border-radius: 50%;
+  background: rgb(14 10 38 / 0.8);
+  cursor: pointer;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+
+.modal-close:hover {
+  background: var(--magenta);
+  box-shadow: var(--glow-magenta);
+}
+
+/* Video täyttää .modal--video:n reunasta reunaan (ei enää tyhjiä kaistoja),
+   joten sulkunappi peittäisi aina saman kohdan videosta. Matalalla näytöllä
+   (esim. puhelin vaakatilassa, jossa video on muutenkin ahtaimmillaan)
+   siirretään nappi osittain modaalin yläpuolelle, jottei se peitä YouTuben
+   tai selaimen omien ohjainten yläkulmaa yhtä paljon. Kosketusalue pysyy
+   silti 44×44px:ssä, vain sijainti muuttuu. */
+@media (max-height: 500px) {
+  .modal--video .modal-close {
+    top: -1.2rem;
+    right: -1.2rem;
+  }
+}
+
+.modal-close span,
+.modal-close span::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--text);
+  translate: -50% -50%;
+  rotate: 45deg;
+}
+
+.modal-close span::after {
+  content: '';
+  rotate: 90deg;
+}

@@ -1,0 +1,198 @@
+.footer {
+  position: relative;
+  overflow: hidden; /* ei ylämarginaalia: footer seuraa heti viimeistä osiota */
+  background: linear-gradient(to bottom, transparent, rgb(8 5 24 / 0.85) 40%);
+}
+
+/* ═══ Neonviiva yläreunassa: valopulssi kulkee vasemmalta oikealle ═══ */
+.footer-line {
+  position: relative;
+  height: 1px;
+  background: var(--line);
+}
+
+.footer-line::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 30%;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--magenta), var(--cyan), transparent);
+  box-shadow: 0 0 14px var(--cyan);
+  animation: line-run 6s linear infinite;
+}
+
+@keyframes line-run {
+  from { translate: -100% 0; }
+  to   { translate: 400% 0; }
+}
+
+/* ═══ Sisältö ═══ */
+.footer-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.2fr auto auto;
+  align-items: center;
+  gap: 2rem 3rem;
+  max-width: var(--max-w);
+  margin-inline: auto;
+  padding: 1.8rem var(--gutter) 1.2rem;
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--text);
+  text-decoration: none;
+  text-shadow: var(--glow-magenta);
+}
+
+.footer-brand p {
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-links a {
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s, text-shadow 0.2s;
+}
+
+.footer-links a:hover {
+  color: var(--cyan);
+  text-shadow: 0 0 10px var(--cyan);
+}
+
+.footer-socials {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-socials a {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, translate 0.2s;
+}
+
+.footer-socials a:hover {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px -2px var(--cyan);
+  translate: 0 -3px;
+}
+
+/* Ikoni värjätään maskilla kuten yhteydenotto-osiossa */
+.footer-icon {
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  /* kuva tulee JSX:stä (maskImage), tässä vain sijoittelu */
+  mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+}
+
+/* ═══ Alapalkki ═══ */
+.footer-bottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem 2rem;
+  max-width: var(--max-w);
+  margin-inline: auto;
+  padding: 1rem var(--gutter) 1.4rem;
+  border-top: 1px solid rgb(58 47 122 / 0.5);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.footer-privacy {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cyan);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.footer-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-top:hover {
+  color: var(--magenta);
+}
+
+.footer-top-arrow {
+  width: 8px;
+  height: 8px;
+  margin-top: 4px;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  rotate: 45deg;
+  transition: translate 0.2s;
+}
+
+.footer-top:hover .footer-top-arrow {
+  translate: 0 -3px;
+}
+
+/* Iso ääriviivateksti taustalla */
+.footer-ghost {
+  position: absolute;
+  left: 50%;
+  bottom: -0.25em;
+  translate: -50% 0;
+  max-width: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(5rem, 20vw, 16rem);
+  line-height: 1;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(178 140 255 / 0.12);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ═══ Kapea näyttö ═══ */
+@media (max-width: 760px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+}

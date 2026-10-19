@@ -1,0 +1,44 @@
+.modal--privacy {
+  width: min(100%, 760px);
+}
+
+/* Teksti rullaa modaalin sisällä, sulkunappi pysyy paikallaan */
+.privacy-scroll {
+  max-height: calc(100vh - 2 * var(--gutter));
+  max-height: calc(100dvh - 2 * var(--gutter));
+  overflow-y: auto;
+  scrollbar-color: var(--line) transparent;
+}
+
+.privacy {
+  display: grid;
+  gap: 1.6rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  padding-right: clamp(3.5rem, 6vw, 4rem); /* tilaa sulkunapille */
+  font-size: 0.97rem;
+}
+
+.privacy h2 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  text-shadow: 0 0 24px rgb(255 61 200 / 0.45);
+}
+
+.privacy-updated {
+  margin-top: -1.2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.privacy h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: var(--cyan);
+}
+
+.privacy p {
+  color: var(--muted);
+}
+
+.privacy a {
+  color: var(--cyan);
+}

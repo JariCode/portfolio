@@ -1,0 +1,395 @@
+/* ═══ Avattavat kortit: CV ja video-CV ═══ */
+.cv-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+}
+
+.cv-tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1.4rem;
+  padding: 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgb(25 18 63 / 0.55);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.3s, box-shadow 0.3s, translate 0.3s;
+}
+
+.cv-tile--doc:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 30px -8px var(--cyan);
+  translate: 0 -4px;
+}
+
+.cv-tile--video:hover {
+  border-color: var(--magenta);
+  box-shadow: 0 0 30px -8px var(--magenta);
+  translate: 0 -4px;
+}
+
+.cv-tile-preview {
+  position: relative;
+  display: block;
+  width: clamp(110px, 14vw, 170px);
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+/* Pienoiskuva paperista: kuva ja tekstiviivoja */
+.cv-tile--doc .cv-tile-preview {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.7rem;
+  background: linear-gradient(160deg, #1f1650, var(--ink));
+  border: 1px solid rgb(41 224 255 / 0.3);
+}
+
+.cv-tile--doc img {
+  width: 34%;
+  height: 60%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.cv-lines {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.cv-lines span {
+  height: 5px;
+  border-radius: 3px;
+  background: rgb(167 159 208 / 0.35);
+  transition: background 0.3s, width 0.4s;
+}
+
+.cv-lines span:nth-child(1) { width: 90%; background: var(--magenta); }
+.cv-lines span:nth-child(2) { width: 60%; }
+.cv-lines span:nth-child(3) { width: 80%; }
+.cv-lines span:nth-child(4) { width: 45%; background: var(--cyan); }
+.cv-lines span:nth-child(5) { width: 75%; }
+.cv-lines span:nth-child(6) { width: 55%; }
+
+/* Hoverissa viivat "kirjoittuvat" uudelleen */
+.cv-tile--doc:hover .cv-lines span {
+  animation: line-type 0.6s ease-out backwards;
+}
+
+.cv-tile--doc:hover .cv-lines span:nth-child(2) { animation-delay: 0.05s; }
+.cv-tile--doc:hover .cv-lines span:nth-child(3) { animation-delay: 0.1s; }
+.cv-tile--doc:hover .cv-lines span:nth-child(4) { animation-delay: 0.15s; }
+.cv-tile--doc:hover .cv-lines span:nth-child(5) { animation-delay: 0.2s; }
+.cv-tile--doc:hover .cv-lines span:nth-child(6) { animation-delay: 0.25s; }
+
+@keyframes line-type {
+  from { transform: scaleX(0); transform-origin: left; }
+}
+
+.cv-tile--video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.8);
+}
+
+.cv-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--magenta);
+  border-radius: 50%;
+  background: rgb(14 10 38 / 0.6);
+  box-shadow: var(--glow-magenta);
+  transition: opacity 0.3s;
+}
+
+.cv-play .play-icon {
+  border-left-width: 11px;
+  border-block-width: 7px;
+  margin-left: 3px;
+}
+
+/* Esikatselun pyöriessä toistonappi himmenee */
+.cv-tile--video:hover .cv-play {
+  opacity: 0.25;
+}
+
+.cv-tile-text {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.cv-tile-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-weight: 600;
+}
+
+.cv-tile-sub {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ═══ Osaamisnauha: liukuu loputtomasti, pysähtyy hiiren alla ═══ */
+.skill-marquee {
+  margin-block: clamp(3rem, 6vw, 4.5rem);
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.skill-track {
+  display: flex;
+  gap: 0.8rem;
+  width: max-content;
+  padding: 0.5rem 0;
+  list-style: none;
+  animation: marquee 28s linear infinite;
+}
+
+.skill-marquee:hover .skill-track {
+  animation-play-state: paused;
+}
+
+.skill-track li {
+  padding: 0.5rem 1.1rem;
+  border: 1.5px solid var(--violet);
+  border-radius: 999px;
+  color: var(--violet);
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 0 14px -4px var(--violet), inset 0 0 10px -6px var(--violet);
+}
+
+.skill-track li:nth-child(3n + 1) {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 14px -4px var(--cyan), inset 0 0 10px -6px var(--cyan);
+}
+
+.skill-track li:nth-child(3n + 2) {
+  border-color: var(--magenta);
+  color: var(--magenta);
+  box-shadow: 0 0 14px -4px var(--magenta), inset 0 0 10px -6px var(--magenta);
+}
+
+/* Lista on kahteen kertaan, joten puolet leveydestä = saumaton silmukka */
+@keyframes marquee {
+  to { transform: translateX(calc(-50% - 0.4rem)); }
+}
+
+/* ═══ Aikajanat ═══ */
+.timelines {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(2.5rem, 5vw, 4rem);
+}
+
+.timeline {
+  --c: var(--magenta);
+}
+
+.timeline--cyan {
+  --c: var(--cyan);
+}
+
+.timeline-title {
+  margin-bottom: 1.6rem;
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  color: var(--c);
+  text-shadow: 0 0 18px var(--c);
+}
+
+.timeline-track {
+  position: relative;
+  padding-left: 2.2rem;
+}
+
+/* Himmeä raide ja sen päälle piirtyvä neonviiva */
+.timeline-track::before,
+.timeline-line {
+  content: '';
+  position: absolute;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  left: 7px;
+  width: 3px;
+  border-radius: 3px;
+}
+
+.timeline-track::before {
+  background: var(--line);
+}
+
+.timeline-line {
+  background: var(--c);
+  box-shadow: 0 0 10px var(--c);
+  transform-origin: top;
+}
+
+.timeline-track ol {
+  display: grid;
+  gap: 1.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-item {
+  position: relative;
+}
+
+/* Asema */
+.timeline-dot {
+  position: absolute;
+  top: 0.3rem;
+  left: calc(-2.2rem + 1px);
+  width: 15px;
+  height: 15px;
+  border: 3px solid var(--c);
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 12px var(--c);
+}
+
+.timeline-card {
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgb(25 18 63 / 0.5);
+  transition: border-color 0.3s;
+}
+
+.timeline-card:hover {
+  border-color: var(--c);
+}
+
+.timeline-time {
+  color: var(--c);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.timeline-card h4 {
+  margin-block: 0.2rem 0.4rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+}
+
+.timeline-text {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ═══ Sertifikaatit ═══ */
+.cert-heading {
+  margin-block: clamp(3.5rem, 7vw, 5rem) 1.6rem;
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  color: var(--violet);
+  text-shadow: 0 0 18px var(--violet);
+}
+
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+  perspective: 900px;
+}
+
+.cert-card {
+  position: relative;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ink-2);
+  cursor: zoom-in;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.cert-card:hover {
+  border-color: var(--violet);
+  box-shadow: 0 0 30px -6px var(--violet);
+}
+
+.cert-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain; /* koko kuva näkyy, mitään ei leikata */
+  padding: 1rem;
+  background: radial-gradient(circle at 50% 40%, rgb(178 140 255 / 0.12), transparent 70%);
+}
+
+/* Valoheijastus liukuu kortin yli kallistuksen mukana */
+.cert-glare {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) 30%, rgb(255 255 255 / 0.22), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.cert-card:hover .cert-glare {
+  opacity: 1;
+}
+
+.cert-name {
+  display: block;
+  padding: 0.8rem 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Iso sertifikaatti modaalissa */
+.modal--cert {
+  width: min(100%, 860px);
+}
+
+.cert-view img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  background: #000;
+}
+
+.cert-view-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.4rem;
+}
+
+.cert-view-bar h3 {
+  font-size: 1.1rem;
+}
+
+/* Video-CV modaalissa */
+.video-frame video {
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+/* ═══ Kapea näyttö ═══ */
+@media (max-width: 860px) {
+  .cv-tiles,
+  .timelines {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

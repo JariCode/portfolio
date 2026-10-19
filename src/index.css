@@ -1,0 +1,156 @@
+/* ═══ Värit, fontit ja yhteiset arvot ═══ */
+:root {
+  --ink: #0e0a26;          /* sivun pohja: syvä indigo */
+  --ink-2: #19123f;        /* korttien ja paneelien pinta */
+  --line: #3a2f7a;         /* hillityt reunat */
+
+  --magenta: #ff3dc8;
+  --cyan: #29e0ff;
+  --violet: #b28cff;
+
+  --text: #f1ecff;
+  --muted: #a79fd0;
+
+  /* Neonhehku: kolme varjokerrosta, lähin terävä, uloin pehmeä */
+  --glow-magenta: 0 0 4px #ff3dc8, 0 0 14px rgb(255 61 200 / .6), 0 0 38px rgb(255 61 200 / .35);
+  --glow-cyan:    0 0 4px #29e0ff, 0 0 14px rgb(41 224 255 / .6), 0 0 38px rgb(41 224 255 / .35);
+
+  --font-display: 'Unbounded Variable', system-ui, sans-serif;
+  --font-body: 'Instrument Sans', system-ui, sans-serif;
+
+  --radius: 14px;
+  --max-w: 1120px;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  /* Osion yläpaddingiin: pitää olla vain kevyt väli navin ja otsikon välissä,
+     ei sama kuin alapadding (joka vastaa välistä seuraavaan osioon) */
+  --section-pad-top: clamp(2.5rem, 5vw, 3.5rem);
+  /* Navin likimääräinen korkeus siinä tilassa, jossa ankkurilinkkejä yleensä
+     klikataan (rullattu/"solid"-tila). Käytetään scroll-padding-topina, jotta
+     osion otsikko ei jää navin alle mutta navin alle ei myöskään jää turhaa
+     tyhjää tilaa (ks. myös html { scroll-padding-top } alempana). */
+  --nav-h: 4rem;
+}
+
+@media (max-width: 760px) {
+  :root {
+    /* Mobiilissa hampurilaisnapin kosketusalue on kiinteä 44×44px
+       (saavutettavuusvaatimus), joten navi on tosiasiassa hieman korkeampi
+       kuin desktopilla rullattuna — arvo on siis isompi, ei pienempi */
+    --nav-h: 4.25rem;
+    /* Osioiden ylä- ja alapadding tiiviimmäksi pienellä näytöllä, jotta
+       otsikko näkyy heti navin alla eikä sivu veny turhan pitkäksi */
+    --section-pad-top: 1.5rem;
+    --section-pad-bottom-mobile: 3.5rem;
+  }
+}
+
+/* ═══ Perusnollaus ═══ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-h); /* ankkurilinkit eivät jää navin alle */
+  /* HUOM: tässä oli aiemmin "overflow-x: hidden" ja kommentti, jonka mukaan
+     se estäisi bodya muuttumasta vieritysjuureksi ja siten korjaisi
+     hampurilaisvalikon rullausbugin. Se oli väärä diagnoosi: todellinen syy
+     valikon rikkoutumiselle rullattaessa oli Navbar.css:n .nav--solidin
+     backdrop-filter, joka teki navista containing blockin kaikille
+     position: fixed -lapsille (korjattu Navbar.css:ssä, ks. .nav::before).
+     overflow-x: clip jätetty tänne vain varmuuden vuoksi estämään
+     vaakarullaus, jos joku koristeellinen elementti (esim. leijuvat laput)
+     ylittäisi näytön reunan — clip ei luo uutta vieritysjuurta eikä riko
+     position: fixed/sticky-toimintaa, toisin kuin hidden/auto saattaisivat
+     joissain selaimissa tehdä. */
+  overflow-x: clip;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--magenta);
+  color: var(--ink);
+}
+
+/* ═══ Typografia ═══ */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: clamp(1.9rem, 4.5vw, 3rem);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+p {
+  max-width: 68ch; /* luettava rivinpituus */
+}
+
+/* ═══ Saavutettavuus ═══ */
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Piilotettu näkyviltä, mutta ruudunlukija lukee sen */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Jos käyttäjä on pyytänyt vähemmän liikettä, CSS-animaatiot pois */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

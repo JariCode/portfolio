@@ -1,0 +1,97 @@
+.code-window {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  border: 1px solid rgb(41 224 255 / 0.35);
+  border-radius: 12px;
+  background: rgb(14 10 38 / 0.75);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 0 0 1px rgb(255 61 200 / 0.08),
+    0 0 50px -12px rgb(41 224 255 / 0.55),
+    0 30px 60px -30px rgb(0 0 0 / 0.8);
+  overflow: hidden;
+}
+
+/* Yläpalkki kuin editorissa */
+.code-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: rgb(25 18 63 / 0.6);
+}
+
+.code-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.code-dot:nth-child(1) { background: var(--magenta); box-shadow: 0 0 8px var(--magenta); }
+.code-dot:nth-child(2) { background: var(--violet); }
+.code-dot:nth-child(3) { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+
+.code-file {
+  margin-left: 0.6rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Koodi: järjestelmän tasalevyinen fontti, ei ulkoista latausta */
+.code-body {
+  margin: 0;
+  padding: 1.1rem 0;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, 'SF Mono', Menlo, monospace;
+  font-size: clamp(0.78rem, 1.1vw, 0.95rem);
+  line-height: 1.8;
+  overflow-x: auto;
+}
+
+.code-line {
+  display: flex;
+  min-height: 1.8em;
+  padding-right: 1.2rem;
+}
+
+.code-num {
+  flex: none;
+  width: 3rem;
+  padding-right: 1.1rem;
+  text-align: right;
+  color: rgb(167 159 208 / 0.4);
+  user-select: none;
+}
+
+.code-line code {
+  font: inherit;
+  white-space: pre;
+}
+
+/* Syntaksivärit neonpaletista */
+.tok-key  { color: var(--magenta); }
+.tok-var  { color: var(--text); }
+.tok-prop { color: var(--violet); }
+.tok-str  { color: var(--cyan); text-shadow: 0 0 8px rgb(41 224 255 / 0.4); }
+.tok-bool { color: var(--magenta); text-shadow: 0 0 8px rgb(255 61 200 / 0.5); }
+.tok-fn   { color: #ffd36e; }
+.tok-pun  { color: var(--muted); }
+
+/* Vilkkuva kursori */
+.code-cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.1em;
+  margin-left: 1px;
+  vertical-align: -0.18em;
+  background: var(--cyan);
+  box-shadow: var(--glow-cyan);
+  animation: cursor-blink 1s steps(1) infinite;
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}
