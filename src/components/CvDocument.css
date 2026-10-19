@@ -150,18 +150,28 @@
     margin: 14mm;
   }
 
+  html {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
   /* Kun CV-modaali on auki, kaikki muu piilotetaan */
   body:has(.modal--doc) > *:not(.modal-backdrop) {
     display: none !important;
   }
 
   body:has(.modal--doc) {
+    height: auto !important;
+    min-height: 0 !important;
     background: #fff !important;
   }
 
   .modal-backdrop:has(.modal--doc) {
     position: static;
+    inset: auto;
     display: block;
+    height: auto;
+    min-height: 0;
     padding: 0;
     background: none;
     backdrop-filter: none;
@@ -170,12 +180,20 @@
 
   .modal--doc {
     width: auto;
+    height: auto;
+    min-height: 0;
     border: 0;
     background: none;
     box-shadow: none;
     overflow: visible;
     transform: none !important;
     opacity: 1 !important;
+  }
+
+  .modal--doc .modal-scroll {
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .modal--doc .modal-close,
