@@ -100,3 +100,19 @@
 .hud-corner--tr { top: 12px; right: 12px; border-left: 0; border-bottom: 0; }
 .hud-corner--bl { bottom: 12px; left: 12px; border-right: 0; border-top: 0; }
 .hud-corner--br { bottom: 12px; right: 12px; border-left: 0; border-top: 0; }
+
+/* ScrambleText: satunnaismerkki piirretään oikean kirjaimen paikalle, jotta tekstin koko ei muutu */
+.scramble-char {
+  position: relative;
+}
+
+.scramble-real {
+  visibility: hidden;
+}
+
+.scramble-glyph {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
