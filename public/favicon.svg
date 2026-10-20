@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <!-- Pehmeä hehku neonputkien ympärille -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.4"/>
+    </filter>
+  </defs>
+
+  <!-- Pohja: teeman indigo, pyöristetty neliö -->
+  <rect width="64" height="64" rx="14" fill="#0e0a26"/>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Hehku: sama muoto sumennettuna putken alla -->
+    <g filter="url(#glow)" stroke-width="7">
+      <path d="M24 15 V39 A8 8 0 0 1 8 39" stroke="#ff3dc8"/>
+      <path d="M56 22.5 A12 12 0 1 0 56 41.5" stroke="#29e0ff"/>
+    </g>
+    <!-- Putket: lähes valkoinen ydin, kuten palavassa neonissa -->
+    <g stroke-width="4.5">
+      <path d="M24 15 V39 A8 8 0 0 1 8 39" stroke="#ffe1f6"/>
+      <path d="M56 22.5 A12 12 0 1 0 56 41.5" stroke="#e3fbff"/>
+    </g>
+  </g>
+</svg>

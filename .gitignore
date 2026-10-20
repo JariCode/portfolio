@@ -23,5 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-# Koko public-kansio sisältöineen ei versionhallintaan
-public/
+# public-kansion kuvat ja videot eivät kuulu versionhallintaan,
+# palvelinasetukset, lomakkeen käsittelijä, favicon ja robots.txt kuuluvat
+public/*
+!public/.htaccess
+!public/contact.php
+!public/favicon.svg
+!public/robots.txt

@@ -1,0 +1,53 @@
+# ================================
+# .htaccess — jaricode.fi juuri (portfolio, React + Vite)
+# Sivukohtaiset turvaotsakkeet (CSP ym.) vain portfolion etusivulle,
+# jotta alikansioissa olevat muut projektit eivät rikkoudu.
+# ================================
+
+Options -Indexes
+
+<IfModule mod_headers.c>
+
+  # ── Kaikille tiedostoille (myös alikansioiden projekteille ja virhesivuille) ──
+  # Turvallisia kaikkialla: selain ei arvaa tiedostotyyppiä, ja yhteys on aina salattu.
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+  # ── Portfolion sivu: tietoturvaotsakkeet ──
+  <If "%{REQUEST_URI} =~ m#^/(index\.html)?$#">
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Automaattinen toisto ja koko näyttö sallitaan vain omalle sivulle ja YouTube-upotukselle
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), autoplay=(self \"https://www.youtube-nocookie.com\"), fullscreen=(self \"https://www.youtube-nocookie.com\")"
+    # Sallitut lähteet: vain oma palvelin + YouTube-upotus. Fontit voivat olla data:-muodossa (Vite upottaa pienet fontit).
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' data:; media-src 'self'; connect-src 'self'; frame-src https://www.youtube-nocookie.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    # Sivu haetaan aina tuoreena, jotta uusi julkaisu näkyy heti
+    Header set Cache-Control "no-cache"
+  </If>
+
+  # ── Viten tuottamat tiedostot: nimessä sisältötiiviste, joten ne voi välimuistittaa pitkään ──
+  <If "%{REQUEST_URI} =~ m#^/assets/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+
+  # ── Kuvat ja video: viikon välimuisti ──
+  <If "%{REQUEST_URI} =~ m#^/(img|video)/#">
+    Header set Cache-Control "public, max-age=604800"
+  </If>
+
+</IfModule>
+
+# Piilotiedostoihin (esim. .git, .env) ei pääse selaimella
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+
+# ── Lomakkeen vastaanotin ──
+# Pyyntötavan (vain POST) ja koon (10 kt) rajaus hoidetaan contact.php:ssä.
+# Palvelin on LiteSpeed, joka ei tue <LimitExcept>-rajausta kuten Apache,
+# vaan estäisi kaikki pyynnöt, myös lomakkeen lähetyksen.
+<Files "contact.php">
+  <IfModule mod_headers.c>
+    Header always set X-Robots-Tag "noindex"
+  </IfModule>
+</Files>
