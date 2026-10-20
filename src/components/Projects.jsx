@@ -141,7 +141,9 @@ export default function Projects() {
           dragElastic={0.25}
           onDragEnd={onSwipe}
         >
-          <AnimatePresence initial={false} mode="popLayout">
+          {/* Kehykset ovat valmiiksi position: absolute päällekkäin, joten popLayout-tilaa ei tarvita.
+              popLayout lisäisi sivulle <style>-elementin, jonka CSP estää. */}
+          <AnimatePresence initial={false}>
             <motion.div
               key={project.name}
               className="proj-media-frame"
