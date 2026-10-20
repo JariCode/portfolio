@@ -14,6 +14,7 @@ Portfoliosivusto, joka kokoaa esittelyn, projektit, CV:n ja yhteydenottolomakkee
 | Tyylit | CSS: muuttujat, grid, `clamp()`, jokaisella komponentilla oma tyylitiedosto |
 | Fontit | Fontsource-npm-paketit, ladataan omalta palvelimelta |
 | Lomakkeen palvelinpuoli | PHP |
+| Palvelinasetukset | `.htaccess` (tietoturvaotsakkeet ja välimuisti) |
 | Laatu | ESLint |
 
 ## Osiot ja toiminnallisuus
@@ -53,6 +54,11 @@ Portfoliosivusto, joka kokoaa esittelyn, projektit, CV:n ja yhteydenottolomakkee
 ## Arkkitehtuuri
 
 ```
+public/
+  .htaccess      palvelimen tietoturvaotsakkeet ja välimuistisäännöt
+  contact.php    lomakkeen vastaanotin
+  favicon.svg    sivuston kuvake
+  robots.txt     ohjeet hakukoneille
 src/
   data/          sisältö: esittely, projektit, CV
   components/    osiot, modaali ja niiden tyylit
@@ -89,7 +95,7 @@ Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakati
   - liian nopeasti täytetty lomake hylätään
   - samasta osoitteesta voi lähettää yhden viestin minuutissa
   - viestiin ei voi lisätä omia vastaanottajia
-  - lomaketta ei voi käyttää toiselta sivustolta
+  - palvelin hyväksyy viestit vain sivuston omalta lomakkeelta, ei muilta sivustoilta eikä suoraan skripteillä
   - liian suuret pyynnöt hylätään
 - Ei evästeitä, analytiikkaa eikä ulkoisia fontteja
 - YouTube-upotus ladataan vasta, kun kävijä käynnistää videon, ja se käyttää yksityisyyttä parantavaa tilaa
@@ -110,4 +116,6 @@ npm run build     # tuotantoversio dist-kansioon
 npm run preview   # tuotantoversion esikatselu
 ```
 
-`public/`-kansio ei ole versionhallinnassa. Siihen kuuluvat kuvat, video-CV, favicon, lomakkeen PHP-vastaanotin ja palvelinasetukset. Ilman niitä sivu toimii, mutta kuvat puuttuvat ja lomake ei lähetä viestejä.
+Kuvat ja video-CV eivät ole versionhallinnassa. Ilman niitä sivu toimii, mutta kuvat puuttuvat.
+
+Lomake tarvitsee PHP:n. Paikallisesti sen saa toimimaan käynnistämällä PHP:n sisäänrakennetun palvelimen (`php -S localhost:8000 -t public`), jolloin Viten kehityspalvelin ohjaa lomakkeen pyynnöt sille. Lisäksi `http://localhost:5173` pitää lisätä väliaikaisesti `contact.php`:n sallittuihin osoitteisiin.
