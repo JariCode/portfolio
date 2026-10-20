@@ -343,6 +343,15 @@
   object-fit: cover;
 }
 
+/* Logo tai pystykuva: koko kuva näkyy, ympärille jää tilaa ja hento hehku */
+.proj-media-img.proj-img--contain,
+.proj-thumb-img.proj-img--contain {
+  object-fit: contain;
+  padding: 8%;
+  background: radial-gradient(circle at 50% 50%, rgb(178 140 255 / 0.18), transparent 70%);
+  animation: none; /* hidas zoomaus leikkaisi reunat */
+}
+
 .proj-thumb .proj-fallback span {
   font-size: 2rem;
 }

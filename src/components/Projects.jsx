@@ -10,7 +10,9 @@ const DURATION = 6; // sekuntia per projekti automaattisessa vaihdossa
 // Kuva tai, jos kuvaa ei ole, neonkuvio projektin alkukirjaimilla
 function ProjectImage({ project, className }) {
   if (project.img) {
-    return <img className={className} src={project.img} alt="" loading="lazy" draggable="false" />;
+    // fit: 'contain' → kuva näytetään kokonaisena (esim. logo), muuten se täyttää kehyksen
+    const fitClass = project.fit === 'contain' ? ' proj-img--contain' : '';
+    return <img className={className + fitClass} src={project.img} alt="" loading="lazy" draggable="false" />;
   }
   // Lyhyt ensimmäinen sana kokonaan ("AI-sivu" → AI), muuten alkukirjain ("Palkkiolaskuri" → P)
   const first = project.name.split(/[\s-]/)[0];
