@@ -54,7 +54,9 @@ Portfoliosivusto, joka kokoaa esittelyn, projektit, CV:n ja yhteydenottolomakkee
 ## Arkkitehtuuri
 
 ```
-public/
+public/          kopioidaan buildissa sellaisenaan dist-kansioon
+  img/           kuvat ja somekuvakkeet (ei versionhallinnassa)
+  video/         video-CV (ei versionhallinnassa)
   .htaccess      palvelimen tietoturvaotsakkeet ja välimuistisäännöt
   contact.php    lomakkeen vastaanotin
   favicon.svg    sivuston kuvake
@@ -62,10 +64,13 @@ public/
 src/
   data/          sisältö: esittely, projektit, CV
   components/    osiot, modaali ja niiden tyylit
+  main.jsx       sovelluksen käynnistys, fontit ja liikkeen vähennysasetus
   App.jsx        sivun rakenne ja yhteinen tila
   index.css      väripaletti, typografia, perustyylit
   App.css        yhteiset rakennuspalat (osiot, napit, tunnisteet)
 ```
+
+`npm run build` tuottaa `dist/`-kansion, joka viedään palvelimelle. Vite kokoaa JavaScriptin, CSS:n ja fontit `dist/assets/`-kansioon tiedostoiksi, joiden nimessä on sisältötiiviste. Siksi palvelin voi välimuistittaa ne pitkäksi aikaa, ja uusi versio saa aina uuden nimen.
 
 **Sisältö on erotettu komponenteista.** Kaikki tekstit, projektit ja CV:n tiedot ovat `src/data/`-tiedostoissa tavallisina JavaScript-olioina. Uusi projekti lisätään yhdellä oliolla, eikä komponentteihin tarvitse koskea. Komponentit päättelevät esitystavan datasta: esimerkiksi YouTube-linkistä tulee traileri-nappi ja muista linkeistä sivustolinkki.
 
