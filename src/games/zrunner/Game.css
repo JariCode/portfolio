@@ -20,7 +20,7 @@
   display: block;
 }
 
-/* ── Yläpalkki: maailma ja aika ── */
+/* ── Yläpalkki: energia, valopallot, zombit ja aika ── */
 .zr-hud {
   position: absolute;
   inset: 0 0 auto;
@@ -30,15 +30,58 @@
   padding: 1.6cqw 2.2cqw;
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   pointer-events: none;
 }
 
-.zr-hud-world {
-  color: var(--cyan);
-  font-size: max(9px, 1.2cqw);
-  text-transform: uppercase;
-  text-shadow: 0 0 0.8cqw var(--cyan);
+.zr-hud-left {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+}
+
+/* Energia: viisi neonpalkkia, tyhjät jäävät himmeiksi ääriviivoiksi */
+.zr-energy {
+  display: flex;
+  gap: 0.4cqw;
+}
+
+.zr-energy-cell {
+  width: max(10px, 1.6cqw);
+  height: max(12px, 1.9cqw);
+  border: 2px solid color-mix(in srgb, var(--magenta) 45%, transparent);
+  border-radius: 3px;
+  transform: skewX(-12deg);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.zr-energy-cell.is-full {
+  border-color: var(--magenta);
+  background: var(--magenta);
+  box-shadow: 0 0 0.8cqw var(--magenta);
+}
+
+.zr-hud-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.6cqw;
+  color: var(--text);
+  font-size: max(10px, 1.4cqw);
+  font-variant-numeric: tabular-nums;
+}
+
+.zr-orb-icon {
+  width: max(10px, 1.3cqw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 25%, var(--cyan) 50%, transparent 72%);
+  box-shadow: 0 0 0.8cqw var(--cyan);
+}
+
+.zr-skull-icon {
+  color: var(--violet);
+  font-size: 1.1em;
+  text-shadow: 0 0 0.6cqw var(--violet);
 }
 
 .zr-hud-time {
@@ -48,6 +91,27 @@
   font-variant-numeric: tabular-nums;
   text-align: right;
   text-shadow: 0 0 1cqw var(--magenta);
+}
+
+/* Lyhyt ilmoitus tallennusten tyhjennyksestä; häviää itsestään */
+.zr-toast {
+  position: absolute;
+  top: 7cqw;
+  left: 50%;
+  translate: -50% 0;
+  padding: 0.6cqw 1.6cqw;
+  border: 1px solid color-mix(in srgb, var(--cyan) 50%, transparent);
+  border-radius: 999px;
+  background: rgb(3 2 10 / 0.8);
+  color: var(--cyan);
+  font-size: max(10px, 1.2cqw);
+  pointer-events: none;
+  animation: zr-toast 2.6s ease-in both;
+}
+
+@keyframes zr-toast {
+  0%, 75% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ── Kosketusnapit: vain kosketusnäytöillä ── */
@@ -99,7 +163,7 @@
   background: color-mix(in srgb, var(--magenta) 35%, transparent);
 }
 
-/* ── Maaliruutu ── */
+/* ── Loppuruutu: maali tai kaatuminen ── */
 .zr-result {
   position: absolute;
   inset: 0;
@@ -107,8 +171,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.2cqw;
-  background: rgb(3 2 10 / 0.7);
+  gap: 1.4cqw;
+  background: rgb(3 2 10 / 0.75);
   text-align: center;
   animation: zr-result-in 0.4s ease-out both;
 }
@@ -116,21 +180,86 @@
 .zr-result-title {
   color: var(--text);
   font-family: var(--font-display);
-  font-size: 7cqw;
+  font-size: 6.5cqw;
   font-weight: 800;
+  line-height: 1;
   text-shadow:
     0 0 0.15em var(--magenta),
     0 0 0.45em var(--magenta);
 }
 
-.zr-result-stats {
-  color: var(--muted);
-  font-size: max(11px, 1.6cqw);
-  letter-spacing: 0.06em;
+.zr-result--dead .zr-result-title {
+  text-shadow:
+    0 0 0.15em var(--violet),
+    0 0 0.45em var(--violet);
 }
 
-.zr-result-stats strong {
+.zr-result-stats {
+  display: flex;
+  gap: 3cqw;
+}
+
+.zr-result-stats div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.3cqw;
+}
+
+.zr-result-stats dt {
+  color: var(--muted);
+  font-size: max(9px, 1.1cqw);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.zr-result-stats dd {
   color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: max(14px, 2.6cqw);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.zr-result-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3cqw;
+  color: var(--muted);
+  font-size: max(10px, 1.2cqw);
+}
+
+.zr-result-score strong {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: max(16px, 2.8cqw);
+  text-shadow: 0 0 0.6cqw var(--magenta);
+}
+
+.zr-result-record {
+  color: var(--magenta);
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Tyhjennä tallennukset: tarkoituksella huomaamaton, ettei sitä paina vahingossa */
+.zr-clear {
+  padding: 0.4cqw 1cqw;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: max(10px, 1.1cqw);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.zr-clear:hover,
+.zr-clear:focus-visible {
+  color: var(--text);
 }
 
 @keyframes zr-result-in {
@@ -139,7 +268,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .zr-result {
+  .zr-result,
+  .zr-toast {
     animation: none;
   }
 }

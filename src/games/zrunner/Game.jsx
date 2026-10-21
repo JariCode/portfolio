@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import * as Phaser from 'phaser';
-import LevelScene, { GAME_W, GAME_H } from './LevelScene.js';
+import LevelScene, { GAME_W, GAME_H, MAX_HP } from './LevelScene.js';
+import { calcScore, clearSaves, formatTime, readRecord, saveRecord } from './score.js';
 import './Game.css';
-
-// Aika muodossa 1:23.4
-function formatTime(ms) {
-  const total = Math.floor(ms / 100);
-  const min = Math.floor(total / 600);
-  const sec = Math.floor((total % 600) / 10);
-  return `${min}:${String(sec).padStart(2, '0')}.${total % 10}`;
-}
 
 // Kosketusnapit kirjoittavat samaan olioon, jota scene lukee joka ruudulla
 const TOUCH_BUTTONS = [
@@ -19,14 +12,18 @@ const TOUCH_BUTTONS = [
   { key: 'jump', label: 'Hyppää', icon: '▲', side: 'right' },
 ];
 
+const EMPTY_HUD = { time: 0, hp: MAX_HP, orbs: 0, totalOrbs: 0, kills: 0, totalZombies: 0 };
+
 export default function Game({ onExit }) {
   const rootRef = useRef(null);
   const hostRef = useRef(null);
   const gameRef = useRef(null);
   const controlsRef = useRef({ left: false, right: false, jump: false, attack: false });
   const replayRef = useRef(null);
-  const [hud, setHud] = useState({ time: 0, falls: 0 });
+  const [hud, setHud] = useState(EMPTY_HUD);
+  // result: { kind: 'finish' | 'dead', ...pelin tiedot, score, newRecord }
   const [result, setResult] = useState(null);
+  const [cleared, setCleared] = useState(false);
 
   // Phaser luodaan kerran ja tuhotaan, kun pelinäkymä suljetaan (modaali, Esc, valikkoon)
   useEffect(() => {
@@ -51,8 +48,21 @@ export default function Game({ onExit }) {
         preBoot: (g) => g.registry.set('controls', controlsRef.current),
       },
     });
+
     game.events.on('zr-hud', setHud);
-    game.events.on('zr-finish', setResult);
+    // Maalissa lasketaan pisteet ja tallennetaan ennätys (vain jos parempi kuin aiempi)
+    game.events.on('zr-finish', (stats) => {
+      const score = calcScore(stats);
+      const newRecord = saveRecord({
+        score: score.total,
+        time: formatTime(stats.time),
+        items: stats.orbs,
+        kills: stats.kills,
+      });
+      setResult({ kind: 'finish', ...stats, score, newRecord, best: readRecord() });
+    });
+    // Kaatuessa ei tallenneta mitään
+    game.events.on('zr-dead', (stats) => setResult({ kind: 'dead', ...stats }));
     gameRef.current = game;
 
     return () => {
@@ -61,7 +71,7 @@ export default function Game({ onExit }) {
     };
   }, []);
 
-  // Maaliruudulla fokus Pelaa uudelleen -napissa, jotta Enter aloittaa heti. Pelin aikana
+  // Loppuruudulla fokus Pelaa uudelleen -napissa, jotta Enter aloittaa heti. Pelin aikana
   // fokus on pelinäkymässä: alkuanimaation Ohita-nappi poistui, eikä fokus saa jäädä sivulle.
   useEffect(() => {
     (result ? replayRef : rootRef).current?.focus({ preventScroll: true });
@@ -69,8 +79,16 @@ export default function Game({ onExit }) {
 
   const replay = () => {
     setResult(null);
-    setHud({ time: 0, falls: 0 });
+    setCleared(false);
+    setHud(EMPTY_HUD);
     gameRef.current?.scene.getScene('level').scene.restart();
+  };
+
+  // Tietosuojaselosteen lupaus: poistaa vain Z-Runnerin tallennukset ja peli alkaa alusta
+  const clear = () => {
+    clearSaves();
+    replay();
+    setCleared(true);
   };
 
   const press = (key, down) => (e) => {
@@ -83,9 +101,25 @@ export default function Game({ onExit }) {
       <div className="zr-game-canvas" ref={hostRef} />
 
       <div className="zr-hud" aria-hidden={!!result}>
-        <span className="zr-hud-world">Maailma 1 · Neonkatu</span>
+        <div className="zr-hud-left">
+          <div className="zr-energy" role="meter" aria-label="Energia" aria-valuemin={0} aria-valuemax={MAX_HP} aria-valuenow={hud.hp}>
+            {Array.from({ length: MAX_HP }, (_, i) => (
+              <span key={i} className={`zr-energy-cell${i < hud.hp ? ' is-full' : ''}`} />
+            ))}
+          </div>
+          <span className="zr-hud-stat zr-hud-stat--orbs">
+            <span className="zr-orb-icon" aria-hidden="true" />
+            {hud.orbs}/{hud.totalOrbs}
+          </span>
+          <span className="zr-hud-stat zr-hud-stat--kills">
+            <span className="zr-skull-icon" aria-hidden="true">✕</span>
+            {hud.kills}/{hud.totalZombies}
+          </span>
+        </div>
         <span className="zr-hud-time">{formatTime(hud.time)}</span>
       </div>
+
+      {cleared && !result && <p className="zr-toast" role="status">Tallennukset tyhjennetty</p>}
 
       <div className="zr-touch" aria-hidden="true">
         {['left', 'right'].map((side) => (
@@ -114,24 +148,57 @@ export default function Game({ onExit }) {
       </div>
 
       {result && (
-        <div className="zr-result" role="dialog" aria-label="Maali">
-          <p className="zr-result-title">Maali!</p>
-          <p className="zr-result-stats">
-            Aika <strong>{formatTime(result.time)}</strong>
-            {result.falls > 0 && (
-              <>
-                {' '}· putoamisia <strong>{result.falls}</strong>
-              </>
-            )}
-          </p>
+        <div className={`zr-result zr-result--${result.kind}`} role="dialog" aria-label={result.kind === 'finish' ? 'Maali' : 'Kaaduit'}>
+          <p className="zr-result-title">{result.kind === 'finish' ? 'Maali!' : 'Kaaduit!'}</p>
+
+          <dl className="zr-result-stats">
+            <div>
+              <dt>Valopallot</dt>
+              <dd>
+                {result.orbs}/{result.totalOrbs}
+              </dd>
+            </div>
+            <div>
+              <dt>Zombit</dt>
+              <dd>
+                {result.kills}/{result.totalZombies}
+              </dd>
+            </div>
+            <div>
+              <dt>Aika</dt>
+              <dd>{formatTime(result.time)}</dd>
+            </div>
+          </dl>
+
+          {result.kind === 'finish' ? (
+            <p className="zr-result-score">
+              <strong>{result.score.total} p</strong>
+              <span>
+                {result.score.orbPoints} + {result.score.killPoints} + aikabonus {result.score.timeBonus}
+              </span>
+              {result.newRecord ? (
+                <em className="zr-result-record">Uusi ennätys!</em>
+              ) : (
+                result.best && <span>Ennätys {result.best.score} p</span>
+              )}
+            </p>
+          ) : (
+            <p className="zr-result-score">
+              <span>Energia loppui. Pisteet lasketaan vain maaliin päästessä.</span>
+            </p>
+          )}
+
           <div className="zr-actions">
             <button type="button" className="zr-btn zr-btn--start" ref={replayRef} onClick={replay}>
-              Pelaa uudelleen
+              {result.kind === 'finish' ? 'Pelaa uudelleen' : 'Yritä uudelleen'}
             </button>
             <button type="button" className="zr-btn zr-btn--ghost" onClick={onExit}>
               Valikkoon
             </button>
           </div>
+          <button type="button" className="zr-clear" onClick={clear}>
+            Tyhjennä tallennukset
+          </button>
         </div>
       )}
     </div>

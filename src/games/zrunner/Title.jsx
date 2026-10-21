@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import CityScape from './CityScape.jsx';
+import { readRecord } from './score.js';
 import './Title.css';
-
-const RECORD_KEY = 'jaricode:zrunner:ennatys';
 
 // Ohjaimet näytetään Ohjeet-paneelissa; sama lista kuin pelin näppäinkäsittelyssä
 const CONTROLS = [
@@ -12,17 +11,8 @@ const CONTROLS = [
   { keys: ['Esc'], alt: '', label: 'Sulje peli' },
 ];
 
-// Ennätys luetaan vain näytettäväksi; tallennus tapahtuu pelin lopussa.
-// try/catch: selain voi estää localStoragen (esim. yksityinen selaus).
-function readRecord() {
-  try {
-    return JSON.parse(localStorage.getItem(RECORD_KEY));
-  } catch {
-    return null;
-  }
-}
-
 export default function Title({ onStart }) {
+  // Ennätys luetaan vain näytettäväksi; tallennus tapahtuu maalissa (score.js)
   const [record] = useState(readRecord);
   const [help, setHelp] = useState(false);
   const startRef = useRef(null);
@@ -69,7 +59,8 @@ export default function Title({ onStart }) {
         <p className="zr-record">
           {record ? (
             <>
-              Ennätys <strong>{record.time}</strong> · kerätty <strong>{record.items}</strong>
+              Ennätys <strong>{record.score} p</strong> · {record.time} · valopalloja{' '}
+              <strong>{record.items}</strong> · zombeja <strong>{record.kills}</strong>
             </>
           ) : (
             'Ei vielä ennätystä'

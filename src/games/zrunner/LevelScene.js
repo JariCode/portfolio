@@ -2,19 +2,37 @@ import * as Phaser from 'phaser';
 import mapData from './maps/maailma1.json';
 import { PLAYER_SHEET, PLAYER_ANIMS, JUMP_FRAME } from './player.js';
 import { createSkyline } from './skyline.js';
+import { Walker, ZOMBIE_BODY, createZombieAnims, preloadZombies } from './enemies.js';
+import { createOrbs, collectOrb } from './orbs.js';
 
 // Pelin sisäinen koko (16:9). Kartta on 12 laattaa x 64 px = 768 px korkea, joten
 // koko kartan korkeus mahtuu kuvaan eikä kamera liiku pystysuunnassa.
 export const GAME_W = 1366;
 export const GAME_H = 768;
+export const MAX_HP = 5;
 
 const TILESET_FILE = '/games/zrunner/kaupunki.png';
+const T = 64;
 
 // Laattojen numerot Tiledin JSONissa (firstgid 1 → kuvan laatta + 1).
 // Katot ja metallitasot: niihin törmätään vain ylhäältä, alta voi hypätä läpi.
 const ONE_WAY = [9, 10, 11, 17, 18, 19];
 // Lätäkkö on koriste, vaikka se olisi piirretty Maastoon
 const NO_COLLIDE = [32];
+
+// Zombien paikat, jos Tiledin Objektit-tasolla ei ole pisteitä nimellä "zombi":
+// sarake kadulla ja zombilaji. Paikat ovat kuoppien välisillä katuosuuksilla.
+const ZOMBIE_SPAWNS = [
+  [12, 'zombi1'],
+  [28, 'zombi4'],
+  [44, 'zombi2'],
+  [55, 'zombi3'],
+  [70, 'zombi1'],
+  [90, 'zombi4'],
+  [105, 'zombi2'],
+  [127, 'zombi3'],
+];
+const ZOMBIE_TYPES = ['zombi1', 'zombi2', 'zombi3', 'zombi4'];
 
 // Hahmo pienennetään laattoihin sopivaksi: noin 1,2 laattaa korkea.
 // Arcade-fysiikka skaalaa törmäyslaatikon samalla kertoimella.
@@ -33,6 +51,14 @@ const MAX_FALL = 1100;
 const COYOTE_MS = 100; // hypyn saa vielä hetken reunalta pudottuaan
 const BUFFER_MS = 120; // liian aikaisin painettu hyppy muistetaan hetken
 
+// Taistelu
+const PUNCH_RANGE = 62; // lyönnin ulottuvuus vartalon reunasta
+const PUNCH_HIT_FRAME = 4; // lyönnin osumaruutu (0–9)
+const STOMP_DAMAGE = 2; // päälle hyppy tekee enemmän vahinkoa kuin lyönti
+const STOMP_BOUNCE = -620;
+const INVULNERABLE_MS = 1200; // osuman jälkeen hetki suojassa, ettei sama zombi osu heti uudelleen
+const STUN_MS = 350; // osuman jälkeen ohjaus palaa pienen hetken päästä
+
 export default class LevelScene extends Phaser.Scene {
   constructor() {
     super('level');
@@ -45,6 +71,7 @@ export default class LevelScene extends Phaser.Scene {
       frameWidth: PLAYER_SHEET.frameWidth,
       frameHeight: PLAYER_SHEET.frameHeight,
     });
+    preloadZombies(this);
   }
 
   create() {
@@ -58,6 +85,7 @@ export default class LevelScene extends Phaser.Scene {
     const ground = map.createLayer('Maasto', tiles).setDepth(2);
     map.createLayer('Edusta', tiles).setDepth(4);
     this.ground = ground;
+    this.back = back;
 
     // Kaikki Maaston laatat ovat kiinteitä paitsi koristeet
     ground.setCollisionByExclusion([-1, ...NO_COLLIDE]);
@@ -77,10 +105,9 @@ export default class LevelScene extends Phaser.Scene {
     // Aloituspiste ja maali Objektit-tasolta (nimet "pelaaja" ja "maali"),
     // muuten oletukset: alku vasemmasta reunasta, maali kartan lopusta
     const objects = map.getObjectLayer('Objektit')?.objects ?? [];
-    const spawn = objects.find((o) => o.name === 'pelaaja') ?? { x: 2 * 64, y: 10 * 64 };
+    const spawn = objects.find((o) => o.name === 'pelaaja') ?? { x: 2 * T, y: 10 * T };
     const goal = objects.find((o) => o.name === 'maali');
-    this.goalX = goal ? goal.x : this.mapWidth - 4 * 64;
-    this.spawn = { x: spawn.x, y: spawn.y };
+    this.goalX = goal ? goal.x : this.mapWidth - 4 * T;
 
     // ── Pelaaja ──
     this.createAnims();
@@ -92,9 +119,31 @@ export default class LevelScene extends Phaser.Scene {
     p.body.setMaxVelocityY(MAX_FALL);
     p.setCollideWorldBounds(true);
     p.play('idle');
+    p.alive = true;
     this.player = p;
     this.physics.add.collider(p, ground);
     this.physics.add.collider(p, back);
+
+    // ── Zombit ──
+    createZombieAnims(this);
+    this.zombies = this.physics.add.group(ZOMBIE_BODY);
+    for (const z of this.zombieSpawns(objects)) {
+      this.zombies.add(new Walker(this, z.x, z.y, z.type));
+    }
+    this.totalZombies = this.zombies.getLength();
+    this.physics.add.collider(this.zombies, ground);
+    this.physics.add.collider(this.zombies, back);
+    // Kosketus ei satuta: zombi satuttaa vain lyömällä. Päälle hyppy kaataa zombin.
+    this.physics.add.overlap(p, this.zombies, this.touchZombie, (_, z) => z.state !== 'dead', this);
+
+    // ── Valopallot ──
+    const orbs = createOrbs(this, objects);
+    this.totalOrbs = orbs.total;
+    this.physics.add.overlap(p, orbs.group, (_, orb) => {
+      collectOrb(this, orb);
+      this.orbs += 1;
+      this.sendHud(true);
+    });
 
     // ── Kamera seuraa pelaajaa, katsoo hieman eteenpäin ──
     const cam = this.cameras.main;
@@ -111,13 +160,18 @@ export default class LevelScene extends Phaser.Scene {
       up: K.UP, w: K.W, space: K.SPACE, x: K.X, k: K.K,
     });
 
+    this.hp = MAX_HP;
+    this.orbs = 0;
+    this.kills = 0;
     this.lastGround = 0;
     this.jumpPressedAt = -Infinity;
     this.prevJump = false;
     this.prevAttack = false;
     this.attacking = false;
+    this.punchDone = false;
+    this.invulnerableUntil = 0;
+    this.stunnedUntil = 0;
     this.safe = { x: spawn.x, y: spawn.y };
-    this.falls = 0;
     this.elapsed = 0; // pelattu aika ruutujen kestoista, ei kellonajasta
     this.finished = false;
     this.lastHud = 0;
@@ -125,12 +179,21 @@ export default class LevelScene extends Phaser.Scene {
     p.on('animationcomplete-attack', () => {
       this.attacking = false;
     });
+    // Lyönti osuu vasta, kun nyrkki on edessä (osumaruutu), ja vain kerran
+    p.on(Phaser.Animations.Events.ANIMATION_UPDATE, (anim, frame) => {
+      if (anim.key === 'attack' && !this.punchDone && frame.index - 1 >= PUNCH_HIT_FRAME) {
+        this.punchDone = true;
+        this.punch();
+      }
+    });
 
     // Pelinäkymä fokusoituu modaalissa; jos ikkuna menettää fokuksen, painetut näppäimet nollataan
     this.game.events.on(Phaser.Core.Events.BLUR, this.releaseKeys, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.game.events.off(Phaser.Core.Events.BLUR, this.releaseKeys, this);
     });
+
+    this.sendHud(true);
   }
 
   createAnims() {
@@ -146,6 +209,20 @@ export default class LevelScene extends Phaser.Scene {
     }
   }
 
+  // Zombien paikat Tiledistä tai oletuslistasta. Paikka siirretään oikealle,
+  // jos sarakkeessa on este (laatikko) tai kuoppa, jottei zombi synny niiden sisään.
+  zombieSpawns(objects) {
+    const fromMap = objects.filter((o) => o.name === 'zombi');
+    if (fromMap.length) {
+      return fromMap.map((o, i) => ({ x: o.x, y: o.y, type: ZOMBIE_TYPES[i % ZOMBIE_TYPES.length] }));
+    }
+    return ZOMBIE_SPAWNS.map(([col, type]) => {
+      let c = col;
+      while (c < col + 6 && (!this.ground.getTileAt(c, 10)?.collides || this.ground.getTileAt(c, 9))) c += 1;
+      return { x: c * T + T / 2, y: 10 * T, type };
+    });
+  }
+
   releaseKeys() {
     this.input.keyboard.resetKeys();
     Object.keys(this.controls).forEach((k) => {
@@ -153,17 +230,103 @@ export default class LevelScene extends Phaser.Scene {
     });
   }
 
+  // HUD päivitetään kymmenen kertaa sekunnissa tai heti, kun jokin muuttuu
+  sendHud(now = false) {
+    if (!now && this.elapsed - this.lastHud < 100) return;
+    this.lastHud = this.elapsed;
+    this.game.events.emit('zr-hud', this.summary());
+  }
+
+  summary() {
+    return {
+      time: this.elapsed,
+      hp: this.hp,
+      orbs: this.orbs,
+      totalOrbs: this.totalOrbs,
+      kills: this.kills,
+      totalZombies: this.totalZombies,
+    };
+  }
+
+  touchZombie(player, zombie) {
+    // Päälle hyppy: pelaaja tulee alaspäin ja jalat ovat zombin pään korkeudella
+    const pb = player.body;
+    if (player.alive && pb.velocity.y > 60 && pb.bottom - zombie.body.top < 26) {
+      pb.setVelocityY(STOMP_BOUNCE);
+      this.lastGround = -Infinity;
+      if (zombie.hurt(STOMP_DAMAGE, player.x)) this.zombieKilled();
+    }
+  }
+
+  punch() {
+    const pb = this.player.body;
+    const dir = this.player.flipX ? -1 : 1;
+    const left = dir > 0 ? pb.right : pb.left - PUNCH_RANGE;
+    const hitbox = new Phaser.Geom.Rectangle(left, pb.top, PUNCH_RANGE, pb.height);
+    for (const z of this.zombies.getChildren()) {
+      if (z.state === 'dead') continue;
+      const zb = z.body;
+      const zr = new Phaser.Geom.Rectangle(zb.left, zb.top, zb.width, zb.height);
+      if (Phaser.Geom.Intersects.RectangleToRectangle(hitbox, zr) && z.hurt(1, this.player.x)) {
+        this.zombieKilled();
+      }
+    }
+  }
+
+  zombieKilled() {
+    this.kills += 1;
+    this.sendHud(true);
+  }
+
+  // Zombin lyönti tai kuoppaan putoaminen vie yhden energian
+  hurtPlayer(source) {
+    const p = this.player;
+    if (!p.alive || this.finished || this.elapsed < this.invulnerableUntil) return;
+    this.hp -= 1;
+    this.invulnerableUntil = this.elapsed + INVULNERABLE_MS;
+    this.attacking = false;
+    this.cameras.main.shake(140, 0.006);
+    this.sendHud(true);
+    if (this.hp <= 0) {
+      this.die();
+      return;
+    }
+    if (source) {
+      // Tönäisy poispäin zombista
+      const away = p.x < source.x ? -1 : 1;
+      this.stunnedUntil = this.elapsed + STUN_MS;
+      p.body.setVelocity(away * 260, -380);
+      p.play('hurt');
+    }
+    // Vilkkuu suoja-ajan
+    this.tweens.add({ targets: p, alpha: 0.35, duration: 100, yoyo: true, repeat: 5, onComplete: () => p.setAlpha(1) });
+  }
+
+  die() {
+    const p = this.player;
+    p.alive = false;
+    p.setAlpha(1);
+    p.body.setVelocityX(0);
+    p.play('dead');
+    p.once('animationcomplete-dead', () => {
+      this.time.delayedCall(500, () => this.game.events.emit('zr-dead', this.summary()));
+    });
+  }
+
   update(time, delta) {
     this.updateSkyline(this.cameras.main);
-    if (this.finished) return;
+    // Kopio listasta: kuoppaan pudonnut zombi poistuu kesken kierroksen
+    for (const z of [...this.zombies.getChildren()]) z.update(time);
+    if (this.finished || !this.player.alive) return;
     this.elapsed += delta;
 
     const p = this.player;
     const body = p.body;
     const k = this.keys;
     const c = this.controls;
-    const left = k.left.isDown || k.a.isDown || c.left;
-    const right = k.right.isDown || k.d.isDown || c.right;
+    const stunned = this.elapsed < this.stunnedUntil;
+    const left = !stunned && (k.left.isDown || k.a.isDown || c.left);
+    const right = !stunned && (k.right.isDown || k.d.isDown || c.right);
     const jump = k.up.isDown || k.w.isDown || k.space.isDown || c.jump;
     const attack = k.x.isDown || k.k.isDown || c.attack;
     const onGround = body.blocked.down;
@@ -177,7 +340,7 @@ export default class LevelScene extends Phaser.Scene {
 
     // Hyppy: painallus muistetaan hetken ja reunalta saa hypätä vielä hetken pudottuaan
     if (jump && !this.prevJump) this.jumpPressedAt = time;
-    if (time - this.jumpPressedAt < BUFFER_MS && time - this.lastGround < COYOTE_MS) {
+    if (!stunned && time - this.jumpPressedAt < BUFFER_MS && time - this.lastGround < COYOTE_MS) {
       body.setVelocityY(JUMP_VELOCITY);
       this.jumpPressedAt = -Infinity;
       this.lastGround = -Infinity;
@@ -188,9 +351,10 @@ export default class LevelScene extends Phaser.Scene {
     }
     this.prevJump = jump;
 
-    // Lyönti: vain animaatio toistaiseksi, osumat tulevat zombien mukana
-    if (attack && !this.prevAttack && !this.attacking && onGround) {
+    // Lyönti: osuma tarkistetaan animaation osumaruudulla (punch)
+    if (attack && !this.prevAttack && !this.attacking && !stunned && onGround) {
       this.attacking = true;
+      this.punchDone = false;
       p.play('attack');
     }
     this.prevAttack = attack;
@@ -201,15 +365,17 @@ export default class LevelScene extends Phaser.Scene {
     const blocked = dir !== 0 && this.wallAhead(dir);
     const moving = dir !== 0 && !blocked && !this.attacking;
 
-    // Vauhti kiihtyy ja hidastuu pehmeästi
-    const target = moving ? dir * RUN_SPEED : 0;
-    const accel = (onGround ? ACCEL_GROUND : ACCEL_AIR) * (delta / 1000);
-    const vx = blocked ? 0 : body.velocity.x;
-    body.setVelocityX(vx < target ? Math.min(vx + accel, target) : Math.max(vx - accel, target));
-    if (dir !== 0) p.setFlipX(dir < 0);
+    // Vauhti kiihtyy ja hidastuu pehmeästi. Tönäisyn aikana vauhtiin ei kosketa.
+    if (!stunned) {
+      const target = moving ? dir * RUN_SPEED : 0;
+      const accel = (onGround ? ACCEL_GROUND : ACCEL_AIR) * (delta / 1000);
+      const vx = blocked ? 0 : body.velocity.x;
+      body.setVelocityX(vx < target ? Math.min(vx + accel, target) : Math.max(vx - accel, target));
+      if (dir !== 0) p.setFlipX(dir < 0);
+    }
 
     // Animaatio painetun suunnan mukaan, ei nopeuden: törmäyksen pienet heilahdukset eivät vaihda sitä
-    if (!this.attacking) {
+    if (!this.attacking && !stunned) {
       if (!onGround) {
         p.anims.stop();
         p.setFrame(JUMP_FRAME);
@@ -220,7 +386,7 @@ export default class LevelScene extends Phaser.Scene {
       }
     }
 
-    // Kuoppaan pudonnut palaa viimeisimmälle turvalliselle paikalle
+    // Kuoppaan pudonnut menettää energiaa ja palaa viimeisimmälle turvalliselle paikalle
     if (p.y > this.mapHeight + 150) this.respawn();
 
     // Maali
@@ -229,11 +395,7 @@ export default class LevelScene extends Phaser.Scene {
       return;
     }
 
-    // Aika näytölle kymmenen kertaa sekunnissa (React-HUD)
-    if (time - this.lastHud > 100) {
-      this.lastHud = time;
-      this.game.events.emit('zr-hud', { time: this.elapsed, falls: this.falls });
-    }
+    this.sendHud();
   }
 
   // Onko kulkusuunnassa heti vartalon vieressä seinä? Katsotaan laatat suoraan eikä
@@ -249,7 +411,6 @@ export default class LevelScene extends Phaser.Scene {
 
   respawn() {
     const p = this.player;
-    this.falls += 1;
     // Siirretään hieman taaksepäin reunalta, jos siellä on maata
     const back = p.flipX ? 48 : -48;
     const tileBelow = this.ground.getTileAtWorldXY(this.safe.x + back, this.safe.y + 8);
@@ -257,8 +418,8 @@ export default class LevelScene extends Phaser.Scene {
     p.body.reset(x, this.safe.y);
     p.setVelocity(0, 0);
     this.cameras.main.flash(250, 255, 61, 200);
-    // Hetken vilkkuminen kertoo, että pelaaja palasi
-    this.tweens.add({ targets: p, alpha: 0.3, duration: 90, yoyo: true, repeat: 5 });
+    this.invulnerableUntil = 0; // putoaminen vie energian aina, vaikka suoja-aika olisi päällä
+    this.hurtPlayer(null);
   }
 
   finish() {
@@ -267,6 +428,7 @@ export default class LevelScene extends Phaser.Scene {
     p.body.setVelocity(0, 0);
     p.body.setAllowGravity(false);
     p.play('idle', true);
-    this.game.events.emit('zr-finish', { time: this.elapsed, falls: this.falls });
+    this.sendHud(true);
+    this.game.events.emit('zr-finish', this.summary());
   }
 }
