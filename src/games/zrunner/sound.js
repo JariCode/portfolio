@@ -12,6 +12,7 @@ export const SOUNDS = {
   punch: 'lyonti.mp3',
   hurt: 'osuma.mp3',
   zombieDie: 'zombi-kuolee.mp3',
+  zombieHit: 'zombi-osuma.mp3',
   zombieAttack: 'zombi-hyokkaa.mp3',
   collect: 'keraa.mp3',
   train: 'juna.mp3',

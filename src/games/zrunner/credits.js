@@ -104,4 +104,12 @@ export const CREDITS = [
     licenseUrl: 'https://pixabay.com/service/license-summary/',
     file: 'keraa.mp3',
   },
+  {
+    type: 'ääni',
+    name: 'Impact Thud',
+    author: 'Universfield',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'zombi-osuma.mp3',
+  },
 ];

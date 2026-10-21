@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { ZOMBIES, ZOMBIE_ANIMS } from './zombies.js';
+import { play } from './sound.js';
 
 // Zombit: kävelevät edestakaisin, jahtaavat pelaajaa nähdessään ja lyövät lähietäisyydeltä.
 // Ne katsovat maata edestään eivätkä kävele kuoppaan tai seinää päin, vaan kääntyvät
@@ -122,6 +123,7 @@ export class Walker extends Phaser.Physics.Arcade.Sprite {
 
   hurt(damage, fromX) {
     if (this.state === 'dead') return false;
+    play('zombieHit', { rate: this.kid ? 1.3 : 1 });
     this.hp -= damage;
     const away = this.x < fromX ? -1 : 1;
     if (this.hp <= 0) {
