@@ -1,22 +1,21 @@
 import { useEffect, useState } from 'react';
 import { profile } from '../data/profile.js';
+import { NAV_LINKS, linkHref } from '../data/nav.js';
 import './Navbar.css';
 
-// id:t vastaavat osioiden id-attribuutteja
-const LINKS = [
-  { id: 'esittely', label: 'Esittely' },
-  { id: 'projektit', label: 'Projektit' },
-  { id: 'cv', label: 'CV' },
-  { id: 'yhteys', label: 'Ota yhteyttä' },
-];
+// Etusivun osiot, joiden näkyvyyttä seurataan (omat sivut, kuten pelit, eivät ole osioita)
+const SECTIONS = NAV_LINKS.filter((l) => !l.href);
 
-export default function Navbar() {
+// page: 'home' = etusivu, muuten sivun id (esim. 'pelit')
+export default function Navbar({ page = 'home' }) {
+  const home = page === 'home';
   const [active, setActive] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
-  // Korostetaan linkki, jonka osio on näkymän keskellä
+  // Korostetaan linkki, jonka osio on näkymän keskellä (vain etusivulla, muualla osioita ei ole)
   useEffect(() => {
+    if (!home) return;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -26,19 +25,20 @@ export default function Navbar() {
       { rootMargin: '-45% 0px -50% 0px' },
     );
 
-    LINKS.forEach(({ id }) => {
+    SECTIONS.forEach(({ id }) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
 
+    return () => observer.disconnect();
+  }, [home]);
+
+  useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', onScroll);
-    };
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   // Esc sulkee mobiilivalikon
@@ -64,8 +64,8 @@ export default function Navbar() {
   const close = () => setOpen(false);
 
   return (
-    <header className={`nav ${scrolled ? 'nav--solid' : ''}`}>
-      <a href="#top" className="nav-logo" onClick={close}>
+    <header className={`nav ${scrolled || !home ? 'nav--solid' : ''}`}>
+      <a href={home ? '#top' : '/'} className="nav-logo" onClick={close}>
         {profile.brand}
       </a>
 
@@ -84,18 +84,22 @@ export default function Navbar() {
 
       <nav aria-label="Päävalikko">
         <ul id="nav-links" className={`nav-links ${open ? 'is-open' : ''}`}>
-          {LINKS.map(({ id, label }) => (
-            <li key={id}>
-              <a
-                href={`#${id}`}
-                className={active === id ? 'is-active' : ''}
-                aria-current={active === id ? 'location' : undefined}
-                onClick={close}
-              >
-                {label}
-              </a>
-            </li>
-          ))}
+          {NAV_LINKS.map((link) => {
+            // Oma sivu on aktiivinen, kun ollaan sillä; osio, kun se näkyy etusivulla
+            const isActive = link.href ? page === link.id : home && active === link.id;
+            return (
+              <li key={link.id}>
+                <a
+                  href={linkHref(link, home)}
+                  className={isActive ? 'is-active' : ''}
+                  aria-current={isActive ? (link.href ? 'page' : 'location') : undefined}
+                  onClick={close}
+                >
+                  {link.label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </header>

@@ -1,0 +1,11 @@
+/* Footer pysyy näytön alareunassa myös silloin, kun sisältöä on vähän
+   (iso näyttö tai peli suljettuna) */
+.pelit-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+.pelit-page main {
+  flex: 1;
+}

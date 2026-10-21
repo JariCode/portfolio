@@ -67,6 +67,9 @@ html {
      position: fixed/sticky-toimintaa, toisin kuin hidden/auto saattaisivat
      joissain selaimissa tehdä. */
   overflow-x: clip;
+    /* Vierityspalkin tila varataan aina, jotta navi ja sisältö eivät hyppää sivusuunnassa
+     sivulla, joka mahtuu näytölle ilman vieritystä (pelialue) */
+  scrollbar-gutter: stable;
 }
 
 body {

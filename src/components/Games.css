@@ -1,0 +1,179 @@
+/* ═══ Pelisivun osio ═══ */
+/* Pelisivulla ei ole heroa eikä seuraavaa osiota, joten välit ovat etusivun osioita
+   tiiviimmät: koko sivu footereineen mahtuu tavalliselle näytölle ilman vieritystä */
+.section.games {
+  padding-top: calc(var(--nav-h) + 2rem);
+  padding-bottom: 3rem;
+}
+
+.games-title {
+  margin-bottom: 1.5rem;
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+}
+
+.games-intro {
+  margin-bottom: 2rem;
+  color: var(--muted);
+}
+/* ═══ Korostusväri: kortti ja pelinäkymä saavat saman värin pelin tiedoista ═══ */
+.games-accent--magenta { --accent: var(--magenta); }
+.games-accent--cyan    { --accent: var(--cyan); }
+.games-accent--violet  { --accent: var(--violet); }
+
+/* Napit pelin värillä (App.css:n .btn on oletuksena magenta) */
+.games-btn {
+  border-color: var(--accent);
+}
+
+.games-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--ink);
+  box-shadow:
+    0 0 4px var(--accent),
+    0 0 14px color-mix(in srgb, var(--accent) 60%, transparent),
+    0 0 38px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* ═══ Pelinäkymä ═══ */
+.games-stage {
+  margin-bottom: 3.5rem;
+}
+
+.games-stage-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.games-stage-name {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  color: var(--accent);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* Leveys rajataan näytön korkeuden mukaan, jotta koko peli mahtuu kerralla näkyviin
+   (7rem = navi, pelin otsikkopalkki ja välit). Kuvasuhde --ratio tulee JSX:stä. */
+.games-screen {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, calc((100svh - var(--nav-h) - 7rem) * var(--ratio)));
+  aspect-ratio: var(--ratio);
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 10px;
+  background: var(--ink);
+  box-shadow: 0 0 50px -14px var(--accent);
+}
+
+.games-msg {
+  padding: 1.5rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ═══ Pelikortit ═══ */
+.games-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.games-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.8rem 1.6rem 1.6rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgb(25 18 63 / 0.55);
+  transition: border-color 0.3s, box-shadow 0.3s, translate 0.3s;
+}
+
+/* Neonputki kortin yläreunassa */
+.games-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 14px var(--accent);
+}
+
+.games-card:hover,
+.games-card.is-active {
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: 0 0 40px -16px var(--accent);
+}
+
+.games-card:hover {
+  translate: 0 -4px;
+}
+
+/* Iso ääriviivanumero kortin kulmassa */
+.games-num {
+  position: absolute;
+  top: 0.6rem;
+  right: 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 3.2rem;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 55%, transparent);
+  pointer-events: none;
+}
+
+.games-genre {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.games-name {
+  font-size: 1.35rem;
+}
+
+.games-desc {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.games-controls {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.games-controls div {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.games-controls dt {
+  min-width: 5.5rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.games-controls dd {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Nappi kortin alareunaan, vaikka kuvausten pituus vaihtelee */
+.games-card .games-btn {
+  align-self: flex-start;
+  margin-top: auto;
+}

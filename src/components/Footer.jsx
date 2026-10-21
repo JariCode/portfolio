@@ -1,20 +1,19 @@
 import { profile, socials } from '../data/profile.js';
+import { NAV_LINKS, linkHref } from '../data/nav.js';
 import './Footer.css';
 
-const LINKS = [
-  { href: '#esittely', label: 'Esittely' },
-  { href: '#projektit', label: 'Projektit' },
-  { href: '#cv', label: 'CV' },
-  { href: '#yhteys', label: 'Ota yhteyttä' },
-];
-
-// Maski asetetaan suoraan elementille: silloin suhteellinen polku (img/...) lasketaan
-// sivun osoitteesta. CSS-muuttujan kautta polku laskettaisiin buildissa /assets/-kansiosta.
-const iconMask = (icon) => ({ maskImage: `url(${icon})`, WebkitMaskImage: `url(${icon})` });
+// Maski asetetaan suoraan elementille: CSS-muuttujan kautta polku laskettaisiin buildissa
+// /assets/-kansiosta. Kauttaviiva eteen, koska footer näkyy myös /pelit/-sivulla, jossa
+// pelkkä img/... osoittaisi kansioon /pelit/img/.
+const iconMask = (icon) => {
+  const src = `url(/${icon})`;
+  return { maskImage: src, WebkitMaskImage: src };
+};
 
 const FOOTER_SOCIALS = socials.filter((s) => s.contact);
 
-export default function Footer({ onOpenPrivacy }) {
+export default function Footer({ page = 'home', onOpenPrivacy }) {
+  const home = page === 'home';
   const year = new Date().getFullYear();
 
   return (
@@ -24,7 +23,7 @@ export default function Footer({ onOpenPrivacy }) {
 
       <div className="footer-inner">
         <div className="footer-brand">
-          <a href="#top" className="footer-logo">
+          <a href={home ? '#top' : '/'} className="footer-logo">
             {profile.name}
           </a>
           <p>{profile.role}</p>
@@ -32,9 +31,9 @@ export default function Footer({ onOpenPrivacy }) {
 
         <nav aria-label="Alavalikko">
           <ul className="footer-links">
-            {LINKS.map((l) => (
-              <li key={l.href}>
-                <a href={l.href}>{l.label}</a>
+            {NAV_LINKS.map((l) => (
+              <li key={l.id}>
+                <a href={linkHref(l, home)}>{l.label}</a>
               </li>
             ))}
           </ul>

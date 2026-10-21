@@ -1,6 +1,6 @@
 # ================================
 # .htaccess — jaricode.fi juuri (portfolio, React + Vite)
-# Sivukohtaiset turvaotsakkeet (CSP ym.) vain portfolion etusivulle,
+# Sivukohtaiset turvaotsakkeet (CSP ym.) vain portfolion sivuille (etusivu ja /pelit/),
 # jotta alikansioissa olevat muut projektit eivät rikkoudu.
 # ================================
 
@@ -13,8 +13,8 @@ Options -Indexes
   Header always set X-Content-Type-Options "nosniff"
   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 
-  # ── Portfolion sivu: tietoturvaotsakkeet ──
-  <If "%{REQUEST_URI} =~ m#^/(index\.html)?$#">
+  # ── Portfolion sivut (etusivu ja /pelit/): tietoturvaotsakkeet ──
+  <If "%{REQUEST_URI} =~ m#^/(index\.html|pelit/(index\.html)?)?$#">
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     # Automaattinen toisto ja koko näyttö sallitaan vain omalle sivulle ja YouTube-upotukselle

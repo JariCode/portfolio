@@ -1,6 +1,6 @@
 # JariCode – Portfolio
 
-Portfoliosivusto, joka kokoaa esittelyn, projektit, CV:n ja yhteydenottolomakkeen yhdelle sivulle. Ulkoasu on neonvaloinen yökaupunki: hehkuvat neonputket, HUD-kehykset ja animaatiot, jotka reagoivat kävijän liikkeisiin.
+Portfoliosivusto, joka kokoaa esittelyn, projektit, CV:n ja yhteydenottolomakkeen yhdelle sivulle. Tulossa on erillinen pelialue, jolla on selaimessa pelattavia pelejä. Ulkoasu on neonvaloinen yökaupunki: hehkuvat neonputket, HUD-kehykset ja animaatiot, jotka reagoivat kävijän liikkeisiin.
 
 **Sivusto:** https://jaricode.fi/
 
@@ -9,7 +9,7 @@ Portfoliosivusto, joka kokoaa esittelyn, projektit, CV:n ja yhteydenottolomakkee
 | Osa-alue | Ratkaisu |
 |---|---|
 | Käyttöliittymä | React 19 |
-| Kehitys ja build | Vite |
+| Kehitys ja build | Vite (monisivutila: etusivu ja pelialue) |
 | Animaatiot | [motion](https://motion.dev/) |
 | Tyylit | CSS: muuttujat, grid, `clamp()`, jokaisella komponentilla oma tyylitiedosto |
 | Fontit | Fontsource-npm-paketit, ladataan omalta palvelimelta |
@@ -46,14 +46,26 @@ Portfoliosivusto, joka kokoaa esittelyn, projektit, CV:n ja yhteydenottolomakkee
 - Kelluvat kenttäotsikot ja kenttäkohtaiset virheilmoitukset
 - Somekortit seuraavat hiirtä magneettimaisesti
 
+### Pelialue (`/pelit/`) – tulossa
+Kolme selaimessa pelattavaa peliä on tulossa. Sivun runko, pelikortit ja pelinäkymä ovat valmiina.
+
+- **Z-Runner:** tasohyppely neonvaloisessa yökaupungissa
+- **Space Driver 2026:** pystysuuntainen avaruusammuskelu
+- **Shadow Builder:** kaupunginrakennus
+
+Peli käynnistyy samalle sivulle pelinäkymään, eikä kävijää ohjata muualle. Pelin koodi ladataan vasta, kun peli avataan, joten se ei hidasta sivun latautumista. Pelinäkymän muoto tulee pelin kuvasuhteesta: pystysuuntainen ammuskelu ja vaakasuuntainen tasohyppely mahtuvat kumpikin kerralla näytölle. Jos peli kaatuu, virhe näkyy pelinäkymässä ja muu sivu toimii normaalisti.
+
 ### Muuta
 - Hiireen reagoiva partikkelitausta canvasilla
-- Navigaatio korostaa näkyvissä olevan osion
-- Footer ja tietosuojaseloste
+- Navigaatio korostaa näkyvissä olevan osion tai sivun ja vie pelialueelta suoraan etusivun oikeaan osioon
+- Footer ja tietosuojaseloste molemmilla sivuilla
 
 ## Arkkitehtuuri
 
 ```
+index.html       etusivu
+pelit/
+  index.html     pelialue (osoite /pelit/)
 public/          kopioidaan buildissa sellaisenaan dist-kansioon
   img/           kuvat ja somekuvakkeet (ei versionhallinnassa)
   video/         video-CV (ei versionhallinnassa)
@@ -62,21 +74,24 @@ public/          kopioidaan buildissa sellaisenaan dist-kansioon
   favicon.svg    sivuston kuvake
   robots.txt     ohjeet hakukoneille
 src/
-  data/          sisältö: esittely, projektit, CV
-  components/    osiot, modaali ja niiden tyylit
-  main.jsx       sovelluksen käynnistys, fontit ja liikkeen vähennysasetus
-  App.jsx        sivun rakenne ja yhteinen tila
+  data/          sisältö: esittely, projektit, CV, pelit ja navigaation linkit
+  components/    osiot, pelialue, modaali ja niiden tyylit
+  pages/         pelialueen käynnistys ja sivun rakenne
+  main.jsx       etusivun käynnistys, fontit ja liikkeen vähennysasetus
+  App.jsx        etusivun rakenne ja yhteinen tila
   index.css      väripaletti, typografia, perustyylit
   App.css        yhteiset rakennuspalat (osiot, napit, tunnisteet)
 ```
 
 `npm run build` tuottaa `dist/`-kansion, joka viedään palvelimelle. Vite kokoaa JavaScriptin, CSS:n ja fontit `dist/assets/`-kansioon tiedostoiksi, joiden nimessä on sisältötiiviste. Siksi palvelin voi välimuistittaa ne pitkäksi aikaa, ja uusi versio saa aina uuden nimen.
 
-**Sisältö on erotettu komponenteista.** Kaikki tekstit, projektit ja CV:n tiedot ovat `src/data/`-tiedostoissa tavallisina JavaScript-olioina. Uusi projekti lisätään yhdellä oliolla, eikä komponentteihin tarvitse koskea. Komponentit päättelevät esitystavan datasta: esimerkiksi YouTube-linkistä tulee traileri-nappi ja muista linkeistä sivustolinkki.
+**Kaksi sivua, yhteiset komponentit.** Etusivu ja pelialue ovat Viten monisivutilassa omia HTML-sivujaan, joilla on kummallakin oma käynnistystiedosto. Navigaatio, footer, tausta ja modaali ovat yhteisiä, ja ne saavat tiedon sivusta propina. Etusivun osiot eivät lataudu pelialueelle, eikä pelien koodi lataudu etusivulle.
+
+**Sisältö on erotettu komponenteista.** Kaikki tekstit, projektit, CV:n tiedot ja pelit ovat `src/data/`-tiedostoissa tavallisina JavaScript-olioina. Uusi projekti lisätään yhdellä oliolla, eikä komponentteihin tarvitse koskea. Komponentit päättelevät esitystavan datasta: esimerkiksi YouTube-linkistä tulee traileri-nappi ja muista linkeistä sivustolinkki. Navigaation linkit ovat yhdessä tiedostossa, josta sekä navi että footer ne lukevat.
 
 **Yksi yhteinen modaali** (`Modal.jsx`) palvelee trailereita, video-CV:tä, CV:tä, sertifikaatteja ja tietosuojaselostetta. Se renderöidään portaalilla suoraan `body`-elementtiin, sulkeutuu Esc-näppäimellä, palauttaa fokuksen ja estää taustan rullauksen.
 
-**Suorituskyky:** hiiren liikkeeseen reagoivat animaatiot käyttävät motionin motion value -arvoja, jotka päivittävät tyylejä ilman Reactin uudelleenrenderöintiä. Taustan canvas-animaatio pysähtyy, kun välilehti ei ole näkyvissä.
+**Suorituskyky:** hiiren liikkeeseen reagoivat animaatiot käyttävät motionin motion value -arvoja, jotka päivittävät tyylejä ilman Reactin uudelleenrenderöintiä. Taustan canvas-animaatio pysähtyy, kun välilehti ei ole näkyvissä. Pelit ladataan erillisinä paloina vasta avattaessa.
 
 ## Saavutettavuus
 
@@ -84,15 +99,16 @@ src/
 - Ruudunlukija lukee animoidut otsikot kokonaisina sanoina, ja koristeet on piilotettu siltä
 - "Vähennä liikettä" -käyttöjärjestelmäasetus pysäyttää animaatiot
 - Automaattisesti vaihtuvat esittelyteksti ja projektit voi pysäyttää napista
+- Pelin avautuessa fokus siirtyy pelinäkymään, ja suljettaessa se palaa pelin korttiin
 - Pääpainikkeiden kosketusalueet vähintään 44 × 44 px
 
 ## Responsiivisuus
 
-Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakatilassa. Mobiilissa navigaatio muuttuu koko ruudun valikoksi, ja videot sekä projektikuvat mitoittuvat matalalle näytölle.
+Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakatilassa. Mobiilissa navigaatio muuttuu koko ruudun valikoksi, ja videot sekä projektikuvat mitoittuvat matalalle näytölle. Pelialue mahtuu tavallisella näytöllä footereineen kerralla näkyviin.
 
 ## Tietoturva ja yksityisyys
 
-- **Sisällön tietoturvakäytäntö (CSP):** selain lataa vain sivuston omia tiedostoja ja YouTube-upotuksen, joten ulkopuolista koodia ei voi ajaa sivulla
+- **Sisällön tietoturvakäytäntö (CSP):** selain lataa vain sivuston omia tiedostoja ja YouTube-upotuksen, joten ulkopuolista koodia ei voi ajaa sivulla. Käytäntö koskee sekä etusivua että pelialuetta.
 - **Tietoturvaotsakkeet:** pakotettu HTTPS-yhteys, sivua ei voi upottaa toiselle sivustolle huijaustarkoituksessa, eikä selain saa arvata tiedostojen tyyppiä sisällön perusteella
 - **Lomakkeen suojaukset:**
   - tiedot tarkistetaan palvelimella, ei pelkästään selaimessa
@@ -103,6 +119,7 @@ Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakati
   - palvelin hyväksyy viestit vain sivuston omalta lomakkeelta, ei muilta sivustoilta eikä suoraan skripteillä
   - liian suuret pyynnöt hylätään
 - Ei evästeitä, analytiikkaa eikä ulkoisia fontteja
+- Pelit toteutetaan kokonaan selaimessa: ei palvelinta, ei API-avaimia eikä ulkoisia lähteitä
 - YouTube-upotus ladataan vasta, kun kävijä käynnistää videon, ja se käyttää yksityisyyttä parantavaa tilaa
 - Repossa ei ole salaisuuksia
 
@@ -112,6 +129,8 @@ Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakati
 npm install
 npm run dev
 ```
+
+Etusivu aukeaa osoitteessa `http://localhost:5173/` ja pelialue osoitteessa `http://localhost:5173/pelit/`.
 
 Muut komennot:
 
