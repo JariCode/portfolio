@@ -105,6 +105,10 @@ export default function Outro({ onDone }) {
             <p>Jari Karri · JariCode</p>
           </section>
           <section className="zr-out-section">
+            <h3>Tarina ja juoni</h3>
+            <p>Jari Karri</p>
+          </section>
+          <section className="zr-out-section">
             <h3>Kartat</h3>
             <p>Jari Karri · Tiled</p>
           </section>
