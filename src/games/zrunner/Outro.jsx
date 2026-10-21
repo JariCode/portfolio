@@ -41,8 +41,9 @@ export default function Outro({ onDone }) {
       return undefined;
     }
     skipRef.current?.focus({ preventScroll: true });
-    // Moottorin ääni koko ajon ajan; hiljenee, jos tekstit ohitetaan
-    const stop = play('car', { volume: 1, duration: ROLL_S + 1 });
+    // Moottorin ääni koko ajon ajan; hiljenee, jos tekstit ohitetaan. gap: 0, koska StrictMode
+    // ajaa efektin kehitystilassa kahdesti ja toinen soitto muuten estyisi.
+    const stop = play('car', { volume: 1, duration: ROLL_S + 1, gap: 0 });
     return () => stop?.(0.6);
   }, [onDone]);
 
