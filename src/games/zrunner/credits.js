@@ -12,37 +12,22 @@
 // changes:    vapaaehtoinen; mitä muokattiin (CC BY vaatii kertomaan muutoksista)
 
 export const CREDITS = [
-  // {
-  //   type: 'musiikki',
-  //   name: 'Kappaleen nimi',
-  //   author: 'Tekijä',
-  //   url: 'https://pixabay.com/music/...',
-  //   license: 'Pixabay Content License',
-  //   licenseUrl: 'https://pixabay.com/service/license/',
-  // },
-  // {
-  //   type: 'ääni',
-  //   name: 'Äänitehosteen nimi',
-  //   author: 'Tekijä',
-  //   url: 'https://pixabay.com/sound-effects/...',
-  //   license: 'Pixabay Content License',
-  //   licenseUrl: 'https://pixabay.com/service/license/',
-  // },
-  // {
-  //   type: 'tileset',
-  //   name: 'Tileset-paketin nimi',
-  //   author: 'Tekijä',
-  //   url: 'https://...',
-  //   license: 'CC0',
-  //   licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
-  // },
-  // {
-  //   type: 'hahmo',
-  //   name: 'Hahmopaketin nimi',
-  //   author: 'Tekijä',
-  //   url: 'https://...',
-  //   license: 'CC BY 4.0',
-  //   licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
-  //   changes: 'Värit muutettu neonpaletiksi',
-  // },
+  {
+    type: 'hahmo',
+    name: '2D Zombie Free Sprite',
+    author: 'CraftPix.net',
+    url: 'https://craftpix.net/freebies/2d-game-zombie-character-free-sprite-pack-1/',
+    license: 'CraftPix Freebie License',
+    licenseUrl: 'https://craftpix.net/file-licenses/',
+    changes: 'Ruudut kohdistettu, skaalattu ja koottu sprite-arkeiksi',
+  },
+  {
+    type: 'hahmo',
+    name: '2D Zombie Kids Free Sprite',
+    author: 'CraftPix.net',
+    url: 'https://craftpix.net/freebies/2d-game-zombie-kids-character-free-sprite-8/',
+    license: 'CraftPix Freebie License',
+    licenseUrl: 'https://craftpix.net/file-licenses/',
+    changes: 'Ruudut kohdistettu, skaalattu ja koottu sprite-arkeiksi',
+  },
 ];
