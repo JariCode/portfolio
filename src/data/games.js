@@ -1,9 +1,10 @@
 // Pelialueen pelit. Kun peli on valmis, sille lisätään load-funktio, esim.
 //   load: () => import('../games/zrunner/ZRunner.jsx'),
-// Ilman loadia peli näkyy kortilla, mutta pelinäkymässä lukee "rakenteilla".
+// Ilman loadia kortissa näkyy Rakenteilla-merkintä ja planned-lista, eikä peliä voi avata.
 //
 // color: korostusväri (magenta, cyan tai violet, ks. Games.css)
 // ratio: pelinäkymän leveys jaettuna korkeudella
+// planned: keskeneräisen pelin kortissa ohjaimien tilalla näytettävät tulevat ominaisuudet
 
 export const GAMES = [
   {
@@ -16,7 +17,7 @@ export const GAMES = [
     description:
       'Pakene zombeja neonvaloisen yökaupungin halki ja kerää valopallot matkalla.',
     controls: {
-      desktop: 'Nuolinäppäimet ja välilyönti',
+      desktop: 'Nuolet, välilyönti ja X (lyönti)',
       mobile: 'Ruutunapit',
     },
   },
@@ -28,6 +29,7 @@ export const GAMES = [
     ratio: 3 / 4,
     description:
       'Ohjaa alusta vihollisaaltojen läpi. Vauhti kiihtyy aalto aallolta, ja lopussa odottaa pomo.',
+    planned: ['Vihollisaallot', 'Pomotaistelu', 'Neonräjähdykset', 'Ennätystila'],
     controls: {
       desktop: 'Hiiri tai nuolinäppäimet',
       mobile: 'Vedä alusta sormella',
@@ -41,6 +43,7 @@ export const GAMES = [
     ratio: 1,
     description:
       'Rakenna yökaupunki tyhjästä. Pidä sähköt päällä, kassa plussalla ja kasvata väkiluku tuhanteen.',
+    planned: ['6 rakennustyyppiä', 'Raha ja sähkö', 'Tavoite 1000 asukasta', 'Tallennus'],
     controls: {
       desktop: 'Hiiri',
       mobile: 'Napauta ruutua',

@@ -215,3 +215,77 @@
   align-self: flex-start;
   margin-top: auto;
 }
+
+
+/* ═══ Keskeneräinen peli ═══ */
+/* Neonputki on himmeä: valot eivät ole vielä syttyneet */
+.games-card--soon::before {
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+.games-card--soon:hover {
+  translate: none;
+}
+
+/* Tulossa olevat ominaisuudet pieninä lappuina ohjaimien paikalla */
+.games-planned {
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.games-planned-title {
+  margin-bottom: 0.4rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.games-planned-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+.games-planned-list li {
+  padding: 0.2rem 0.75rem;
+  border: 1px dashed color-mix(in srgb, var(--accent) 50%, transparent);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
+/* Tilamerkintä Pelaa-napin paikalla: samassa kohdassa kortin alareunassa */
+.games-soon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 0.85rem 1.6rem;
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 999px;
+  color: var(--accent);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Vilkkuva valo kuin rakennustyömaalla */
+.games-soon-dot {
+  width: 0.5rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: games-soon-blink 1.4s ease-in-out infinite;
+}
+
+@keyframes games-soon-blink {
+  50% { opacity: 0.2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .games-soon-dot {
+    animation: none;
+  }
+}

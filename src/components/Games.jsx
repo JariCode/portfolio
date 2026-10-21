@@ -40,34 +40,56 @@ export default function Games() {
     <section id="top" className="section games">
       <ScrambleText as="h1" className="section-title games-title" text="Pelialue" />
       <p className="games-intro">
-        Kolme pientä peliä, jotka olen koodannut itse. Pelit pyörivät suoraan tällä sivulla
-        selaimessasi, eikä niitä tarvitse asentaa.
+        Pieniä pelejä, jotka olen koodannut itse. Pelit pyörivät suoraan tällä sivulla
+        selaimessasi, eikä niitä tarvitse asentaa. Z-Runner on valmis, kaksi muuta on työn alla.
       </p>
 
       <ul className="games-list">
         {GAMES.map((g, i) => (
-          <li key={g.id} className={`games-card games-accent--${g.color}`}>
+          <li key={g.id} className={`games-card games-accent--${g.color}${g.load ? '' : ' games-card--soon'}`}>
             <span className="games-num" aria-hidden="true">
               {String(i + 1).padStart(2, '0')}
             </span>
             <p className="games-genre">{g.genre}</p>
             <h2 className="games-name">{g.name}</h2>
-            <p className="games-desc">{g.description}</p>
+            {/* Keskeneräisestä pelistä ei kuvausta: Tulossa-laput kertovat saman lyhyemmin */}
+            {g.load && <p className="games-desc">{g.description}</p>}
 
-            <dl className="games-controls">
-              <div>
-                <dt>Tietokone</dt>
-                <dd>{g.controls.desktop}</dd>
+            {/* Valmiista pelistä ohjaimet, keskeneräisestä tulossa olevat ominaisuudet samassa tilassa,
+                jotta kortit pysyvät yhtä matalina ja sivu footereineen mahtuu näytölle */}
+            {g.load ? (
+              <dl className="games-controls">
+                <div>
+                  <dt>Tietokone</dt>
+                  <dd>{g.controls.desktop}</dd>
+                </div>
+                <div>
+                  <dt>Puhelin</dt>
+                  <dd>{g.controls.mobile}</dd>
+                </div>
+              </dl>
+            ) : (
+              <div className="games-planned">
+                <p className="games-planned-title">Tulossa</p>
+                <ul className="games-planned-list">
+                  {g.planned.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
               </div>
-              <div>
-                <dt>Puhelin</dt>
-                <dd>{g.controls.mobile}</dd>
-              </div>
-            </dl>
+            )}
 
-            <button type="button" className="btn games-btn" onClick={() => setActiveId(g.id)}>
-              Pelaa
-            </button>
+            {/* Vain valmiin pelin voi avata; keskeneräisen tilalla on tilamerkintä */}
+            {g.load ? (
+              <button type="button" className="btn games-btn" onClick={() => setActiveId(g.id)}>
+                Pelaa
+              </button>
+            ) : (
+              <p className="games-soon">
+                <span className="games-soon-dot" aria-hidden="true" />
+                Rakenteilla
+              </p>
+            )}
           </li>
         ))}
       </ul>
