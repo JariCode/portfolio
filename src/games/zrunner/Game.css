@@ -1,0 +1,145 @@
+/* ═══ Z-Runnerin pelikenttä (Game.jsx) ═══ */
+.zr-game {
+  position: absolute;
+  inset: 0;
+  background: #05030f;
+}
+
+/* Fokus on pelinäkymässä näppäimistöä varten; reunus ei kuulu peliin */
+.zr-game:focus {
+  outline: none;
+}
+
+/* Phaser skaalaa canvasin tähän laatikkoon (Scale.FIT) */
+.zr-game-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.zr-game-canvas canvas {
+  display: block;
+}
+
+/* ── Yläpalkki: maailma ja aika ── */
+.zr-hud {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.6cqw 2.2cqw;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+.zr-hud-world {
+  color: var(--cyan);
+  font-size: max(9px, 1.2cqw);
+  text-transform: uppercase;
+  text-shadow: 0 0 0.8cqw var(--cyan);
+}
+
+.zr-hud-time {
+  min-width: 6ch;
+  color: var(--text);
+  font-size: max(12px, 1.9cqw);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  text-shadow: 0 0 1cqw var(--magenta);
+}
+
+/* ── Kosketusnapit: vain kosketusnäytöillä ── */
+.zr-touch {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .zr-touch {
+    position: absolute;
+    inset: auto 0 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 2cqw 2.4cqw;
+    pointer-events: none;
+  }
+}
+
+.zr-touch-group {
+  display: flex;
+  gap: 2cqw;
+}
+
+.zr-touch-btn {
+  display: grid;
+  place-items: center;
+  width: max(52px, 8cqw);
+  aspect-ratio: 1;
+  border: 2px solid color-mix(in srgb, var(--cyan) 60%, transparent);
+  border-radius: 50%;
+  background: rgb(9 6 22 / 0.45);
+  color: var(--text);
+  font-size: max(18px, 2.6cqw);
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.zr-touch-btn:active {
+  background: color-mix(in srgb, var(--cyan) 35%, transparent);
+}
+
+.zr-touch-btn--jump {
+  border-color: color-mix(in srgb, var(--magenta) 70%, transparent);
+}
+
+.zr-touch-btn--jump:active {
+  background: color-mix(in srgb, var(--magenta) 35%, transparent);
+}
+
+/* ── Maaliruutu ── */
+.zr-result {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2cqw;
+  background: rgb(3 2 10 / 0.7);
+  text-align: center;
+  animation: zr-result-in 0.4s ease-out both;
+}
+
+.zr-result-title {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 7cqw;
+  font-weight: 800;
+  text-shadow:
+    0 0 0.15em var(--magenta),
+    0 0 0.45em var(--magenta);
+}
+
+.zr-result-stats {
+  color: var(--muted);
+  font-size: max(11px, 1.6cqw);
+  letter-spacing: 0.06em;
+}
+
+.zr-result-stats strong {
+  color: var(--cyan);
+}
+
+@keyframes zr-result-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zr-result {
+    animation: none;
+  }
+}

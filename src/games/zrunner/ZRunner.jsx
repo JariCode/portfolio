@@ -1,15 +1,23 @@
-import { useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useState } from 'react';
 import Title from './Title.jsx';
 import Intro from './Intro.jsx';
 import './ZRunner.css';
 
+// Phaser on iso kirjasto: ladataan vasta, kun pelaaja aloittaa. Aloitusnäkymä ja
+// alkuanimaatio aukeavat heti, ja lataus ehtii yleensä valmiiksi animaation aikana.
+const Game = lazy(() => import('./Game.jsx'));
+const preloadGame = () => import('./Game.jsx');
+
 // Z-Runnerin vaiheet: aloitusnäkymä → alkuanimaatio → peli.
-// Varsinainen pelikenttä (Phaser ja Tiled-kartat) tulee "play"-vaiheeseen.
+// Pelikenttä (Phaser ja Tiled-kartta) on Game.jsx:ssä; se tuhoutuu, kun vaihe vaihtuu.
 export default function ZRunner() {
   const [phase, setPhase] = useState('title');
 
   // Pysyvät funktiot: Intro käynnistää ajastimensa uudelleen, jos onDone vaihtuu
-  const start = useCallback(() => setPhase('intro'), []);
+  const start = useCallback(() => {
+    preloadGame();
+    setPhase('intro');
+  }, []);
   const play = useCallback(() => setPhase('play'), []);
   const toTitle = useCallback(() => setPhase('title'), []);
 
@@ -18,13 +26,9 @@ export default function ZRunner() {
       {phase === 'title' && <Title onStart={start} />}
       {phase === 'intro' && <Intro onDone={play} />}
       {phase === 'play' && (
-        <div className="zr-soon">
-          <p className="zr-soon-world">Maailma 1 · Neonkatu</p>
-          <p className="zr-soon-text">Kenttä on vielä rakenteilla.</p>
-          <button type="button" className="zr-btn zr-btn--ghost" onClick={toTitle}>
-            Takaisin valikkoon
-          </button>
-        </div>
+        <Suspense fallback={<p className="zr-loading">Ladataan…</p>}>
+          <Game onExit={toTitle} />
+        </Suspense>
       )}
     </div>
   );

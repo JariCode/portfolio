@@ -12,29 +12,14 @@
   user-select: none;
 }
 
-/* Väliaikainen näkymä, kunnes ensimmäinen kenttä on valmis */
-.zr-soon {
+/* Näkyy vain, jos Phaser ei ehtinyt latautua alkuanimaation aikana */
+.zr-loading {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.6cqw;
-  text-align: center;
-}
-
-.zr-soon-world {
-  color: var(--cyan);
-  font-family: var(--font-display);
-  font-size: max(12px, 2.4cqw);
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  text-shadow: 0 0 1cqw var(--cyan);
-}
-
-.zr-soon-text {
+  display: grid;
+  place-items: center;
   color: var(--muted);
+  font-family: var(--font-display);
   font-size: max(11px, 1.5cqw);
+  letter-spacing: 0.2em;
 }
