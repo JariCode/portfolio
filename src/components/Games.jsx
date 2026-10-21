@@ -1,6 +1,7 @@
-import { Component, Suspense, lazy, useEffect, useRef, useState } from 'react';
+import { Component, Suspense, lazy, useCallback, useRef, useState } from 'react';
 import { GAMES } from '../data/games.js';
 import ScrambleText from './ScrambleText.jsx';
+import Modal from './Modal.jsx';
 import './Games.css';
 
 // lazy() luodaan kerran moduulin tasolla: renderöinnissä luotuna peli latautuisi ja nollautuisi joka kerta.
@@ -27,31 +28,13 @@ class GameErrorBoundary extends Component {
 
 export default function Games() {
   const [activeId, setActiveId] = useState(null);
-  const stageRef = useRef(null);
-  const closeRef = useRef(null);
-  const listRef = useRef(null);
-  const returnFocusTo = useRef(null); // suljetun pelin id, jonka Pelaa-nappiin fokus palaa
+  const screenRef = useRef(null);
 
   const game = GAMES.find((g) => g.id === activeId);
   const GameView = game ? GAME_COMPONENTS[game.id] : null;
 
-  // Avattu peli vieritetään näkyviin (scroll-padding-top pitää sen navin alapuolella).
-  // Fokus siirretään Sulje-nappiin, koska painettu Pelaa-nappi poistuu käytöstä
-  // ja fokus putoaisi muuten sivun alkuun. Suljettaessa fokus palaa pelin korttiin.
-  useEffect(() => {
-    if (activeId) {
-      stageRef.current?.scrollIntoView({ block: 'start' });
-      closeRef.current?.focus({ preventScroll: true });
-    } else if (returnFocusTo.current) {
-      listRef.current?.querySelector(`[data-game="${returnFocusTo.current}"]`)?.focus();
-      returnFocusTo.current = null;
-    }
-  }, [activeId]);
-
-  const closeGame = () => {
-    returnFocusTo.current = activeId;
-    setActiveId(null);
-  };
+  // Pysyvä funktio: Modal ajaa efektinsä uudelleen aina, kun onClose vaihtuu
+  const closeGame = useCallback(() => setActiveId(null), []);
 
   return (
     <section id="top" className="section games">
@@ -61,66 +44,63 @@ export default function Games() {
         selaimessasi, eikä niitä tarvitse asentaa.
       </p>
 
-      {game && (
-        <div ref={stageRef} className={`games-stage games-accent--${game.color}`}>
-          <div className="games-stage-bar">
-            <h2 className="games-stage-name">{game.name}</h2>
-            <button ref={closeRef} type="button" className="btn games-btn" onClick={closeGame}>
-              Sulje peli
+      <ul className="games-list">
+        {GAMES.map((g, i) => (
+          <li key={g.id} className={`games-card games-accent--${g.color}`}>
+            <span className="games-num" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <p className="games-genre">{g.genre}</p>
+            <h2 className="games-name">{g.name}</h2>
+            <p className="games-desc">{g.description}</p>
+
+            <dl className="games-controls">
+              <div>
+                <dt>Tietokone</dt>
+                <dd>{g.controls.desktop}</dd>
+              </div>
+              <div>
+                <dt>Puhelin</dt>
+                <dd>{g.controls.mobile}</dd>
+              </div>
+            </dl>
+
+            <button type="button" className="btn games-btn" onClick={() => setActiveId(g.id)}>
+              Pelaa
             </button>
-          </div>
-
-          {/* Kuvasuhde tulee pelin tiedoista, jotta pysty- ja vaakapelit mahtuvat näytölle */}
-          <div className="games-screen" style={{ '--ratio': game.ratio }}>
-            {GameView ? (
-              <GameErrorBoundary key={game.id}>
-                <Suspense fallback={<p className="games-msg">Ladataan peliä…</p>}>
-                  <GameView />
-                </Suspense>
-              </GameErrorBoundary>
-            ) : (
-              <p className="games-msg">{game.name} on vielä rakenteilla.</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      <ul ref={listRef} className="games-list">
-        {GAMES.map((g, i) => {
-          const isActive = g.id === activeId;
-          return (
-            <li key={g.id} className={`games-card games-accent--${g.color}${isActive ? ' is-active' : ''}`}>
-              <span className="games-num" aria-hidden="true">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <p className="games-genre">{g.genre}</p>
-              <h2 className="games-name">{g.name}</h2>
-              <p className="games-desc">{g.description}</p>
-
-              <dl className="games-controls">
-                <div>
-                  <dt>Tietokone</dt>
-                  <dd>{g.controls.desktop}</dd>
-                </div>
-                <div>
-                  <dt>Puhelin</dt>
-                  <dd>{g.controls.mobile}</dd>
-                </div>
-              </dl>
-
-              <button
-                type="button"
-                className="btn games-btn"
-                data-game={g.id}
-                onClick={() => setActiveId(g.id)}
-                disabled={isActive}
-              >
-                {isActive ? 'Käynnissä' : 'Pelaa'}
-              </button>
-            </li>
-          );
-        })}
+          </li>
+        ))}
       </ul>
+
+      {/* Peli kelluu sivun päällä: sivu ei rullaa pelatessa, ja Modal palauttaa
+          sulkiessa fokuksen sen pelin Pelaa-nappiin */}
+      <Modal
+        open={!!game}
+        onClose={closeGame}
+        label={game?.name ?? ''}
+        className={`modal--game games-accent--${game?.color}`}
+        initialFocus={screenRef}
+        closeOnBackdrop={false}
+      >
+        {game && (
+          <>
+            <h2 className="games-modal-name">{game.name}</h2>
+            {/* Kuvasuhde tulee pelin tiedoista, jotta pysty- ja vaakapelit mahtuvat näytölle.
+                tabIndex: pelinäkymä saa fokuksen, joten näppäimet menevät peliin */}
+            <div ref={screenRef} className="games-screen" style={{ '--ratio': game.ratio }} tabIndex={-1}>
+              {GameView ? (
+                <GameErrorBoundary key={game.id}>
+                  <Suspense fallback={<p className="games-msg">Ladataan peliä…</p>}>
+                    <GameView />
+                  </Suspense>
+                </GameErrorBoundary>
+              ) : (
+                <p className="games-msg">{game.name} on vielä rakenteilla.</p>
+              )}
+            </div>
+          </>
+        )}
+      </Modal>
     </section>
   );
 }

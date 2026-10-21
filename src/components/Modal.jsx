@@ -3,8 +3,19 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import './Modal.css';
 
-// Yleinen modaali: tumma tausta, neonreunainen ikkuna, Esc ja taustan klikkaus sulkevat
-export default function Modal({ open, onClose, label, className = '', children }) {
+// Yleinen modaali: tumma tausta, neonreunainen ikkuna, Esc ja taustan klikkaus sulkevat.
+// initialFocus: elementti, joka saa fokuksen avattaessa (oletus Sulje-nappi). Peli antaa tähän
+// pelinäkymänsä, jottei välilyönti tai Enter osu Sulje-nappiin kesken pelin.
+// closeOnBackdrop: pelissä false, jottei ohi lipsahtanut klikkaus tai sormi sulje peliä.
+export default function Modal({
+  open,
+  onClose,
+  label,
+  className = '',
+  initialFocus,
+  closeOnBackdrop = true,
+  children,
+}) {
   const closeRef = useRef(null);
 
   useEffect(() => {
@@ -17,14 +28,14 @@ export default function Modal({ open, onClose, label, className = '', children }
 
     document.body.style.overflow = 'hidden'; // sivu ei rullaa modaalin alla
     window.addEventListener('keydown', onKey);
-    closeRef.current?.focus();
+    (initialFocus ?? closeRef).current?.focus();
 
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', onKey);
       previousFocus?.focus();
     };
-  }, [open, onClose]);
+  }, [open, onClose, initialFocus]);
 
   // Portaali piirtää modaalin suoraan bodyyn, jolloin mikään osion tyyli ei rajaa sitä
   return createPortal(
@@ -32,7 +43,7 @@ export default function Modal({ open, onClose, label, className = '', children }
       {open && (
         <motion.div
           className="modal-backdrop"
-          onClick={onClose}
+          onClick={closeOnBackdrop ? onClose : undefined}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

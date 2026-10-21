@@ -15,7 +15,8 @@
   margin-bottom: 2rem;
   color: var(--muted);
 }
-/* ═══ Korostusväri: kortti ja pelinäkymä saavat saman värin pelin tiedoista ═══ */
+
+/* ═══ Korostusväri: kortti ja pelimodaali saavat saman värin pelin tiedoista ═══ */
 .games-accent--magenta { --accent: var(--magenta); }
 .games-accent--cyan    { --accent: var(--cyan); }
 .games-accent--violet  { --accent: var(--violet); }
@@ -25,7 +26,7 @@
   border-color: var(--accent);
 }
 
-.games-btn:hover:not(:disabled) {
+.games-btn:hover {
   background: var(--accent);
   color: var(--ink);
   box-shadow:
@@ -34,40 +35,56 @@
     0 0 38px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
-/* ═══ Pelinäkymä ═══ */
-.games-stage {
-  margin-bottom: 3.5rem;
+/* ═══ Pelimodaali ═══ */
+/* Modaalin leveys tulee pelinäkymästä (ei Modal.css:n kiinteää 1000px:ää) */
+.modal.modal--game {
+  width: auto;
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 0 60px -10px var(--accent);
 }
 
-.games-stage-bar {
+/* Otsikkopalkki on kiinteän korkuinen, jotta pelinäkymän koon voi laskea tarkasti.
+   Oikea padding jättää tilan Modalin Sulje-napille. */
+.games-modal-name {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.games-stage-name {
-  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  height: 3.75rem;
+  padding: 0 4.5rem 0 1.25rem;
+  font-size: 1.1rem;
   color: var(--accent);
   text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Leveys rajataan näytön korkeuden mukaan, jotta koko peli mahtuu kerralla näkyviin
-   (7rem = navi, pelin otsikkopalkki ja välit). Kuvasuhde --ratio tulee JSX:stä. */
+/* Pelinäkymä on niin suuri kuin näyttö sallii pelin kuvasuhteessa
+   (--ratio JSX:stä). Korkeudesta vähennetään modaalin välit, otsikkopalkki ja reunat.
+   100dvh toisena huomioi mobiiliselaimen työkalupalkit, 100vh on varamuoto. */
 .games-screen {
-  position: relative;
   display: grid;
   place-items: center;
-  width: min(100%, calc((100svh - var(--nav-h) - 7rem) * var(--ratio)));
+  width: min(
+    calc(100vw - 2 * var(--gutter) - 2px),
+    calc((100vh - 2 * var(--gutter) - 3.75rem - 2px) * var(--ratio))
+  );
+  width: min(
+    calc(100vw - 2 * var(--gutter) - 2px),
+    calc((100dvh - 2 * var(--gutter) - 3.75rem - 2px) * var(--ratio))
+  );
   aspect-ratio: var(--ratio);
-  margin-inline: auto;
+  /* Ilman tätä pelin canvas voisi venyttää näkymän korkeammaksi kuin kuvasuhde sallii */
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-  border-radius: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
   background: var(--ink);
-  box-shadow: 0 0 50px -14px var(--accent);
+  /* Sormella vetäminen ohjaa peliä eikä rullaa tai zoomaa sivua */
+  touch-action: none;
+}
+
+/* Pelinäkymä saa fokuksen vain, jotta näppäimet menevät peliin; korostusta ei tarvita,
+   koska koko modaali on jo kehystetty */
+.games-screen:focus {
+  outline: none;
 }
 
 .games-msg {
@@ -108,13 +125,9 @@
   box-shadow: 0 0 14px var(--accent);
 }
 
-.games-card:hover,
-.games-card.is-active {
+.games-card:hover {
   border-color: color-mix(in srgb, var(--accent) 60%, transparent);
   box-shadow: 0 0 40px -16px var(--accent);
-}
-
-.games-card:hover {
   translate: 0 -4px;
 }
 
