@@ -213,6 +213,7 @@ export default class LevelScene extends Phaser.Scene {
     this.finished = false;
     this.lastHud = 0;
     this.lastAlert = -Infinity;
+    this.stopAlert = null; // soivan huudon hiljennys (maalissa); edellisen maailman huuto ei kuulu tähän
 
     p.on('animationcomplete-attack', () => {
       this.attacking = false;
@@ -276,10 +277,11 @@ export default class LevelScene extends Phaser.Scene {
   }
 
   // Zombi huomasi pelaajan (enemies.js). Huuto vain välillä, ettei se soi jatkuvasti.
+  // Maalin jälkeen ei huudeta: zombit päivittyvät yhä, vaikka pelaaja on jo autossa.
   zombieAlert(kid = false) {
-    if (!this.player.alive || this.elapsed - this.lastAlert < ALERT_GAP_MS) return;
+    if (!this.player.alive || this.finished || this.elapsed - this.lastAlert < ALERT_GAP_MS) return;
     this.lastAlert = this.elapsed;
-    play('zombieAttack', { volume: 0.5, rate: kid ? 1.3 : 1 });
+    this.stopAlert = play('zombieAttack', { volume: 0.5, rate: kid ? 1.3 : 1 });
   }
 
   releaseKeys() {
@@ -497,6 +499,8 @@ export default class LevelScene extends Phaser.Scene {
 
   finish() {
     this.finished = true;
+    // Juuri ennen maalia alkanut huuto hiljennetään, ettei se kuulu autossa tai välianimaatiossa
+    this.stopAlert?.(0.3);
     const p = this.player;
     p.body.setVelocity(0, 0);
     p.body.setAllowGravity(false);
