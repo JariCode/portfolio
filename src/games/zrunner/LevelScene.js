@@ -5,6 +5,7 @@ import { Walker, ZOMBIE_BODY, createZombieAnims, preloadZombies } from './enemie
 import { createOrbs, collectOrb } from './orbs.js';
 import { createEnergyPacks, collectPack } from './energy.js';
 import Train from './train.js';
+import Car from './car.js';
 import { WORLDS } from './worlds.js';
 import { play } from './sound.js';
 
@@ -170,6 +171,14 @@ export default class LevelScene extends Phaser.Scene {
 
     // ── Metron juna ──
     this.train = w.train ? new Train(this) : null;
+
+    // ── Pakoauto viimeisen maailman lopussa: maali on auton ovella ──
+    this.car = null;
+    if (w.car) {
+      const col = this.ground.layer.width - 9;
+      this.car = new Car(this, col * T, this.groundY(col) ?? 10 * T);
+      this.goalX = this.car.doorX;
+    }
 
     // ── Kamera seuraa pelaajaa, katsoo hieman eteenpäin ──
     const cam = this.cameras.main;
@@ -493,6 +502,9 @@ export default class LevelScene extends Phaser.Scene {
     p.body.setAllowGravity(false);
     p.play('idle', true);
     this.sendHud(true);
-    this.game.events.emit('zr-finish', this.summary());
+    const done = () => this.game.events.emit('zr-finish', this.summary());
+    // Viimeisessä maailmassa pelaaja pakenee autolla ennen loppuruutua
+    if (this.car) this.car.drive(p, done);
+    else done();
   }
 }

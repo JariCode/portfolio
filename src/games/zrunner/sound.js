@@ -16,6 +16,7 @@ export const SOUNDS = {
   zombieAttack: 'zombi-hyokkaa.mp3',
   collect: 'keraa.mp3',
   train: 'juna.mp3',
+  car: 'auto.mp3',
   music: 'musiikki.mp3',
   intro: 'intro.mp3',
 };
@@ -76,6 +77,8 @@ export function unlock() {
 // Efekti. rate: toistonopeus (ja sävelkorkeus), jotta sama ääni voi kuulostaa vähän eri
 // tavalla; duration: soitetaan vain alusta näin monta sekuntia ja häivytetään loppu.
 // gap: sama ääni soi enintään kerran näin monessa sekunnissa (esim. juna kaataa monta zombia kerralla).
+// Palauttaa funktion, joka hiljentää äänen kesken (esim. lopputekstien ohitus), tai undefined,
+// jos ääni ei soinut.
 export function play(name, { volume = SFX_VOLUME, rate = 1, duration, gap = 0.08 } = {}) {
   const buffer = buffers.get(name);
   if (!ctx || !(buffer instanceof AudioBuffer)) return;
@@ -94,6 +97,17 @@ export function play(name, { volume = SFX_VOLUME, rate = 1, duration, gap = 0.08
     gain.gain.linearRampToValueAtTime(0, now + duration);
     source.stop(now + duration);
   }
+  return (fade = 0.4) => {
+    const t = ctx.currentTime;
+    gain.gain.cancelScheduledValues(t);
+    gain.gain.setValueAtTime(gain.gain.value, t);
+    gain.gain.linearRampToValueAtTime(0, t + fade);
+    try {
+      source.stop(t + fade);
+    } catch {
+      // Ääni oli jo loppunut
+    }
+  };
 }
 
 // Taustamusiikki: vaihtaa kappaleen pehmeästi. Sama kappale jatkuu katkeamatta.
