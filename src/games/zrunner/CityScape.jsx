@@ -211,9 +211,9 @@ export default function CityScape({ variant = 'title' }) {
       {/* Zombit laahustavat kadulla */}
       <g className="zr-horde">
         <Zombie x={260} scale={0.9} delay={0} variant="a" />
-        <Zombie x={540} scale={0.75} delay={0.6} variant="b" />
+        <Zombie x={540} scale={1} delay={0.6} variant="kid" />
         <Zombie x={1060} scale={1} delay={1.1} variant="b" flip />
-        <Zombie x={1190} scale={0.8} delay={0.3} variant="a" />
+        <Zombie x={1190} scale={0.8} delay={0.3} variant="c" />
       </g>
 
       {/* Sade */}
