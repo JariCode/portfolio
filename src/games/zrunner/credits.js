@@ -6,9 +6,10 @@
 // type:       'musiikki' | 'ääni' | 'tileset' | 'hahmo'
 // name:       tiedoston tai paketin nimi lähteessä
 // author:     tekijän nimi tai nimimerkki
-// url:        sivu, jolta tiedosto ladattiin
+// url:        vapaaehtoinen; sivu, jolta tiedosto ladattiin (Pixabay ei vaadi)
 // license:    lisenssin nimi (esim. 'CC0', 'CC BY 4.0', 'Pixabay Content License')
 // licenseUrl: linkki lisenssin ehtoihin
+// file:       vapaaehtoinen; tiedoston nimi public/audio/zrunner/ -kansiossa
 // changes:    vapaaehtoinen; mitä muokattiin (CC BY vaatii kertomaan muutoksista)
 
 export const CREDITS = [
@@ -38,5 +39,69 @@ export const CREDITS = [
     license: 'CraftPix Freebie License',
     licenseUrl: 'https://craftpix.net/file-licenses/',
     changes: 'Ruudut kohdistettu, skaalattu ja koottu sprite-arkeiksi',
+  },
+  {
+    type: 'musiikki',
+    name: 'Instrumental Synthwave Background Music',
+    author: 'UsefulPix',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'musiikki.mp3',
+  },
+  {
+    type: 'musiikki',
+    name: 'Intro Opening Titles Music',
+    author: 'alex-morgan',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'intro.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Man death scream',
+    author: 'u_r7cny11q7r',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'zombi-kuolee.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Punch',
+    author: 'Universfield',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'lyonti.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'young man being hurt',
+    author: 'pepsimanfan (Freesound), julkaisija freesound_community',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'osuma.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Scary Scream',
+    author: 'DRAGON-STUDIO',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'zombi-hyokkaa.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Train #1',
+    author: 'Phoenix_Connection_Brazil',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'juna.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'collect',
+    author: 'Wagna (Freesound), julkaisija freesound_community',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'keraa.mp3',
   },
 ];

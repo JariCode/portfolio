@@ -1,6 +1,7 @@
-import { lazy, Suspense, useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import Title from './Title.jsx';
 import Intro from './Intro.jsx';
+import { isMuted, playMusic, setMuted, stopMusic, unlock } from './sound.js';
 import './ZRunner.css';
 
 // Phaser on iso kirjasto: ladataan vasta, kun pelaaja aloittaa. Aloitusnäkymä ja
@@ -13,13 +14,31 @@ const preloadGame = () => import('./Game.jsx');
 export default function ZRunner() {
   const [phase, setPhase] = useState('title');
 
-  // Pysyvät funktiot: Intro käynnistää ajastimensa uudelleen, jos onDone vaihtuu
+  // M mykistää kaikissa vaiheissa. Kun peli suljetaan, musiikki hiljenee.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.code === 'KeyM' && !e.repeat) setMuted(!isMuted());
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      stopMusic(0.2);
+    };
+  }, []);
+
+  // Pysyvät funktiot: Intro käynnistää ajastimensa uudelleen, jos onDone vaihtuu.
+  // Aloita peli -painallus on käyttäjän ele, joten ääni avataan tässä (selaimen vaatimus).
   const start = useCallback(() => {
+    unlock();
+    playMusic('intro', { loop: false, fadeIn: 0.3 });
     preloadGame();
     setPhase('intro');
   }, []);
   const play = useCallback(() => setPhase('play'), []);
-  const toTitle = useCallback(() => setPhase('title'), []);
+  const toTitle = useCallback(() => {
+    stopMusic();
+    setPhase('title');
+  }, []);
 
   return (
     <div className="zr">

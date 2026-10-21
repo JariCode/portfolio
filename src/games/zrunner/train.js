@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { play } from './sound.js';
 
 // Metron juna: kiitää raiteilla kameran läpi oikealta vasemmalle. Ennen junaa tunnelin
 // päässä vilkkuu varoitus ja maa jyrisee, jolloin pelaaja ehtii nousta laiturille tai
@@ -12,6 +13,7 @@ const SPEED = 1400;
 const FIRST_DELAY = 7000; // ensimmäinen juna vasta, kun pelaaja on ehtinyt tutustua asemaan
 const INTERVAL = [9000, 13000]; // satunnainen väli junien välillä (ms)
 const WARNING_MS = 1800;
+const SOUND_S = 4; // junan äänestä soitetaan alusta näin monta sekuntia
 // Raiteiden pinta on rivin 11 yläreunassa; tätä alempana seisova on junan tiellä
 const RAIL_TOP = 11 * 64;
 const DANGER_Y = RAIL_TOP - 24;
@@ -90,6 +92,8 @@ export default class Train {
       this.light.setPosition(scene.scale.width - 40, RAIL_TOP - 60 - cam.scrollY).setVisible(true);
       scene.tweens.add({ targets: this.light, alpha: 0.2, duration: 160, yoyo: true, repeat: -1 });
       cam.shake(WARNING_MS, 0.002);
+      // Ääni alkaa varoituksesta ja kestää ohituksen yli; loppu häivytetään
+      play('train', { volume: 0.6, duration: SOUND_S });
       scene.game.events.emit('zr-train', true);
     }
 
@@ -128,7 +132,7 @@ export default class Train {
 
     for (const z of this.scene.zombies.getChildren()) {
       if (z.state !== 'dead' && inTrain(z.body) && z.hurt(99, this.sprite.x + this.sprite.width)) {
-        this.scene.zombieKilled();
+        this.scene.zombieKilled(z);
       }
     }
   }

@@ -20,6 +20,7 @@ const SIGHT_X = 380; // kuinka kaukaa zombi huomaa pelaajan vaakasuunnassa
 const SIGHT_Y = 90; // pelaajan pitää olla suunnilleen samalla korkeudella
 const REACH = 52; // lyöntietäisyys vartalon reunasta
 const ATTACK_COOLDOWN = 1100;
+const LOST_MS = 3000; // näin kauan näkymättömissä, niin zombi "unohtaa" pelaajan
 const ATTACK_HIT_FRAME = 3; // lyönnin osumaruutu (0–5): osuma tulee vasta, kun käsi on edessä
 
 // Animaatiot luodaan kerran jokaiselle zombilajille: avaimet muotoa "zombi1-walk"
@@ -61,7 +62,10 @@ export class Walker extends Phaser.Physics.Arcade.Sprite {
     // Painovoima ja putoamisnopeus tulevat ryhmän asetuksista (ZOMBIE_BODY), koska
     // ryhmään lisääminen korvaa yksittäisen kappaleen arvot ryhmän oletuksilla
 
+    this.kid = this.stats === STATS.kid;
     this.hp = this.stats.hp;
+    this.alerted = false; // huomasiko pelaajan (hyökkäyshuuto)
+    this.lostAt = 0;
     this.state = 'patrol';
     this.face(Math.random() < 0.5 ? -1 : 1);
     this.nextAttack = 0;
@@ -139,7 +143,7 @@ export class Walker extends Phaser.Physics.Arcade.Sprite {
     // Kuoppaan pudonnut zombi (esim. pelaajan tönäisemä) poistuu ja lasketaan kaadetuksi
     if (this.y > this.scene.mapHeight + 150 && this.state !== 'dead') {
       this.state = 'dead';
-      this.scene.zombieKilled();
+      this.scene.zombieKilled(this);
       this.destroy();
       return;
     }
@@ -155,6 +159,15 @@ export class Walker extends Phaser.Physics.Arcade.Sprite {
 
     const dx = player.x - this.x;
     const sees = player.alive && Math.abs(dx) < SIGHT_X && Math.abs(player.y - this.y) < SIGHT_Y;
+
+    // Huuto, kun zombi huomaa pelaajan. Uudelleen vasta, kun pelaaja on ollut hetken poissa näkyvistä.
+    if (sees) {
+      if (!this.alerted) this.scene.zombieAlert(this.kid);
+      this.alerted = true;
+      this.lostAt = time;
+    } else if (time - this.lostAt > LOST_MS) {
+      this.alerted = false;
+    }
 
     if (sees) {
       this.face(Math.sign(dx) || this.dir);

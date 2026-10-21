@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import * as Phaser from 'phaser';
 import LevelScene, { GAME_W, GAME_H, MAX_HP, NEW_RUN } from './LevelScene.js';
 import MetroCutscene from './MetroCutscene.jsx';
 import { WORLDS } from './worlds.js';
 import { calcScore, clearSaves, formatTime, readRecord, saveRecord } from './score.js';
+import { isMuted, onMuteChange, playMusic, setMuted } from './sound.js';
 import './Game.css';
 
 // Kosketusnapit kirjoittavat samaan olioon, jota scene lukee joka ruudulla
@@ -31,6 +32,8 @@ export default function Game({ onExit }) {
   const [cutscene, setCutscene] = useState(null);
   const [train, setTrain] = useState(false);
   const [cleared, setCleared] = useState(false);
+  // Mykistys on sound.js:ssä, jotta M-näppäin (ZRunner.jsx) ja nappi pysyvät samassa tilassa
+  const muted = useSyncExternalStore(onMuteChange, isMuted);
 
   // Phaser luodaan kerran ja tuhotaan, kun pelinäkymä suljetaan (modaali, Esc, valikkoon)
   useEffect(() => {
@@ -48,7 +51,7 @@ export default function Game({ onExit }) {
       render: { roundPixels: true },
       // Kuvat <img>-elementillä: oletus (XHR + blob:-osoite) vaatisi CSP:hen img-src blob:
       loader: { imageLoadType: 'HTMLImageElement' },
-      // Ei Phaserin omaa ääntä vielä; Web Audio lisätään myöhemmin
+      // Phaserin oma ääni pois: äänet soitetaan sound.js:llä, jota myös animaatiot käyttävät
       audio: { noAudio: true },
       scene: [LevelScene],
       callbacks: {
@@ -66,6 +69,7 @@ export default function Game({ onExit }) {
         const { hp, time, orbs, totalOrbs, kills, totalZombies } = stats;
         worldStartRef.current = { world: next, carry: { hp, time, orbs, totalOrbs, kills, totalZombies } };
         setCutscene({ number: next + 1, name: WORLDS[next].name });
+        playMusic('intro', { loop: false, fadeIn: 0.3 });
         return;
       }
       // Koko pelin maali: pisteet ja ennätys (tallennetaan vain, jos parempi kuin aiempi)
@@ -84,6 +88,7 @@ export default function Game({ onExit }) {
       setResult({ kind: 'dead', ...stats });
     });
     gameRef.current = game;
+    playMusic('music');
 
     return () => {
       game.destroy(true);
@@ -124,6 +129,7 @@ export default function Game({ onExit }) {
   // Välianimaation jälkeen seuraava maailma. Pysyvä funktio: animaation ajastin ei käynnisty uudelleen.
   const endCutscene = useCallback(() => {
     setCutscene(null);
+    playMusic('music');
     startWorld(worldStartRef.current);
   }, [startWorld]);
 
@@ -162,7 +168,29 @@ export default function Game({ onExit }) {
         <span className="zr-hud-world">
           {hud.world + 1} · {hud.worldName}
         </span>
-        <span className="zr-hud-time">{formatTime(hud.time)}</span>
+        <div className="zr-hud-right">
+          <span className="zr-hud-time">{formatTime(hud.time)}</span>
+          {/* Hiiren painallus ei vie fokusta napille: muuten välilyönti (hyppy) painaisi nappia */}
+          <button
+            type="button"
+            className={`zr-mute${muted ? ' is-muted' : ''}`}
+            aria-pressed={muted}
+            aria-label="Mykistä äänet (M)"
+            title="Mykistä äänet (M)"
+            tabIndex={-1}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setMuted(!muted)}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path className="zr-mute-speaker" d="M4 9h4l5-4v14l-5-4H4z" />
+              {muted ? (
+                <path className="zr-mute-wave" d="M16 9l6 6M22 9l-6 6" />
+              ) : (
+                <path className="zr-mute-wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {train && !result && (

@@ -100,6 +100,54 @@
   text-shadow: 0 0 1cqw var(--magenta);
 }
 
+.zr-hud-right {
+  display: flex;
+  align-items: center;
+  gap: 1.4cqw;
+}
+
+/* Mykistysnappi: HUD ei ota painalluksia vastaan, joten nappi sallii ne erikseen */
+.zr-mute {
+  display: grid;
+  place-items: center;
+  width: max(28px, 2.8cqw);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 50%;
+  background: rgb(3 2 10 / 0.6);
+  color: var(--cyan);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.zr-mute:hover {
+  border-color: var(--cyan);
+}
+
+.zr-mute.is-muted {
+  border-color: color-mix(in srgb, var(--magenta) 55%, transparent);
+  color: var(--magenta);
+}
+
+.zr-mute svg {
+  width: 60%;
+  height: 60%;
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+.zr-mute-speaker {
+  fill: currentColor;
+}
+
+.zr-mute-wave {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
 /* Junan varoitus metrossa: vilkkuu, kunnes juna on mennyt ohi */
 .zr-train-warning {
   position: absolute;

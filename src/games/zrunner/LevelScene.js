@@ -6,6 +6,7 @@ import { createOrbs, collectOrb } from './orbs.js';
 import { createEnergyPacks, collectPack } from './energy.js';
 import Train from './train.js';
 import { WORLDS } from './worlds.js';
+import { play } from './sound.js';
 
 // Pelin sisäinen koko (16:9). Kartta on 12 laattaa x 64 px = 768 px korkea, joten
 // koko kartan korkeus mahtuu kuvaan eikä kamera liiku pystysuunnassa.
@@ -52,6 +53,8 @@ const STOMP_DAMAGE = 2; // päälle hyppy tekee enemmän vahinkoa kuin lyönti
 const STOMP_BOUNCE = -620;
 const INVULNERABLE_MS = 1200; // osuman jälkeen hetki suojassa, ettei sama zombi osu heti uudelleen
 const STUN_MS = 350; // osuman jälkeen ohjaus palaa pienen hetken päästä
+// Zombin hyökkäyshuuto kuuluu enintään näin usein, vaikka moni zombi huomaisi pelaajan
+const ALERT_GAP_MS = 4000;
 
 // Aiemmista maailmoista kertyneet tiedot; ensimmäisessä maailmassa kaikki nollassa
 export const NEW_RUN = { hp: MAX_HP, orbs: 0, kills: 0, time: 0, totalOrbs: 0, totalZombies: 0 };
@@ -147,6 +150,7 @@ export default class LevelScene extends Phaser.Scene {
     this.totalOrbs = orbs.total;
     this.physics.add.overlap(p, orbs.group, (_, orb) => {
       collectOrb(this, orb);
+      play('collect', { volume: 0.5 });
       this.orbs += 1;
       this.sendHud(true);
     });
@@ -199,6 +203,7 @@ export default class LevelScene extends Phaser.Scene {
     this.elapsed = 0; // pelattu aika ruutujen kestoista, ei kellonajasta
     this.finished = false;
     this.lastHud = 0;
+    this.lastAlert = -Infinity;
 
     p.on('animationcomplete-attack', () => {
       this.attacking = false;
@@ -261,6 +266,13 @@ export default class LevelScene extends Phaser.Scene {
       .filter(Boolean);
   }
 
+  // Zombi huomasi pelaajan (enemies.js). Huuto vain välillä, ettei se soi jatkuvasti.
+  zombieAlert(kid = false) {
+    if (!this.player.alive || this.elapsed - this.lastAlert < ALERT_GAP_MS) return;
+    this.lastAlert = this.elapsed;
+    play('zombieAttack', { volume: 0.5, rate: kid ? 1.3 : 1 });
+  }
+
   releaseKeys() {
     this.input.keyboard.resetKeys();
     Object.keys(this.controls).forEach((k) => {
@@ -297,7 +309,7 @@ export default class LevelScene extends Phaser.Scene {
     if (player.alive && pb.velocity.y > 60 && pb.bottom - zombie.body.top < 26) {
       pb.setVelocityY(STOMP_BOUNCE);
       this.lastGround = -Infinity;
-      if (zombie.hurt(STOMP_DAMAGE, player.x)) this.zombieKilled();
+      if (zombie.hurt(STOMP_DAMAGE, player.x)) this.zombieKilled(zombie);
     }
   }
 
@@ -311,12 +323,14 @@ export default class LevelScene extends Phaser.Scene {
       const zb = z.body;
       const zr = new Phaser.Geom.Rectangle(zb.left, zb.top, zb.width, zb.height);
       if (Phaser.Geom.Intersects.RectangleToRectangle(hitbox, zr) && z.hurt(1, this.player.x)) {
-        this.zombieKilled();
+        this.zombieKilled(z);
       }
     }
   }
 
-  zombieKilled() {
+  // Lapsizombin äänet soitetaan nopeammin, jolloin ne ovat kimeämpiä
+  zombieKilled(zombie) {
+    play('zombieDie', { rate: zombie?.kid ? 1.3 : 1 });
     this.kills += 1;
     this.sendHud(true);
   }
@@ -335,6 +349,7 @@ export default class LevelScene extends Phaser.Scene {
       this.die();
       return;
     }
+    play('hurt');
     if (source) {
       // Tönäisy poispäin osujasta; junan voima on etumerkillinen (juna kulkee vasemmalle)
       const away = p.x < source.x ? -1 : 1;
@@ -353,6 +368,8 @@ export default class LevelScene extends Phaser.Scene {
     p.setAlpha(1);
     p.body.setVelocityX(0);
     p.play('dead');
+    // Kaatuminen: sama osumaääni matalampana ja hitaampana
+    play('hurt', { rate: 0.75 });
     p.once('animationcomplete-dead', () => {
       this.time.delayedCall(500, () => this.game.events.emit('zr-dead', this.summary()));
     });
@@ -402,6 +419,7 @@ export default class LevelScene extends Phaser.Scene {
       this.attacking = true;
       this.punchDone = false;
       p.play('attack');
+      play('punch', { volume: 0.55 });
     }
     this.prevAttack = attack;
 
