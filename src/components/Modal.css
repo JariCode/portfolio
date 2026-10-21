@@ -1,6 +1,9 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
+  /* Ulottuu myös vierityspalkille varatun kaistan yli (index.css: scrollbar-gutter),
+     jotta oikeaan reunaan ei jää peittämätöntä raitaa */
+  width: 100vw;
   z-index: 100;
   display: grid;
   place-items: center;
