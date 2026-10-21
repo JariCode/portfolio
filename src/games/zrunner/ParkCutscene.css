@@ -158,6 +158,8 @@
   font-weight: 700;
   letter-spacing: 0.35em;
   text-transform: uppercase;
+  /* Aina yhdellä rivillä: pitkä nimi (Metrotunneli) rivittyisi muuten puhelimella kahdelle */
+  white-space: nowrap;
   text-shadow: 0 0 1cqw var(--cyan);
   opacity: 0;
   animation: zr-pk-card 1.5s 7.3s ease-out both;
@@ -221,7 +223,8 @@
   100% { opacity: 1; }
 }
 
+/* Kirjaimet liukuvat yhteen. Alkuväli on maltillinen, jotta pisinkin nimi mahtuu ruutuun. */
 @keyframes zr-pk-card {
-  from { opacity: 0; letter-spacing: 0.8em; }
+  from { opacity: 0; letter-spacing: 0.55em; }
   to { opacity: 1; letter-spacing: 0.35em; }
 }
