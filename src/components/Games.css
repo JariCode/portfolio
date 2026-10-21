@@ -36,19 +36,26 @@
 }
 
 /* ═══ Pelimodaali ═══ */
-/* Modaalin leveys tulee pelinäkymästä (ei Modal.css:n kiinteää 1000px:ää) */
+/* Modaalin leveys tulee pelinäkymästä (ei Modal.css:n kiinteää 1000px:ää).
+   --game-bar = otsikkopalkin korkeus, jota myös pelinäkymän kokolaskelma käyttää. */
 .modal.modal--game {
+  --game-bar: 3.75rem;
   width: auto;
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   box-shadow: 0 0 60px -10px var(--accent);
 }
 
 /* Otsikkopalkki on kiinteän korkuinen, jotta pelinäkymän koon voi laskea tarkasti.
-   Oikea padding jättää tilan Modalin Sulje-napille. */
+   Oikea padding jättää tilan Modalin Sulje-napille.
+   width: 0 + min-width: 100%: palkki ei levennä modaalia, vaan on aina pelinäkymän
+   levyinen. Muuten kapean pystypelin pitkä nimi tekisi modaalista pelinäkymää
+   leveämmän ja viereen jäisi tyhjä raita (näkyi puhelimen vaakatilassa). */
 .games-modal-name {
-  display: flex;
-  align-items: center;
-  height: 3.75rem;
+  width: 0;
+  min-width: 100%;
+  height: var(--game-bar);
+  /* Rivikorkeus keskittää tekstin; flex ei käy, koska ellipsis ei toimi flex-elementissä */
+  line-height: var(--game-bar);
   padding: 0 4.5rem 0 1.25rem;
   font-size: 1.1rem;
   color: var(--accent);
@@ -66,11 +73,11 @@
   place-items: center;
   width: min(
     calc(100vw - 2 * var(--gutter) - 2px),
-    calc((100vh - 2 * var(--gutter) - 3.75rem - 2px) * var(--ratio))
+    calc((100vh - 2 * var(--gutter) - var(--game-bar) - 2px) * var(--ratio))
   );
   width: min(
     calc(100vw - 2 * var(--gutter) - 2px),
-    calc((100dvh - 2 * var(--gutter) - 3.75rem - 2px) * var(--ratio))
+    calc((100dvh - 2 * var(--gutter) - var(--game-bar) - 2px) * var(--ratio))
   );
   aspect-ratio: var(--ratio);
   /* Ilman tätä pelin canvas voisi venyttää näkymän korkeammaksi kuin kuvasuhde sallii */
@@ -79,6 +86,24 @@
   background: var(--ink);
   /* Sormella vetäminen ohjaa peliä eikä rullaa tai zoomaa sivua */
   touch-action: none;
+}
+
+/* Matala näyttö (puhelin vaakatilassa): matalampi otsikkopalkki ja Sulje-nappi sen
+   reunaan, jotta pelille jää enemmän korkeutta. Napin kosketusalue pysyy 44×44px:ssä. */
+@media (max-height: 500px) {
+  .modal.modal--game {
+    --game-bar: 3rem;
+  }
+
+  .modal--game .modal-close {
+    top: 0.1rem;
+    right: 0.3rem;
+  }
+
+  .games-modal-name {
+    padding-right: 3.5rem;
+    font-size: 0.95rem;
+  }
 }
 
 /* Pelinäkymä saa fokuksen vain, jotta näppäimet menevät peliin; korostusta ei tarvita,
