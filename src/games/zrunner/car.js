@@ -115,7 +115,7 @@ export default class Car {
     scene.cameras.main.stopFollow();
     scene.tweens.add({ targets: player, x: this.doorX + 20, alpha: 0, duration: 300, ease: 'Quad.in' });
     scene.tweens.add({ targets: beam, alpha: 0.28, duration: 120, delay: 450, yoyo: true, repeat: 1, hold: 80 });
-    scene.time.delayedCall(450, () => play('car', { volume: 0.55, duration: 2.6 }));
+    scene.time.delayedCall(450, () => play('car', { volume: 1.2, duration: 2.6 }));
     scene.tweens.add({
       targets: [sprite, beam],
       x: `+=${scene.scale.width + 300}`,

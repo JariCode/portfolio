@@ -42,7 +42,7 @@ export default function Outro({ onDone }) {
     }
     skipRef.current?.focus({ preventScroll: true });
     // Moottorin ääni koko ajon ajan; hiljenee, jos tekstit ohitetaan
-    const stop = play('car', { volume: 0.4, duration: ROLL_S + 1 });
+    const stop = play('car', { volume: 1, duration: ROLL_S + 1 });
     return () => stop?.(0.6);
   }, [onDone]);
 

@@ -123,7 +123,7 @@ export class Walker extends Phaser.Physics.Arcade.Sprite {
 
   hurt(damage, fromX) {
     if (this.state === 'dead') return false;
-    play('zombieHit', { rate: this.kid ? 1.3 : 1 });
+    play('zombieHit', { volume: 1.2, rate: this.kid ? 1.3 : 1 });
     this.hp -= damage;
     const away = this.x < fromX ? -1 : 1;
     if (this.hp <= 0) {
