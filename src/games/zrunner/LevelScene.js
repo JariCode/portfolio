@@ -4,6 +4,7 @@ import { PLAYER_SHEET, PLAYER_ANIMS, JUMP_FRAME } from './player.js';
 import { createSkyline } from './skyline.js';
 import { Walker, ZOMBIE_BODY, createZombieAnims, preloadZombies } from './enemies.js';
 import { createOrbs, collectOrb } from './orbs.js';
+import { createEnergyPacks, collectPack } from './energy.js';
 
 // Pelin sisäinen koko (16:9). Kartta on 12 laattaa x 64 px = 768 px korkea, joten
 // koko kartan korkeus mahtuu kuvaan eikä kamera liiku pystysuunnassa.
@@ -144,6 +145,19 @@ export default class LevelScene extends Phaser.Scene {
       this.orbs += 1;
       this.sendHud(true);
     });
+
+    // ── Energiapakkaukset: +1 energia. Täydellä energialla pakkaus jää odottamaan. ──
+    const packs = createEnergyPacks(this, objects);
+    this.physics.add.overlap(
+      p,
+      packs,
+      (_, pack) => {
+        collectPack(this, pack);
+        this.hp += 1;
+        this.sendHud(true);
+      },
+      () => p.alive && this.hp < MAX_HP,
+    );
 
     // ── Kamera seuraa pelaajaa, katsoo hieman eteenpäin ──
     const cam = this.cameras.main;
