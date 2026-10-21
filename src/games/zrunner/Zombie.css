@@ -1,0 +1,126 @@
+/* ═══ Zombin siluetti (Zombie.jsx) ═══ */
+/* Värit ovat tummia ja harmaanvihreitä; neonvalo heijastuu reunoista (stroke),
+   jotta zombi erottuu märältä kadulta. Ei verta: väkivalta pysyy abstraktina. */
+.zr-z-skin { fill: color-mix(in srgb, var(--cyan) 14%, #2b3329); }
+.zr-z-shirt { fill: color-mix(in srgb, var(--violet) 28%, #1b1528); }
+.zr-z--b .zr-z-shirt { fill: color-mix(in srgb, var(--magenta) 18%, #1e1422); }
+.zr-z-pants { fill: color-mix(in srgb, var(--violet) 26%, #211a3a); }
+.zr-z-shoe { fill: #120d20; }
+.zr-z-tear { fill: color-mix(in srgb, var(--violet) 26%, #211a3a); }
+.zr-z-mouth { fill: #050208; }
+.zr-z-teeth { fill: color-mix(in srgb, var(--text) 65%, #8b8a6c); }
+.zr-z-socket { fill: #050208; }
+.zr-z-shade { fill: rgb(0 0 0 / 0.38); }
+
+/* Kauempana olevat raajat tummemmiksi, jotta syvyys erottuu */
+.zr-z-far { filter: brightness(0.72); }
+
+/* Neonin heijastus siluetin reunoissa */
+.zr-z-skin,
+.zr-z-shirt,
+.zr-z-pants,
+.zr-z-shoe {
+  stroke: color-mix(in srgb, var(--magenta) 55%, transparent);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+.zr-z-stripes path,
+.zr-z-ribs path,
+.zr-z-brow,
+.zr-z-nails {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.zr-z-stripes path { stroke: rgb(0 0 0 / 0.35); stroke-width: 2.2; }
+.zr-z-ribs path { stroke: rgb(0 0 0 / 0.55); stroke-width: 1; }
+.zr-z-brow { stroke: rgb(0 0 0 / 0.6); stroke-width: 2.4; }
+.zr-z-nails { stroke: color-mix(in srgb, var(--text) 50%, #6f6a52); stroke-width: 1.4; }
+
+.zr-z-hair { fill: #0c0a12; }
+.zr-z-stitch path { fill: none; stroke: #0c0a12; stroke-width: 1.3; stroke-linecap: round; }
+
+/* Variantti a: hiukset, ei tikkejä · variantti b: kalju, tikit, korvasta puuttuu pala */
+.zr-z--a .zr-z-stitch { display: none; }
+.zr-z--b .zr-z-hair { display: none; }
+.zr-z--b .zr-z-ear { clip-path: inset(0 0 45% 0); }
+.zr-z--a .zr-z-stripes { display: none; }
+
+.zr-z-eye {
+  fill: var(--magenta);
+  filter: drop-shadow(0 0 3px var(--magenta)) drop-shadow(0 0 6px var(--magenta));
+  animation: zr-z-blink 3.4s ease-in-out infinite;
+  animation-delay: var(--zr-delay, 0s);
+}
+
+/* ── Liike: koko vartalo keinuu, raajat kääntyvät nivelistään ── */
+.zr-z {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: zr-z-sway 1.8s ease-in-out infinite;
+  animation-delay: var(--zr-delay, 0s);
+}
+
+.zr-z-leg,
+.zr-z-arm--back {
+  transform-box: fill-box;
+  transform-origin: 50% 0%; /* lonkka / olkapää ryhmän yläreunassa */
+  animation: zr-z-swing 1.8s ease-in-out infinite;
+  animation-delay: var(--zr-delay, 0s);
+}
+
+.zr-z-leg--back { animation-direction: reverse; }
+
+.zr-z-arm--front {
+  transform-box: fill-box;
+  transform-origin: 0% 40%; /* olkapää käsivarren vasemmassa reunassa */
+  animation: zr-z-reach 1.8s ease-in-out infinite;
+  animation-delay: var(--zr-delay, 0s);
+}
+
+.zr-z-head {
+  transform-box: fill-box;
+  transform-origin: 30% 90%; /* kaula */
+  animation: zr-z-nod 2.7s ease-in-out infinite;
+  animation-delay: var(--zr-delay, 0s);
+}
+
+.zr-z-jaw {
+  transform-box: fill-box;
+  transform-origin: 10% 10%;
+  animation: zr-z-jaw 1.3s ease-in-out infinite;
+  animation-delay: var(--zr-delay, 0s);
+}
+
+@keyframes zr-z-sway {
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  50% { transform: rotate(3deg) translateY(-1.5px); }
+}
+
+@keyframes zr-z-swing {
+  0%, 100% { transform: rotate(-11deg); }
+  50% { transform: rotate(11deg); }
+}
+
+@keyframes zr-z-reach {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@keyframes zr-z-nod {
+  0%, 100% { transform: rotate(-4deg); }
+  40% { transform: rotate(7deg); }
+  55% { transform: rotate(2deg); }
+}
+
+@keyframes zr-z-jaw {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(14deg); }
+}
+
+@keyframes zr-z-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}

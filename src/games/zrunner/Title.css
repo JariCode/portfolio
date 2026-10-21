@@ -1,0 +1,341 @@
+/* ═══ Z-Runnerin aloitusnäkymä ═══ */
+/* Mitat ovat cqw-yksiköissä (prosentteja pelinäkymän leveydestä, ks. ZRunner.css),
+   joten näkymä skaalautuu samoin isolla näytöllä ja puhelimessa */
+.zr-title {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Tummennus keskelle ja reunoille, jotta teksti erottuu kaupungista */
+.zr-title-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 42%, rgb(5 3 15 / 0.72), transparent 75%),
+    radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.65) 100%);
+  pointer-events: none;
+}
+
+/* Hienovaraiset vaakaviivat kuin vanhassa näytössä */
+.zr-title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+
+.zr-title-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1cqw;
+  padding: 3cqw;
+  text-align: center;
+  animation: zr-rise 0.8s ease-out both;
+}
+
+/* ── Neonlogo ── */
+.zr-logo {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--font-display);
+  font-size: 11cqw;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+.zr-logo-z {
+  color: var(--magenta);
+  text-shadow:
+    0 0 0.04em #fff,
+    0 0 0.12em var(--magenta),
+    0 0 0.35em var(--magenta),
+    0 0 0.8em color-mix(in srgb, var(--magenta) 60%, transparent);
+  animation: zr-neon-flicker 5s linear infinite;
+}
+
+.zr-logo-dash {
+  margin-inline: 0.04em;
+  color: var(--text);
+  text-shadow: 0 0 0.2em var(--violet);
+}
+
+.zr-logo-run {
+  /* Täytetty neonteksti: ääriviiva (text-stroke) piirtäisi muuttuvan fontin
+     päällekkäiset kirjainmuodot näkyviin ylimääräisinä viivoina */
+  color: color-mix(in srgb, var(--cyan) 35%, #fff);
+  text-shadow:
+    0 0 0.04em #fff,
+    0 0 0.12em var(--cyan),
+    0 0 0.35em var(--cyan),
+    0 0 0.8em color-mix(in srgb, var(--cyan) 55%, transparent);
+  animation: zr-glow-pulse 3.2s ease-in-out infinite;
+}
+
+/* Neonputki logon alla: valo kulkee putkea pitkin */
+.zr-logo-tube {
+  position: relative;
+  width: 46cqw;
+  height: max(2px, 0.35cqw);
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--magenta) 35%, transparent);
+  box-shadow: 0 0 1.2cqw var(--magenta);
+  overflow: hidden;
+}
+
+.zr-logo-tube::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, #fff, transparent);
+  animation: zr-tube-run 2.6s ease-in-out infinite;
+}
+
+.zr-tagline {
+  margin-top: 0.6cqw;
+  font-family: var(--font-display);
+  font-size: max(11px, 2.1cqw);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.zr-tagline span {
+  display: inline-block;
+  animation: zr-word 0.6s ease-out both;
+}
+
+.zr-tagline span:nth-child(1) { animation-delay: 0.3s; }
+.zr-tagline span:nth-child(2) { animation-delay: 0.55s; color: var(--cyan); }
+.zr-tagline span:nth-child(3) { animation-delay: 0.8s; color: var(--magenta); }
+
+.zr-sub {
+  color: var(--muted);
+  font-size: max(9px, 1.25cqw);
+  letter-spacing: 0.12em;
+}
+
+/* ── Napit ── */
+.zr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.4cqw;
+  margin-top: 1.6cqw;
+}
+
+.zr-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8cqw;
+  min-height: 32px;
+  padding: max(6px, 0.9cqw) max(14px, 2.4cqw);
+  border: 2px solid var(--cyan);
+  border-radius: 999px;
+  background: rgb(9 6 22 / 0.7);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: max(11px, 1.45cqw);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, translate 0.2s;
+}
+
+.zr-btn:hover,
+.zr-btn:focus-visible {
+  background: var(--cyan);
+  color: var(--ink);
+  box-shadow: 0 0 2cqw var(--cyan);
+  translate: 0 -2px;
+}
+
+.zr-btn--start {
+  border-color: var(--magenta);
+  animation: zr-btn-pulse 2s ease-in-out infinite;
+}
+
+.zr-btn--start:hover,
+.zr-btn--start:focus-visible {
+  background: var(--magenta);
+  box-shadow: 0 0 2.4cqw var(--magenta);
+}
+
+/* Toistokolmio CSS:llä */
+.zr-btn-play {
+  width: 0;
+  height: 0;
+  border-block: 0.45em solid transparent;
+  border-left: 0.7em solid currentColor;
+}
+
+.zr-btn--ghost {
+  border-color: color-mix(in srgb, var(--cyan) 55%, transparent);
+}
+
+.zr-record {
+  margin-top: 0.6cqw;
+  color: var(--muted);
+  font-size: max(9px, 1.2cqw);
+  letter-spacing: 0.08em;
+}
+
+.zr-record strong {
+  color: var(--cyan);
+}
+
+/* ── Ohjeet-paneeli ── */
+.zr-help {
+  position: absolute;
+  inset: 8% 22%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2cqw;
+  padding: 2.4cqw 3cqw;
+  overflow-y: auto;
+  border: 1px solid color-mix(in srgb, var(--cyan) 50%, transparent);
+  border-radius: 1.2cqw;
+  background: rgb(9 6 22 / 0.94);
+  box-shadow: 0 0 4cqw -1cqw var(--cyan);
+  font-size: max(10px, 1.35cqw);
+  animation: zr-rise 0.3s ease-out both;
+}
+
+.zr-help h4 {
+  font-family: var(--font-display);
+  font-size: max(12px, 2cqw);
+  color: var(--cyan);
+}
+
+.zr-help dl {
+  display: grid;
+  gap: 0.8cqw;
+}
+
+.zr-help dl div {
+  display: flex;
+  align-items: center;
+  gap: 1.2cqw;
+}
+
+.zr-help dt {
+  min-width: 9em;
+  font-weight: 600;
+}
+
+.zr-help dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5cqw;
+  margin: 0;
+}
+
+.zr-help kbd {
+  padding: 0.1em 0.55em;
+  border: 1px solid var(--line);
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  background: var(--ink-2);
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+.zr-help-alt {
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+.zr-help p {
+  max-width: none;
+  color: var(--muted);
+}
+
+.zr-help-close {
+  align-self: flex-start;
+}
+
+/* Kapeassa näkymässä (puhelin) ohjeet täyttävät koko alueen */
+@container (max-width: 520px) {
+  .zr-help {
+    inset: 4%;
+    gap: 6px;
+    padding: 10px 12px;
+    font-size: 10px;
+  }
+
+  .zr-help h4 {
+    font-size: 12px;
+  }
+
+  .zr-help dl {
+    gap: 4px;
+  }
+
+  .zr-help .zr-btn {
+    min-height: 28px;
+    padding-block: 3px;
+  }
+
+  .zr-help dt {
+    min-width: 6em;
+  }
+
+  .zr-sub {
+    display: none;
+  }
+}
+
+/* Matala näkymä (puhelin pystyssä): ohjaimet kahteen sarakkeeseen ja selitysteksti pois,
+   jotta paneeli mahtuu ilman rullausta */
+@container (max-height: 260px) {
+  .zr-help dl {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .zr-help dt {
+    min-width: 0;
+  }
+
+  .zr-help p {
+    display: none;
+  }
+}
+
+/* ═══ Keyframet ═══ */
+@keyframes zr-rise {
+  from { opacity: 0; translate: 0 2cqw; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes zr-word {
+  from { opacity: 0; translate: 0 0.6em; filter: blur(4px); }
+  to { opacity: 1; translate: 0 0; filter: blur(0); }
+}
+
+@keyframes zr-neon-flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.35; }
+}
+
+@keyframes zr-glow-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.35); }
+}
+
+@keyframes zr-tube-run {
+  from { translate: -100% 0; }
+  to { translate: 340% 0; }
+}
+
+@keyframes zr-btn-pulse {
+  0%, 100% { box-shadow: 0 0 0.6cqw color-mix(in srgb, var(--magenta) 60%, transparent); }
+  50% { box-shadow: 0 0 2.2cqw var(--magenta); }
+}

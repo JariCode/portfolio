@@ -1,0 +1,294 @@
+/* ═══ Z-Runnerin alkuanimaatio ═══ */
+/* Aikajana (s): 0–1,2 pimeys väistyy · 0,6–2,2 valot syttyvät · 1,6–4,3 rivi 1 ·
+   4,4–6,6 rivi 2 ja silmät · 6,8 välähdys ja logo · 9,4 loppu (Intro.jsx DURATION) */
+.zr-intro {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Kamera liukuu hitaasti taaksepäin ja alas, kuin elokuvan avausotos */
+.zr-intro-camera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 60% 70%;
+  animation: zr-cam 7.2s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+.zr-intro-shade {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 62% 52% at 50% 54%, rgb(3 2 10 / 0.85), transparent 82%);
+  opacity: 0;
+  animation: zr-shade 7.8s 1.4s ease-in-out both;
+  pointer-events: none;
+}
+
+.zr-intro-blackout {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  animation: zr-fade-out 1.4s 0.2s ease-in both;
+  pointer-events: none;
+}
+
+/* ── Silmät pimeässä ── */
+.zr-intro-eyes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.zr-intro-eye {
+  position: absolute;
+  width: 3.4cqw;
+  height: 1cqw;
+  translate: -50% -50%;
+  opacity: 0;
+  animation: zr-eyes 4.2s ease-out both;
+  animation-delay: var(--zr-delay, 5s);
+}
+
+/* Kaksi silmää: pseudoelementit vierekkäin */
+.zr-intro-eye::before,
+.zr-intro-eye::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 1cqw;
+  height: 0.6cqw;
+  border-radius: 50%;
+  background: var(--magenta);
+  box-shadow: 0 0 0.6cqw var(--magenta), 0 0 1.6cqw var(--magenta);
+}
+
+.zr-intro-eye::before { left: 0; }
+.zr-intro-eye::after { right: 0; }
+
+/* ── Tarinateksti ── */
+.zr-intro-story {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.zr-intro-line {
+  grid-area: 1 / 1;
+  max-width: none;
+  padding-inline: 4cqw;
+  font-family: var(--font-display);
+  text-align: center;
+  opacity: 0;
+}
+
+.zr-intro-line--1 {
+  color: var(--cyan);
+  font-size: 4cqw;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 0.15em var(--cyan), 0 0 0.5em color-mix(in srgb, var(--cyan) 50%, transparent);
+  animation: zr-line 2.7s 1.6s ease-in-out both;
+}
+
+.zr-intro-line--2 {
+  position: relative;
+  color: var(--magenta);
+  font-size: 4.4cqw;
+  font-weight: 800;
+  text-shadow: 0 0 0.15em var(--magenta), 0 0 0.6em color-mix(in srgb, var(--magenta) 50%, transparent);
+  animation: zr-line 2.3s 4.4s ease-in-out both;
+}
+
+/* ── Välähdys ja logo ── */
+.zr-intro-flash {
+  position: absolute;
+  inset: 0;
+  background: var(--text);
+  opacity: 0;
+  animation: zr-flash 0.7s 6.75s ease-out both;
+  pointer-events: none;
+}
+
+.zr-intro-logo-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2cqw;
+  pointer-events: none;
+}
+
+.zr-intro-logo {
+  position: relative;
+  max-width: none;
+  font-family: var(--font-display);
+  font-size: 13cqw;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-shadow:
+    0 0 0.05em #fff,
+    0 0 0.15em var(--magenta),
+    0 0 0.45em var(--magenta),
+    0 0 1em color-mix(in srgb, var(--magenta) 50%, transparent);
+  opacity: 0;
+  animation: zr-slam 0.55s 6.8s cubic-bezier(0.2, 1.6, 0.4, 1) both, zr-shake 0.4s 7.3s linear both;
+}
+
+/* Glitch: logon kopiot leikataan kaistoiksi ja nykäistään sivuun eri väreissä */
+.zr-intro-logo::before,
+.zr-intro-logo::after,
+.zr-intro-line--2::before,
+.zr-intro-line--2::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  text-shadow: none;
+  /* Piilossa oletuksena; keyframet paljastavat ohuen kaistan vain hetkeksi */
+  clip-path: inset(100% 0 0 0);
+}
+
+.zr-intro-logo::before,
+.zr-intro-line--2::before {
+  color: var(--cyan);
+  animation: zr-glitch-a 1.3s steps(1, end) infinite;
+}
+
+.zr-intro-logo::after,
+.zr-intro-line--2::after {
+  color: var(--violet);
+  animation: zr-glitch-b 1.7s steps(1, end) infinite;
+}
+
+.zr-intro-world {
+  /* Oma tumma pohja: kaupungin kyltit ovat samalla korkeudella */
+  padding: 0.5cqw 1.6cqw 0.5cqw 2cqw;
+  border: 1px solid color-mix(in srgb, var(--cyan) 40%, transparent);
+  border-radius: 999px;
+  background: rgb(3 2 10 / 0.8);
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: 1.8cqw;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: zr-word-in 0.8s 7.6s ease-out both;
+}
+
+/* ── Edistymispalkki ja Ohita-nappi ── */
+.zr-intro-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: max(2px, 0.3cqw);
+  background: linear-gradient(90deg, var(--magenta), var(--cyan));
+  box-shadow: 0 0 1cqw var(--cyan);
+  transform-origin: left;
+  animation: zr-progress 9.4s linear both;
+}
+
+.zr-intro-skip {
+  position: absolute;
+  right: 2.4cqw;
+  bottom: 2.4cqw;
+  z-index: 2;
+  min-height: 32px;
+  padding: max(5px, 0.6cqw) max(12px, 1.8cqw);
+  border: 1px solid color-mix(in srgb, var(--text) 40%, transparent);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: max(10px, 1.2cqw);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.zr-intro-skip:hover,
+.zr-intro-skip:focus-visible {
+  border-color: var(--cyan);
+  background: rgb(9 6 22 / 0.9);
+}
+
+/* ═══ Keyframet ═══ */
+@keyframes zr-cam {
+  from { transform: scale(1.35) translate(-4%, -6%); }
+  to { transform: scale(1) translate(0, 0); }
+}
+
+@keyframes zr-shade {
+  0% { opacity: 0; }
+  8%, 100% { opacity: 1; }
+}
+
+@keyframes zr-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes zr-eyes {
+  0% { opacity: 0; scale: 1 0.1; }
+  12% { opacity: 1; scale: 1 1; }
+  60% { opacity: 1; scale: 1 1; }
+  64% { opacity: 1; scale: 1 0.1; }
+  68% { opacity: 1; scale: 1 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes zr-line {
+  0% { opacity: 0; translate: 0 1.5cqw; filter: blur(6px); }
+  18% { opacity: 1; translate: 0 0; filter: blur(0); }
+  82% { opacity: 1; translate: 0 0; filter: blur(0); }
+  100% { opacity: 0; translate: 0 -1cqw; filter: blur(4px); }
+}
+
+@keyframes zr-flash {
+  0% { opacity: 0; }
+  15% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+@keyframes zr-slam {
+  0% { opacity: 0; scale: 2.6; filter: blur(10px); }
+  100% { opacity: 1; scale: 1; filter: blur(0); }
+}
+
+@keyframes zr-shake {
+  0%, 100% { translate: 0 0; }
+  20% { translate: -0.6cqw 0.3cqw; }
+  40% { translate: 0.5cqw -0.4cqw; }
+  60% { translate: -0.3cqw 0.2cqw; }
+  80% { translate: 0.2cqw -0.1cqw; }
+}
+
+@keyframes zr-glitch-a {
+  0%, 72%, 100% { translate: 0 0; clip-path: inset(100% 0 0 0); }
+  74% { translate: -0.05em 0; clip-path: inset(30% 0 52% 0); }
+  78% { translate: 0.04em 0; clip-path: inset(8% 0 80% 0); }
+  80% { translate: 0 0; clip-path: inset(100% 0 0 0); }
+}
+
+@keyframes zr-glitch-b {
+  0%, 60%, 100% { translate: 0 0; clip-path: inset(100% 0 0 0); }
+  62% { translate: 0.05em 0; clip-path: inset(62% 0 22% 0); }
+  66% { translate: -0.04em 0; clip-path: inset(80% 0 6% 0); }
+  68% { translate: 0 0; clip-path: inset(100% 0 0 0); }
+}
+
+@keyframes zr-word-in {
+  from { opacity: 0; letter-spacing: 1em; }
+  to { opacity: 1; letter-spacing: 0.4em; }
+}
+
+@keyframes zr-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}

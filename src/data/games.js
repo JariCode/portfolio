@@ -12,6 +12,7 @@ export const GAMES = [
     genre: 'Tasohyppely',
     color: 'magenta',
     ratio: 16 / 9,
+    load: () => import('../games/zrunner/ZRunner.jsx'),
     description:
       'Juokse neonvaloisen yökaupungin halki, väistele zombeja ja kerää tavarat ennen maalia.',
     controls: {
