@@ -12,16 +12,24 @@ dist
 dist-ssr
 *.local
 
+# Ympäristömuuttujat ja salaisuudet eivät koskaan repoon
+.env
+.env.*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Tiledin henkilökohtaiset ikkuna-asetukset (.tiled-project kuuluu repoon)
+*.tiled-session
 
 # public-kansion kuvat, videot sekä pelien äänet, tilesetit ja hahmot (audio/, games/)
 # eivät kuulu versionhallintaan: osa on omia, osan lisenssi kieltää jakamisen sellaisenaan.
