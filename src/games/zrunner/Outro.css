@@ -168,6 +168,12 @@
   animation: zr-out-roll var(--zr-roll) 1s linear both;
 }
 
+/* Sivun yleinen p-sääntö (max-width 68ch) kaventaisi kappaleet vasempaan reunaan,
+   jolloin keskitetty teksti näyttäisi olevan otsikoita vasemmalla */
+.zr-out-roll p {
+  max-width: none;
+}
+
 .zr-out-logo {
   color: var(--text);
   font-family: var(--font-display);
@@ -196,6 +202,8 @@
   font-weight: 700;
   letter-spacing: 0.25em;
   text-transform: uppercase;
+  /* Kirjainväli lisätään myös viimeisen kirjaimen perään: sama tyhjä vasemmalle, jotta otsikko on keskellä */
+  padding-left: 0.25em;
 }
 
 .zr-out-section p {
