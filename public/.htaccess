@@ -32,6 +32,8 @@ Options -Indexes
 
   # ── Kuvat, video sekä pelien kuvat ja äänet: viikon välimuisti ──
   <If "%{REQUEST_URI} =~ m#^/(img|video|games|audio)/#">
+    Header set Cache-Control "public, max-age=604800"
+  </If>
 
 </IfModule>
 
