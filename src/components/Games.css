@@ -45,6 +45,17 @@
   box-shadow: 0 0 60px -10px var(--accent);
 }
 
+/* Pelatessa sormi osuu helposti otsikkoon tai pelinäkymän ohi: iPhone aloittaisi silloin
+   tekstin valinnan ja näyttäisi kopioi/liitä-valikon, ja nopea tuplanapautus zoomaisi sivua.
+   Pelissä ei ole valittavaa tekstiä. */
+.modal--game {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 /* Otsikkopalkki on kiinteän korkuinen, jotta pelinäkymän koon voi laskea tarkasti.
    Oikea padding jättää tilan Modalin Sulje-napille.
    width: 0 + min-width: 100%: palkki ei levennä modaalia, vaan on aina pelinäkymän
