@@ -14,7 +14,7 @@ export const GAMES = [
     ratio: 16 / 9,
     load: () => import('../games/zrunner/ZRunner.jsx'),
     description:
-      'Juokse neonvaloisen yökaupungin halki, väistele zombeja ja kerää tavarat ennen maalia.',
+      'Pakene zombeja neonvaloisen yökaupungin halki ja kerää valopallot matkalla.',
     controls: {
       desktop: 'Nuolinäppäimet ja välilyönti',
       mobile: 'Ruutunapit',

@@ -354,3 +354,12 @@
     animation: none;
   }
 }
+
+
+/* Kapealla pelinäkymällä (puhelin pystyssä) maailman nimi ei mahdu energian, laskurien ja ajan
+   väliin, vaan rivittyy niiden päälle. Nimi näkyy silti välianimaatioissa. */
+@container (max-width: 520px) {
+  .zr-hud-world {
+    display: none;
+  }
+}
