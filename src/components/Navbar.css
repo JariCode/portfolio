@@ -50,6 +50,7 @@
 
 .nav-links {
   display: flex;
+  align-items: center; /* pelialueen nappi on linkkejä korkeampi: linkit sen keskikohtaan */
   gap: 2rem;
   padding: 0;
   list-style: none;
@@ -164,5 +165,42 @@
   .nav-links a {
     font-family: var(--font-display);
     font-size: 1.5rem;
+  }
+}
+
+/* ═══ Pelialueen nappi: osiolinkkien jälkeen, erotinviivan takana ═══ */
+.nav-games {
+  display: flex;
+  align-items: center;
+  padding-left: 2rem;
+  border-left: 1px solid var(--line);
+}
+
+/* Nappi saa omat tyylinsä GamesLink.css:stä, ei osiolinkkien alleviivausta */
+.nav-links .nav-games a::after {
+  content: none;
+}
+
+.nav-links .nav-games a {
+  padding-block: 0.45rem;
+  color: var(--text);
+}
+
+.nav-links .nav-games a:hover,
+.nav-links .nav-games a.is-active {
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  /* Mobiilivalikossa nappi on linkkien alla, viiva erottaa sen yläpuolelta */
+  .nav-games {
+    padding: 2rem 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .nav-links .nav-games a {
+    font-family: inherit;
+    font-size: 1.15rem;
   }
 }

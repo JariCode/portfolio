@@ -181,6 +181,11 @@
   100% { transform: translateY(100%); }
 }
 
+/* Pelialueen sisäänkäynti omalla rivillään pääpainikkeiden alla */
+.hero-games {
+  margin-top: 1.4rem;
+}
+
 /* ═══ Kapea näyttö: koodi-ikkuna tekstin alle ═══ */
 @media (max-width: 960px) {
   .hero {

@@ -189,6 +189,11 @@
   user-select: none;
 }
 
+/* Pelialueen nappi nimen ja ammatin alla, erillään osiolinkeistä */
+.footer-games {
+  margin-top: 0.9rem;
+}
+
 /* ═══ Kapea näyttö ═══ */
 @media (max-width: 760px) {
   .footer-inner {

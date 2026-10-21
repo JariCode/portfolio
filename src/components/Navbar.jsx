@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { profile } from '../data/profile.js';
 import { NAV_LINKS, linkHref } from '../data/nav.js';
+import GamesLink from './GamesLink.jsx';
 import './Navbar.css';
-
-// Etusivun osiot, joiden näkyvyyttä seurataan (omat sivut, kuten pelit, eivät ole osioita)
-const SECTIONS = NAV_LINKS.filter((l) => !l.href);
 
 // page: 'home' = etusivu, muuten sivun id (esim. 'pelit')
 export default function Navbar({ page = 'home' }) {
@@ -25,7 +23,7 @@ export default function Navbar({ page = 'home' }) {
       { rootMargin: '-45% 0px -50% 0px' },
     );
 
-    SECTIONS.forEach(({ id }) => {
+    NAV_LINKS.forEach(({ id }) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
@@ -85,14 +83,14 @@ export default function Navbar({ page = 'home' }) {
       <nav aria-label="Päävalikko">
         <ul id="nav-links" className={`nav-links ${open ? 'is-open' : ''}`}>
           {NAV_LINKS.map((link) => {
-            // Oma sivu on aktiivinen, kun ollaan sillä; osio, kun se näkyy etusivulla
-            const isActive = link.href ? page === link.id : home && active === link.id;
+            // Osio on aktiivinen, kun se näkyy etusivulla
+            const isActive = home && active === link.id;
             return (
               <li key={link.id}>
                 <a
                   href={linkHref(link, home)}
                   className={isActive ? 'is-active' : ''}
-                  aria-current={isActive ? (link.href ? 'page' : 'location') : undefined}
+                  aria-current={isActive ? 'location' : undefined}
                   onClick={close}
                 >
                   {link.label}
@@ -100,6 +98,10 @@ export default function Navbar({ page = 'home' }) {
               </li>
             );
           })}
+          {/* Pelialue omana nappinaan osiolinkkien jälkeen, erotinviivan takana */}
+          <li className="nav-games">
+            <GamesLink active={page === 'pelit'} onClick={close} />
+          </li>
         </ul>
       </nav>
     </header>

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'motion/react';
 import { profile } from '../data/profile.js';
 import CodeWindow from './CodeWindow.jsx';
+import GamesLink from './GamesLink.jsx';
 import './Hero.css';
 
 // Yksi neonkirjain: syttyy vuorollaan (CSS) ja kirkastuu + nousee, kun hiiri tulee lähelle
@@ -87,6 +88,11 @@ export default function Hero() {
         <motion.div className="hero-actions" {...appear(1.8)}>
           <a href="#projektit" className="btn">Katso projektit</a>
           <a href="#yhteys" className="btn btn--cyan">Ota yhteyttä</a>
+        </motion.div>
+
+        {/* Pelialue omalla rivillään: eri sivu, joten se ei ole samassa rivissä osioiden nappien kanssa */}
+        <motion.div className="hero-games" {...appear(2.1)}>
+          <GamesLink variant="hero" />
         </motion.div>
       </div>
 

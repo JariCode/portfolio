@@ -1,5 +1,6 @@
 import { profile, socials } from '../data/profile.js';
 import { NAV_LINKS, linkHref } from '../data/nav.js';
+import GamesLink from './GamesLink.jsx';
 import './Footer.css';
 
 // Maski asetetaan suoraan elementille: CSS-muuttujan kautta polku laskettaisiin buildissa
@@ -27,6 +28,10 @@ export default function Footer({ page = 'home', onOpenPrivacy }) {
             {profile.name}
           </a>
           <p>{profile.role}</p>
+          {/* Pelialue omana nappinaan: oma sivunsa, ei osiolinkkien joukossa */}
+          <div className="footer-games">
+            <GamesLink active={page === 'pelit'} />
+          </div>
         </div>
 
         <nav aria-label="Alavalikko">

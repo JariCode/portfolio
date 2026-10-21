@@ -1,0 +1,134 @@
+/* ═══ Pelialueen painike (GamesLink.jsx) ═══ */
+/* Violetti erottaa sen osiolinkeistä (syaani) ja pääpainikkeista (magenta) */
+.games-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  padding: 0.45rem 1.1rem 0.45rem 0.9rem;
+  border: 1.5px solid var(--violet);
+  border-radius: 999px;
+  background: rgb(178 140 255 / 0.08);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 0 14px -4px var(--violet);
+  transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+}
+
+.games-link:hover,
+.games-link.is-active {
+  background: var(--violet);
+  color: var(--ink);
+  box-shadow: 0 0 22px -2px var(--violet);
+}
+
+.games-link-icon {
+  flex: none;
+  width: 1.35em;
+  height: 1.35em;
+}
+
+.games-link-pad {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.games-link-cross {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.games-link-btn {
+  fill: currentColor;
+}
+
+/* ── Hero: isompi, kaksirivinen ja hehkuva reunus sykkii ── */
+.games-link--hero {
+  gap: 0.9rem;
+  padding: 0.7rem 1.4rem 0.7rem 1.1rem;
+  border-radius: 18px;
+  font-size: 1.05rem;
+}
+
+.games-link--hero .games-link-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--violet);
+  filter: drop-shadow(0 0 6px var(--violet));
+  transition: color 0.25s, filter 0.25s;
+}
+
+.games-link--hero:hover .games-link-icon {
+  color: var(--ink);
+  filter: none;
+}
+
+.games-link-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  text-align: left;
+}
+
+/* Herossa otsikkofontti; navissa ja footerissa sama fontti kuin muissa linkeissä */
+.games-link--hero .games-link-label {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+.games-link-sub {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.25s;
+}
+
+.games-link--hero:hover .games-link-sub {
+  color: var(--ink);
+}
+
+.games-link-arrow {
+  width: 9px;
+  height: 9px;
+  margin-left: 0.3rem;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  rotate: 45deg;
+  transition: translate 0.2s;
+}
+
+.games-link--hero:hover .games-link-arrow {
+  translate: 3px 0;
+}
+
+/* Hehkuva rengas laajenee ja häipyy: kutsuu klikkaamaan ilman, että vie huomion nimeltä */
+.games-link--hero::after {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border: 1.5px solid var(--violet);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  animation: games-link-pulse 2.8s 2.6s ease-out infinite;
+}
+
+@keyframes games-link-pulse {
+  0% { opacity: 0.7; scale: 1; }
+  70%, 100% { opacity: 0; scale: 1.12 1.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .games-link--hero::after {
+    animation: none;
+  }
+}
