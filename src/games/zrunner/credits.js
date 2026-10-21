@@ -112,4 +112,12 @@ export const CREDITS = [
     licenseUrl: 'https://pixabay.com/service/license-summary/',
     file: 'zombi-osuma.mp3',
   },
+  {
+    type: 'ääni',
+    name: 'Inside Car (Driving)',
+    author: 'Fabrizio84 (Freesound), julkaisija freesound_community',
+    license: 'Pixabay Content License',
+    licenseUrl: 'https://pixabay.com/service/license-summary/',
+    file: 'auto.mp3',
+  },
 ];

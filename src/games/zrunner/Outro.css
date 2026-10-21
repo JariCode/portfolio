@@ -1,0 +1,265 @@
+/* ═══ Lopputekstit auton sisältä (Outro.jsx) ═══ */
+.zr-out {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  background: #05030f;
+  animation: zr-out-open 1s ease-out both;
+}
+
+/* ── Ulkona: taivas, kaupunki horisontissa ja tie ── */
+.zr-out-view {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#05030f 0%, #0e0a26 30%, color-mix(in srgb, var(--magenta) 22%, #0e0a26) 52%, #05030f 52%);
+}
+
+.zr-out-city {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 36%;
+  width: 100%;
+  height: 16%;
+  fill: #120d2a;
+}
+
+/* Tie: kalteva taso, jonka keskiviiva liikkuu kohti katsojaa */
+.zr-out-ground {
+  position: absolute;
+  left: -60%;
+  right: -60%;
+  top: 52%;
+  bottom: 0;
+  overflow: hidden;
+  perspective: 18cqw;
+  perspective-origin: 50% 0;
+}
+
+.zr-out-road {
+  position: absolute;
+  inset: 0 0 -300%;
+  transform-origin: 50% 0;
+  transform: rotateX(80deg);
+  background:
+    linear-gradient(var(--text) 0 50%, transparent 50%) 50% 0 / 0.6% 2% repeat-y,
+    linear-gradient(90deg, #07140f 0 38%, var(--magenta) 38% 38.4%, #17162a 38.4% 61.6%, var(--magenta) 61.6% 62%, #07140f 62%);
+  animation: zr-out-road 14s linear infinite;
+}
+
+/* Katulamput lähtevät horisontista (tolpan juuri tien reunalla) ja kasvavat ohittaessaan auton */
+.zr-out-lamp {
+  position: absolute;
+  left: 50%;
+  top: calc(52% - 9cqw);
+  width: 0.6cqw;
+  height: 9cqw;
+  background: #2a3358;
+  transform-origin: 50% 100%;
+  opacity: 0;
+  animation: zr-out-lamp-l 2.4s var(--zr-delay) cubic-bezier(0.55, 0, 0.9, 0.6) infinite;
+}
+
+.zr-out-lamp::before {
+  content: '';
+  position: absolute;
+  top: -1.2cqw;
+  left: 50%;
+  width: 4cqw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 15%, #ffc23d 30%, transparent 70%);
+  translate: -50% 0;
+}
+
+.zr-out-lamp--r {
+  animation-name: zr-out-lamp-r;
+}
+
+/* ── Sisätila ── */
+.zr-out-cabin {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: zr-out-bump 0.45s ease-in-out infinite alternate;
+}
+
+.zr-out-frame { fill: #05030f; }
+
+.zr-out-frame-glow,
+.zr-out-dash-glow {
+  fill: none;
+  stroke: var(--magenta);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 6px var(--magenta));
+}
+
+.zr-out-stem { fill: #120d2a; }
+
+.zr-out-mirror {
+  fill: #0b0818;
+  stroke: color-mix(in srgb, var(--cyan) 60%, transparent);
+  stroke-width: 3;
+}
+
+.zr-out-dash { fill: #0b0918; }
+
+.zr-out-gauges circle {
+  fill: #07050f;
+  stroke: var(--cyan);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 6px var(--cyan));
+}
+
+.zr-out-needle {
+  stroke: var(--magenta);
+  stroke-width: 5;
+  stroke-linecap: round;
+  transform-origin: 420px 770px;
+  animation: zr-out-needle 1.6s ease-in-out infinite alternate;
+}
+
+.zr-out-screen {
+  fill: #07050f;
+  stroke: color-mix(in srgb, var(--violet) 70%, transparent);
+  stroke-width: 3;
+}
+
+.zr-out-route {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.zr-out-wheel {
+  fill: none;
+  stroke: #1f1940;
+  stroke-width: 34;
+  transform-origin: 420px 900px;
+  animation: zr-out-steer 3.2s ease-in-out infinite alternate;
+}
+
+/* ── Lopputekstit: rullaavat tuulilasin alueella, reunat häivytetty ── */
+.zr-out-credits {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 15%;
+  height: 52%;
+  overflow: hidden;
+  mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+}
+
+/* Alkaa alueen alapuolelta ja päättyy, kun viimeinen rivi on noussut yläreunan yli */
+.zr-out-roll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  color: var(--text);
+  font-size: max(11px, 1.35cqw);
+  line-height: 1.5;
+  text-align: center;
+  text-shadow: 0 0 0.6cqw #000, 0 0 1.2cqw #000;
+  animation: zr-out-roll var(--zr-roll) 1s linear both;
+}
+
+.zr-out-logo {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: max(22px, 4.4cqw);
+  font-weight: 800;
+  text-shadow:
+    0 0 0.15em var(--magenta),
+    0 0 0.45em var(--magenta);
+}
+
+.zr-out-lead {
+  margin-bottom: 4cqw;
+  color: var(--cyan);
+  font-style: italic;
+}
+
+.zr-out-section {
+  margin-bottom: 3cqw;
+}
+
+.zr-out-section h3 {
+  margin-bottom: 0.8cqw;
+  color: var(--magenta);
+  font-family: var(--font-display);
+  font-size: max(10px, 1.2cqw);
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+.zr-out-section p {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2cqw;
+}
+
+.zr-out-section small {
+  color: var(--muted);
+  font-size: 0.8em;
+}
+
+.zr-out-thanks {
+  margin-top: 6cqw;
+  padding-bottom: 2cqw;
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: max(14px, 2.4cqw);
+  font-weight: 700;
+  text-shadow: 0 0 1cqw var(--cyan);
+}
+
+/* ═══ Keyframet ═══ */
+@keyframes zr-out-open {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Katkoviivan jakso on 2 % tien pituudesta; 0 % → 100 % siirtää 98 % eli tasan 49 jaksoa,
+   joten silmukka jatkuu ilman nykäystä */
+@keyframes zr-out-road {
+  from { background-position: 50% 0, 0 0; }
+  to { background-position: 50% 100%, 0 0; }
+}
+
+@keyframes zr-out-lamp-l {
+  0% { opacity: 0; transform: translate(-2cqw, 0) scale(0.08); }
+  15% { opacity: 1; }
+  100% { opacity: 1; transform: translate(-40cqw, 10cqw) scale(1.5); }
+}
+
+@keyframes zr-out-lamp-r {
+  0% { opacity: 0; transform: translate(2cqw, 0) scale(0.08); }
+  15% { opacity: 1; }
+  100% { opacity: 1; transform: translate(40cqw, 10cqw) scale(1.5); }
+}
+
+@keyframes zr-out-bump {
+  from { transform: translateY(0); }
+  to { transform: translateY(0.25%); }
+}
+
+@keyframes zr-out-needle {
+  from { transform: rotate(-6deg); }
+  to { transform: rotate(8deg); }
+}
+
+@keyframes zr-out-steer {
+  from { transform: rotate(-3deg); }
+  to { transform: rotate(3deg); }
+}
+
+@keyframes zr-out-roll {
+  from { top: 100%; transform: translateY(0); }
+  to { top: 0; transform: translateY(-100%); }
+}

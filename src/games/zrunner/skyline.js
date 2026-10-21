@@ -1,4 +1,4 @@
-// Kentän tausta (parallaksi): neonkaupunki tai metrotunneli. Piirretään kerran canvasille
+// Kentän tausta (parallaksi): neonkaupunki, metrotunneli tai puisto. Piirretään kerran canvasille
 // tekstuureiksi; pelin aikana vain siirretään valmiita kuvia, joten tausta ei kuormita.
 // Värit luetaan index.css:n muuttujista, jotta peli ja muu sivu pysyvät samoissa sävyissä.
 
@@ -196,27 +196,99 @@ function drawMetroLayer(scene, key, h, c) {
   tex.refresh();
 }
 
+// ── Puisto: sama taivas ja kaupunki kaukana kuin Neonkadulla, lähimpänä puiden siluetit
+//    ja katulamppujen kajo. Kaupungin kaksi kaukaista kerrosta jaetaan Neonkadun kanssa. ──
+const PARK_TREES = { key: 'zr-park-trees', factor: 0.45 };
+
+function drawParkTrees(scene, h, c) {
+  const rand = seeded(91);
+  const tex = scene.textures.createCanvas(PARK_TREES.key, TEX_W, h);
+  const ctx = tex.getContext();
+  const ground = 730;
+  const crown = mix('#1d5a3e', '#05030f', 0.12);
+  const trunk = '#080610';
+
+  // Puut arvotaan kuten talot: reunan yli menevä puu piirretään myös toiseen laitaan
+  let x = 20;
+  while (x < TEX_W) {
+    const r = 38 + rand() * 30;
+    const height = 100 + rand() * 90;
+    const blobs = Array.from({ length: 4 }, () => ({ dx: (rand() - 0.5) * r * 1.3, dy: (rand() - 0.5) * r * 0.7, r: r * (0.55 + rand() * 0.35) }));
+    const lamp = rand() < 0.35;
+    for (const offset of [0, -TEX_W]) {
+      const tx = x + offset;
+      if (tx + r * 2 < 0) continue;
+      ctx.fillStyle = trunk;
+      ctx.fillRect(tx - 7, ground - height + r * 0.5, 14, height - r * 0.5);
+      ctx.fillStyle = crown;
+      ctx.beginPath();
+      ctx.arc(tx, ground - height, r, 0, Math.PI * 2);
+      blobs.forEach((b) => {
+        ctx.moveTo(tx + b.dx + b.r, ground - height + b.dy);
+        ctx.arc(tx + b.dx, ground - height + b.dy, b.r, 0, Math.PI * 2);
+      });
+      ctx.fill();
+      // Kuun valo latvuksen yläreunassa
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = c.cyan;
+      ctx.beginPath();
+      ctx.arc(tx, ground - height, r, Math.PI * 1.15, Math.PI * 1.85);
+      ctx.lineTo(tx, ground - height);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      if (lamp) {
+        const lx = tx + r + 30;
+        ctx.fillStyle = trunk;
+        ctx.fillRect(lx - 2, ground - 150, 4, 150);
+        const glow = ctx.createRadialGradient(lx, ground - 150, 0, lx, ground - 150, 60);
+        glow.addColorStop(0, 'rgba(255, 194, 61, 0.55)');
+        glow.addColorStop(1, 'rgba(255, 194, 61, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(lx - 60, ground - 210, 120, 120);
+      }
+    }
+    x += r * 2 + 30 + rand() * 90;
+  }
+  // Nurmikko puiden juurella
+  ctx.fillStyle = trunk;
+  ctx.fillRect(0, ground, TEX_W, h - ground);
+  tex.refresh();
+}
+
+// Teemat: taivaan tekstuuri ja parallaksikerrokset kaukaa lähelle
+const THEMES = {
+  city: { sky: 'zr-sky', layers: LAYERS },
+  metro: { sky: 'zr-metro-sky', layers: METRO_LAYERS },
+  park: { sky: 'zr-sky', layers: [LAYERS[0], LAYERS[1], PARK_TREES] },
+};
+
+// Piirtää puuttuvat tekstuurit. Teemat jakavat kerroksia (puisto käyttää kaupungin taivasta
+// ja kaukaisia taloja), joten jokainen tekstuuri tarkistetaan erikseen.
+function ensureTextures(scene, theme, width, height, colors) {
+  const { sky, layers } = THEMES[theme];
+  if (!scene.textures.exists(sky)) {
+    if (theme === 'metro') drawMetroBack(scene, width, height, colors);
+    else drawSky(scene, width, height, colors);
+  }
+  layers.forEach((layer) => {
+    if (scene.textures.exists(layer.key)) return;
+    const cityIndex = LAYERS.indexOf(layer);
+    if (cityIndex >= 0) drawLayer(scene, layer, height, colors, 7 + cityIndex * 14);
+    else if (layer === PARK_TREES) drawParkTrees(scene, height, colors);
+    else drawMetroLayer(scene, layer.key, height, colors);
+  });
+}
+
 // Luo taustan scenen alimmaksi; palauttaa funktion, joka päivittää kerrokset kameran mukaan.
-// theme: 'city' (Neonkatu) tai 'metro' (Metrotunneli)
+// theme: 'city' (Neonkatu), 'metro' (Metrotunneli) tai 'park' (Puisto)
 export function createSkyline(scene, theme = 'city') {
   const { width, height } = scene.scale;
-  const colors = cssColors();
-  const metro = theme === 'metro';
-  const layers = metro ? METRO_LAYERS : LAYERS;
-  const skyKey = metro ? 'zr-metro-sky' : 'zr-sky';
+  const { sky, layers } = THEMES[theme] ?? THEMES.city;
 
   // Tekstuurit piirretään vain kerran pelin aikana; uusi yritys käyttää samoja
-  if (!scene.textures.exists(skyKey)) {
-    if (metro) {
-      drawMetroBack(scene, width, height, colors);
-      METRO_LAYERS.forEach((layer) => drawMetroLayer(scene, layer.key, height, colors));
-    } else {
-      drawSky(scene, width, height, colors);
-      LAYERS.forEach((layer, i) => drawLayer(scene, layer, height, colors, 7 + i * 14));
-    }
-  }
+  ensureTextures(scene, THEMES[theme] ? theme : 'city', width, height, cssColors());
 
-  scene.add.image(0, 0, skyKey).setOrigin(0).setScrollFactor(0).setDepth(-10);
+  scene.add.image(0, 0, sky).setOrigin(0).setScrollFactor(0).setDepth(-10);
   const sprites = layers.map((layer, i) =>
     scene.add
       .tileSprite(0, 0, width, height, layer.key)

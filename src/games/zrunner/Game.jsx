@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import * as Phaser from 'phaser';
 import LevelScene, { GAME_W, GAME_H, MAX_HP, NEW_RUN } from './LevelScene.js';
 import MetroCutscene from './MetroCutscene.jsx';
+import ParkCutscene from './ParkCutscene.jsx';
+import Outro from './Outro.jsx';
 import { WORLDS } from './worlds.js';
 import { calcScore, clearSaves, formatTime, readRecord, saveRecord } from './score.js';
 import { isMuted, onMuteChange, playMusic, setMuted } from './sound.js';
@@ -18,6 +20,9 @@ const TOUCH_BUTTONS = [
 const EMPTY_HUD = { time: 0, hp: MAX_HP, orbs: 0, totalOrbs: 0, kills: 0, totalZombies: 0, world: 0, worldName: WORLDS[0].name };
 const FIRST_WORLD = { world: 0, carry: NEW_RUN };
 
+// Välianimaatiot maailmojen välillä: worlds.js kertoo, mikä näytetään ennen maailmaa
+const CUTSCENES = { metro: MetroCutscene, park: ParkCutscene };
+
 export default function Game({ onExit }) {
   const rootRef = useRef(null);
   const hostRef = useRef(null);
@@ -32,6 +37,9 @@ export default function Game({ onExit }) {
   const [cutscene, setCutscene] = useState(null);
   const [train, setTrain] = useState(false);
   const [cleared, setCleared] = useState(false);
+  // Lopputekstit ennen maaliruutua; maaliruudun tiedot odottavat refissä
+  const [outro, setOutro] = useState(false);
+  const pendingRef = useRef(null);
   // Mykistys on sound.js:ssä, jotta M-näppäin (ZRunner.jsx) ja nappi pysyvät samassa tilassa
   const muted = useSyncExternalStore(onMuteChange, isMuted);
 
@@ -68,7 +76,7 @@ export default function Game({ onExit }) {
         const next = stats.world + 1;
         const { hp, time, orbs, totalOrbs, kills, totalZombies } = stats;
         worldStartRef.current = { world: next, carry: { hp, time, orbs, totalOrbs, kills, totalZombies } };
-        setCutscene({ number: next + 1, name: WORLDS[next].name });
+        setCutscene({ number: next + 1, name: WORLDS[next].name, kind: WORLDS[next].cutscene });
         playMusic('intro', { loop: false, fadeIn: 0.3 });
         return;
       }
@@ -80,7 +88,8 @@ export default function Game({ onExit }) {
         items: stats.orbs,
         kills: stats.kills,
       });
-      setResult({ kind: 'finish', ...stats, score, newRecord, best: readRecord() });
+      pendingRef.current = { kind: 'finish', ...stats, score, newRecord, best: readRecord() };
+      setOutro(true);
     });
     // Kaatuessa ei tallenneta mitään
     game.events.on('zr-dead', (stats) => {
@@ -99,14 +108,15 @@ export default function Game({ onExit }) {
   // Loppuruudulla fokus Pelaa uudelleen -napissa, jotta Enter aloittaa heti. Pelin aikana
   // fokus on pelinäkymässä: animaation Ohita-nappi poistui, eikä fokus saa jäädä sivulle.
   useEffect(() => {
-    if (cutscene) return;
+    if (cutscene || outro) return;
     (result ? replayRef : rootRef).current?.focus({ preventScroll: true });
-  }, [result, cutscene]);
+  }, [result, cutscene, outro]);
 
   // Käynnistää maailman: { world, carry }. Sama scene käynnistyy uudelleen uusilla tiedoilla.
   // Pysyvä funktio (vain refejä ja tilan asettajia), jotta välianimaation ajastin ei nollaudu.
   const startWorld = useCallback((start) => {
     setResult(null);
+    setOutro(false);
     setTrain(false);
     setHud({ ...EMPTY_HUD, ...start.carry, world: start.world, worldName: WORLDS[start.world].name });
     gameRef.current?.scene.getScene('level').scene.restart(start);
@@ -133,12 +143,20 @@ export default function Game({ onExit }) {
     startWorld(worldStartRef.current);
   }, [startWorld]);
 
+  // Lopputekstien jälkeen maaliruutu pisteineen. Pysyvä funktio: Outro ei käynnisty uudelleen.
+  const endOutro = useCallback(() => {
+    setOutro(false);
+    setResult(pendingRef.current);
+  }, []);
+
   // Tietosuojaselosteen lupaus: poistaa vain Z-Runnerin tallennukset ja peli alkaa alusta
   const clear = () => {
     clearSaves();
     newGame();
     setCleared(true);
   };
+
+  const Cutscene = cutscene ? CUTSCENES[cutscene.kind] ?? MetroCutscene : null;
 
   const press = (key, down) => (e) => {
     e.preventDefault();
@@ -227,7 +245,9 @@ export default function Game({ onExit }) {
         ))}
       </div>
 
-      {cutscene && <MetroCutscene number={cutscene.number} worldName={cutscene.name} onDone={endCutscene} />}
+      {Cutscene && <Cutscene number={cutscene.number} worldName={cutscene.name} onDone={endCutscene} />}
+
+      {outro && <Outro onDone={endOutro} />}
 
       {result && (
         <div className={`zr-result zr-result--${result.kind}`} role="dialog" aria-label={result.kind === 'finish' ? 'Maali' : 'Kaaduit'}>

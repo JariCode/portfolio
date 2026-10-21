@@ -1,0 +1,227 @@
+/* ═══ Välianimaatio: metrosta puistoon (ParkCutscene.jsx) ═══ */
+/* Aikajana (s): 0–0,6 kuva aukeaa · 0,4–0,9 junan ovet aukeavat · 1,0–2,2 pelaaja juoksee
+   portaille · 2,2–5,4 portaat ylös askel kerrallaan, kamera nousee pinnalle (2,4–5,4) ·
+   5,5 käännös · 5,6–7,2 juoksu puistoon · 6,4–7,0 silmät pensaissa · 7,3–9,0 maailman nimi */
+.zr-pk {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  background: #000;
+  animation: zr-pk-open 0.6s ease-out both;
+}
+
+/* Kaksi kerrosta päällekkäin: alussa näkyy alempi (asema), kamera nousee ylempään (puisto) */
+.zr-pk-world {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 200%;
+  animation: zr-pk-camera 3s 2.4s cubic-bezier(0.45, 0, 0.25, 1) both;
+}
+
+.zr-pk-scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Pinta ── */
+.zr-pk-sky-top { stop-color: #05030f; }
+.zr-pk-sky-low { stop-color: color-mix(in srgb, var(--violet) 25%, #0e0a26); }
+.zr-pk-moon {
+  fill: var(--text);
+  filter: drop-shadow(0 0 24px var(--violet));
+}
+.zr-pk-city rect { fill: #120d2a; }
+.zr-pk-trees { fill: #08130f; }
+.zr-pk-bushes { fill: #0b1f17; }
+.zr-pk-grass { fill: #1d5a3e; }
+.zr-pk-post { fill: #2a3358; }
+.zr-pk-bulb {
+  fill: #ffc23d;
+  filter: drop-shadow(0 0 10px #ffc23d);
+}
+.zr-pk-lamp-in { stop-color: #ffc23d; stop-opacity: 0.45; }
+.zr-pk-lamp-out { stop-color: #ffc23d; stop-opacity: 0; }
+
+/* Zombien silmät syttyvät pensaissa yksi kerrallaan */
+.zr-pk-eyes {
+  fill: var(--magenta);
+  filter: drop-shadow(0 0 6px var(--magenta));
+  opacity: 0;
+  animation: zr-pk-eyes 0.5s var(--zr-delay) ease-out both;
+}
+
+/* ── Maan alla ── */
+.zr-pk-soil { fill: #0d0918; }
+.zr-pk-wall { fill: #1b2340; }
+.zr-pk-ceiling { fill: color-mix(in srgb, var(--cyan) 50%, transparent); }
+.zr-pk-tube {
+  fill: #fff;
+  filter: drop-shadow(0 0 12px var(--cyan));
+}
+.zr-pk-floor { fill: #1a1830; }
+.zr-pk-edge { fill: #ffc23d; opacity: 0.85; }
+.zr-pk-shaft { fill: #07050f; }
+
+.zr-pk-steps rect {
+  fill: #1b1636;
+  stroke: color-mix(in srgb, var(--cyan) 70%, transparent);
+  stroke-width: 2;
+}
+
+/* ── Juna ── */
+.zr-pk-car { fill: #2c365e; }
+.zr-pk-window {
+  fill: var(--cyan);
+  opacity: 0.7;
+}
+.zr-pk-stripe { fill: var(--magenta); }
+.zr-pk-doorway { fill: color-mix(in srgb, var(--cyan) 35%, #fff); }
+.zr-pk-door { fill: #1e2848; }
+.zr-pk-door--l { animation: zr-pk-door-l 0.5s 0.4s ease-in-out both; }
+.zr-pk-door--r { animation: zr-pk-door-r 0.5s 0.4s ease-in-out both; }
+
+/* ── Uloskäynti ── */
+.zr-pk-kiosk,
+.zr-pk-kiosk-front {
+  fill: #221a48;
+  stroke: color-mix(in srgb, var(--magenta) 45%, transparent);
+  stroke-width: 2;
+}
+.zr-pk-roof { fill: #1c1540; }
+.zr-pk-roof-glow {
+  fill: var(--magenta);
+  filter: drop-shadow(0 0 6px var(--magenta));
+}
+.zr-pk-sign-ring {
+  fill: #0b0818;
+  stroke: var(--magenta);
+  stroke-width: 5;
+  filter: drop-shadow(0 0 8px var(--magenta));
+}
+.zr-pk-sign-m {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Pelaaja: sisäkkäiset ryhmät, joista jokaisella on yksi liike. Näin vaiheet eivät
+   ohita toisiaan (yhden elementin peräkkäiset animaatiot kilpailisivat transformista). ── */
+.zr-pk-frame { overflow: hidden; }
+
+.zr-pk-sprite {
+  animation: zr-pk-run 0.75s steps(12) infinite;
+}
+
+.zr-pk-player {
+  animation: zr-pk-appear 0.2s 0.95s ease-out both;
+}
+
+/* Junan ovelta (x 510) portaiden juurelle (x 700) aseman lattialla (y 1700) */
+.zr-pk-run1 {
+  animation: zr-pk-run1 1.2s 1s linear both;
+}
+
+/* 16 askelmaa ylös: jokainen askel on oma pykälänsä (steps) */
+.zr-pk-climb {
+  animation: zr-pk-climb 3.2s 2.2s steps(16, end) both;
+}
+
+.zr-pk-flip {
+  animation: zr-pk-flip 0.01s 5.5s steps(1, end) both;
+}
+
+.zr-pk-park {
+  animation: zr-pk-park 1.6s 5.6s cubic-bezier(0.3, 0, 0.5, 1) both;
+}
+
+/* ── Maailman nimi ── */
+.zr-pk-card {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.zr-pk-title {
+  padding: 0.8cqw 2.4cqw 0.8cqw 2.8cqw;
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 999px;
+  background: rgb(3 2 10 / 0.85);
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: 2.4cqw;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  text-shadow: 0 0 1cqw var(--cyan);
+  opacity: 0;
+  animation: zr-pk-card 1.5s 7.3s ease-out both;
+}
+
+/* ═══ Keyframet ═══ */
+@keyframes zr-pk-open {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Lopussa näkyy pinnasta y 250–1150: maa ruudun alaneljänneksessä, pelaaja kokonaan näkyvissä */
+@keyframes zr-pk-camera {
+  from { transform: translateY(-50%); }
+  to { transform: translateY(-13.9%); }
+}
+
+@keyframes zr-pk-door-l {
+  to { transform: translateX(-48px); }
+}
+
+@keyframes zr-pk-door-r {
+  to { transform: translateX(48px); }
+}
+
+@keyframes zr-pk-run {
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--zr-step)); }
+}
+
+@keyframes zr-pk-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zr-pk-run1 {
+  from { transform: translate(510px, 1700px); }
+  to { transform: translate(700px, 1700px); }
+}
+
+/* 16 askelta, kukin 50 yksikköä oikealle ja ylös (STEP JSX:ssä) */
+@keyframes zr-pk-climb {
+  from { transform: translate(0, 0); }
+  to { transform: translate(800px, -800px); }
+}
+
+@keyframes zr-pk-flip {
+  from { transform: none; }
+  to { transform: scaleX(-1); }
+}
+
+@keyframes zr-pk-park {
+  from { transform: translateX(0); }
+  to { transform: translateX(-560px); }
+}
+
+@keyframes zr-pk-eyes {
+  0% { opacity: 0; }
+  40% { opacity: 1; }
+  55% { opacity: 0.2; }
+  100% { opacity: 1; }
+}
+
+@keyframes zr-pk-card {
+  from { opacity: 0; letter-spacing: 0.8em; }
+  to { opacity: 1; letter-spacing: 0.35em; }
+}
