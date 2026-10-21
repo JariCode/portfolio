@@ -5,7 +5,8 @@ const SAVE_PREFIX = 'jaricode:zrunner:';
 const RECORD_KEY = `${SAVE_PREFIX}ennatys`;
 
 // Pisteytys: valopallo 10, zombi 50 ja aikabonus 5 pistettä jokaisesta sekunnista,
-// joka jää alle kolmen minuutin. Nopea, mutta kaiken keräävä ja zombit kaatava voittaa.
+// joka jää alle aikarajan (kolme minuuttia jokaista pelattua maailmaa kohti).
+// Nopea, mutta kaiken keräävä ja zombit kaatava voittaa.
 const ORB_POINTS = 10;
 const KILL_POINTS = 50;
 const TIME_LIMIT_S = 180;
@@ -19,8 +20,8 @@ export function formatTime(ms) {
   return `${min}:${String(sec).padStart(2, '0')}.${total % 10}`;
 }
 
-export function calcScore({ orbs, kills, time }) {
-  const timeBonus = Math.max(0, Math.round((TIME_LIMIT_S - time / 1000) * TIME_POINTS));
+export function calcScore({ orbs, kills, time, worlds = 1 }) {
+  const timeBonus = Math.max(0, Math.round((TIME_LIMIT_S * worlds - time / 1000) * TIME_POINTS));
   return { orbPoints: orbs * ORB_POINTS, killPoints: kills * KILL_POINTS, timeBonus, total: orbs * ORB_POINTS + kills * KILL_POINTS + timeBonus };
 }
 

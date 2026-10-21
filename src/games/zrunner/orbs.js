@@ -22,13 +22,14 @@ function drawOrb(scene) {
 
 // Automaattinen sijoittelu: joka kolmas sarake. Pallo tulee sarakkeen ylimmän
 // kiinteän laatan päälle; kuopan kohdalla se leijuu hypyn korkeudella.
-function autoPositions(ground, back) {
+// startRow: ylin rivi, jolta pintaa etsitään (metrossa korkeat katokset ohitetaan)
+function autoPositions(ground, back, startRow) {
   const out = [];
   const T = ground.tilemap.tileWidth;
   const rows = ground.tilemap.height;
   for (let col = 4; col < ground.tilemap.width - 4; col += 3) {
     let surface = -1;
-    for (let row = 0; row < rows; row++) {
+    for (let row = startRow; row < rows; row++) {
       const t = ground.getTileAt(col, row) ?? back.getTileAt(col, row);
       if (t?.collides) {
         surface = row;
@@ -42,10 +43,10 @@ function autoPositions(ground, back) {
   return out;
 }
 
-export function createOrbs(scene, objects) {
+export function createOrbs(scene, objects, startRow = 0) {
   drawOrb(scene);
   const placed = objects.filter((o) => o.name === 'valopallo').map((o) => ({ x: o.x, y: o.y }));
-  const positions = placed.length ? placed : autoPositions(scene.ground, scene.back);
+  const positions = placed.length ? placed : autoPositions(scene.ground, scene.back, startRow);
 
   const group = scene.physics.add.staticGroup();
   positions.forEach((pos, i) => {

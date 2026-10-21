@@ -1,4 +1,4 @@
-// Kentän taustalla liikkuva neonkaupunki (parallaksi). Piirretään kerran canvasille
+// Kentän tausta (parallaksi): neonkaupunki tai metrotunneli. Piirretään kerran canvasille
 // tekstuureiksi; pelin aikana vain siirretään valmiita kuvia, joten tausta ei kuormita.
 // Värit luetaan index.css:n muuttujista, jotta peli ja muu sivu pysyvät samoissa sävyissä.
 
@@ -124,17 +124,100 @@ function drawLayer(scene, layer, h, c, seed) {
   tex.refresh();
 }
 
-// Luo taustan scenen alimmaksi; palauttaa funktion, joka päivittää kerrokset kameran mukaan
-export function createSkyline(scene) {
+// ── Metrotunneli: ei taivasta. Kaukana tunnelin renkaat, keskellä putket ja merkkivalot,
+//    lähellä tukipilarien varjot. Samat parallaksikerrokset kuin kaupungissa. ──
+const METRO_LAYERS = [
+  { key: 'zr-metro-far', factor: 0.12 },
+  { key: 'zr-metro-mid', factor: 0.25 },
+  { key: 'zr-metro-near', factor: 0.45 },
+];
+
+function drawMetroBack(scene, w, h, c) {
+  const tex = scene.textures.createCanvas('zr-metro-sky', w, h);
+  const ctx = tex.getContext();
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#04030b');
+  g.addColorStop(0.6, '#0a0818');
+  g.addColorStop(1, mix(c.violet, c.ink, 0.18));
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  // Kattovalojen heikko kajo tunnelin yläosassa
+  const glow = ctx.createLinearGradient(0, 0, 0, h * 0.35);
+  glow.addColorStop(0, 'rgba(41, 224, 255, 0.10)');
+  glow.addColorStop(1, 'rgba(41, 224, 255, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h * 0.35);
+  tex.refresh();
+}
+
+function drawMetroLayer(scene, key, h, c) {
+  const tex = scene.textures.createCanvas(key, TEX_W, h);
+  const ctx = tex.getContext();
+  if (key === 'zr-metro-far') {
+    // Tunnelin renkaat: kaarevat rivat tasaisin välein (1024 / 8 = 128, toistuu saumatta)
+    ctx.strokeStyle = mix(c.violet, c.ink, 0.22);
+    ctx.lineWidth = 6;
+    for (let x = 64; x < TEX_W; x += 128) {
+      ctx.beginPath();
+      ctx.moveTo(x, h);
+      ctx.quadraticCurveTo(x - 30, h * 0.45, x, 40);
+      ctx.stroke();
+    }
+    ctx.fillStyle = mix(c.violet, c.ink, 0.12);
+    ctx.fillRect(0, 34, TEX_W, 10);
+  } else if (key === 'zr-metro-mid') {
+    // Putket ja kaapelikourut, välillä keltainen merkkivalo
+    ctx.fillStyle = '#141029';
+    ctx.fillRect(0, 120, TEX_W, 14);
+    ctx.fillRect(0, 150, TEX_W, 8);
+    ctx.fillStyle = '#1b1636';
+    for (let x = 0; x < TEX_W; x += 128) ctx.fillRect(x, 110, 10, 52);
+    ctx.fillStyle = '#ffc23d';
+    for (let x = 64; x < TEX_W; x += 256) {
+      ctx.globalAlpha = 0.25;
+      ctx.beginPath();
+      ctx.arc(x, 142, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.beginPath();
+      ctx.arc(x, 142, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else {
+    // Tukipilarien varjot etualalla, harvassa
+    ctx.fillStyle = '#07060f';
+    for (let x = 160; x < TEX_W; x += 512) {
+      ctx.fillRect(x, 0, 46, h);
+      ctx.fillStyle = mix(c.cyan, '#07060f', 0.12);
+      ctx.fillRect(x, 0, 3, h);
+      ctx.fillStyle = '#07060f';
+    }
+  }
+  tex.refresh();
+}
+
+// Luo taustan scenen alimmaksi; palauttaa funktion, joka päivittää kerrokset kameran mukaan.
+// theme: 'city' (Neonkatu) tai 'metro' (Metrotunneli)
+export function createSkyline(scene, theme = 'city') {
   const { width, height } = scene.scale;
   const colors = cssColors();
-  if (!scene.textures.exists('zr-sky')) {
-    drawSky(scene, width, height, colors);
-    LAYERS.forEach((layer, i) => drawLayer(scene, layer, height, colors, 7 + i * 14));
+  const metro = theme === 'metro';
+  const layers = metro ? METRO_LAYERS : LAYERS;
+  const skyKey = metro ? 'zr-metro-sky' : 'zr-sky';
+
+  // Tekstuurit piirretään vain kerran pelin aikana; uusi yritys käyttää samoja
+  if (!scene.textures.exists(skyKey)) {
+    if (metro) {
+      drawMetroBack(scene, width, height, colors);
+      METRO_LAYERS.forEach((layer) => drawMetroLayer(scene, layer.key, height, colors));
+    } else {
+      drawSky(scene, width, height, colors);
+      LAYERS.forEach((layer, i) => drawLayer(scene, layer, height, colors, 7 + i * 14));
+    }
   }
 
-  scene.add.image(0, 0, 'zr-sky').setOrigin(0).setScrollFactor(0).setDepth(-10);
-  const sprites = LAYERS.map((layer, i) =>
+  scene.add.image(0, 0, skyKey).setOrigin(0).setScrollFactor(0).setDepth(-10);
+  const sprites = layers.map((layer, i) =>
     scene.add
       .tileSprite(0, 0, width, height, layer.key)
       .setOrigin(0)
@@ -144,7 +227,7 @@ export function createSkyline(scene) {
 
   return (camera) => {
     sprites.forEach((sprite, i) => {
-      sprite.tilePositionX = camera.scrollX * LAYERS[i].factor;
+      sprite.tilePositionX = camera.scrollX * layers[i].factor;
     });
   };
 }

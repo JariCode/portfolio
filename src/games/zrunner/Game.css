@@ -84,6 +84,13 @@
   text-shadow: 0 0 0.6cqw var(--violet);
 }
 
+.zr-hud-world {
+  color: var(--cyan);
+  font-size: max(9px, 1.15cqw);
+  text-transform: uppercase;
+  text-shadow: 0 0 0.8cqw var(--cyan);
+}
+
 .zr-hud-time {
   min-width: 6ch;
   color: var(--text);
@@ -91,6 +98,31 @@
   font-variant-numeric: tabular-nums;
   text-align: right;
   text-shadow: 0 0 1cqw var(--magenta);
+}
+
+/* Junan varoitus metrossa: vilkkuu, kunnes juna on mennyt ohi */
+.zr-train-warning {
+  position: absolute;
+  top: 6.5cqw;
+  left: 50%;
+  translate: -50% 0;
+  padding: 0.5cqw 1.8cqw;
+  border: 2px solid var(--magenta);
+  border-radius: 999px;
+  background: rgb(3 2 10 / 0.8);
+  color: var(--magenta);
+  font-family: var(--font-display);
+  font-size: max(11px, 1.6cqw);
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  box-shadow: 0 0 1.4cqw var(--magenta);
+  pointer-events: none;
+  animation: zr-train-blink 0.32s steps(1, end) infinite;
+}
+
+@keyframes zr-train-blink {
+  50% { opacity: 0.35; }
 }
 
 /* Lyhyt ilmoitus tallennusten tyhjennyksestä; häviää itsestään */
@@ -269,7 +301,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .zr-result,
-  .zr-toast {
+  .zr-toast,
+  .zr-train-warning {
     animation: none;
   }
 }

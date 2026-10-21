@@ -1,14 +1,10 @@
 // Energiapakkaukset: palauttavat yhden energian. Kuva piirretään koodilla (neonakku plus-merkillä).
 // Paikat tulevat Tiledin Objektit-tasolta (pisteet nimellä "energia"); jos niitä ei ole,
-// käytetään oletussarakkeita. Pakkaus jää paikalleen, jos energia on jo täynnä.
+// käytetään maailman sarakkeita (worlds.js). Pakkaus jää paikalleen, jos energia on jo täynnä.
 
 const PACK_KEY = 'zr-energy';
 const W = 40;
 const H = 48;
-
-// Oletussarakkeet: kentän ensimmäisen, toisen ja viimeisen kolmanneksen alussa.
-// Valopallot ovat joka kolmannessa sarakkeessa (4, 7, 10…), joten nämä eivät osu samaan kohtaan.
-const DEFAULT_COLUMNS = [35, 68, 101];
 
 function drawPack(scene) {
   if (scene.textures.exists(PACK_KEY)) return;
@@ -39,10 +35,10 @@ function drawPack(scene) {
 
 // Sarakkeen ylin kiinteä laatta; pakkaus asetetaan sen päälle. Kuopan kohdalla siirrytään
 // seuraavaan sarakkeeseen, jottei pakkaus leiju tavoittamattomissa.
-function surfacePosition(ground, back, col) {
+function surfacePosition(ground, back, col, startRow) {
   const T = ground.tilemap.tileWidth;
   for (let c = col; c < col + 6; c++) {
-    for (let row = 0; row < ground.tilemap.height; row++) {
+    for (let row = startRow; row < ground.tilemap.height; row++) {
       const t = ground.getTileAt(c, row) ?? back.getTileAt(c, row);
       if (t?.collides) return { x: c * T + T / 2, y: row * T - H / 2 - 4 };
     }
@@ -50,12 +46,13 @@ function surfacePosition(ground, back, col) {
   return null;
 }
 
-export function createEnergyPacks(scene, objects) {
+// columns: oletussarakkeet; startRow: ylin rivi, jolta pintaa etsitään (kuten valopalloilla)
+export function createEnergyPacks(scene, objects, columns, startRow = 0) {
   drawPack(scene);
   const placed = objects.filter((o) => o.name === 'energia').map((o) => ({ x: o.x, y: o.y }));
   const positions = placed.length
     ? placed
-    : DEFAULT_COLUMNS.map((col) => surfacePosition(scene.ground, scene.back, col)).filter(Boolean);
+    : columns.map((col) => surfacePosition(scene.ground, scene.back, col, startRow)).filter(Boolean);
 
   const group = scene.physics.add.staticGroup();
   positions.forEach((pos, i) => {

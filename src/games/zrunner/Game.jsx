@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Phaser from 'phaser';
-import LevelScene, { GAME_W, GAME_H, MAX_HP } from './LevelScene.js';
+import LevelScene, { GAME_W, GAME_H, MAX_HP, NEW_RUN } from './LevelScene.js';
+import MetroCutscene from './MetroCutscene.jsx';
+import { WORLDS } from './worlds.js';
 import { calcScore, clearSaves, formatTime, readRecord, saveRecord } from './score.js';
 import './Game.css';
 
@@ -12,7 +14,8 @@ const TOUCH_BUTTONS = [
   { key: 'jump', label: 'Hyppää', icon: '▲', side: 'right' },
 ];
 
-const EMPTY_HUD = { time: 0, hp: MAX_HP, orbs: 0, totalOrbs: 0, kills: 0, totalZombies: 0 };
+const EMPTY_HUD = { time: 0, hp: MAX_HP, orbs: 0, totalOrbs: 0, kills: 0, totalZombies: 0, world: 0, worldName: WORLDS[0].name };
+const FIRST_WORLD = { world: 0, carry: NEW_RUN };
 
 export default function Game({ onExit }) {
   const rootRef = useRef(null);
@@ -20,9 +23,13 @@ export default function Game({ onExit }) {
   const gameRef = useRef(null);
   const controlsRef = useRef({ left: false, right: false, jump: false, attack: false });
   const replayRef = useRef(null);
+  // Nykyisen maailman alku: kaatuessa yritetään uudelleen tästä, ei koko pelin alusta
+  const worldStartRef = useRef(FIRST_WORLD);
   const [hud, setHud] = useState(EMPTY_HUD);
   // result: { kind: 'finish' | 'dead', ...pelin tiedot, score, newRecord }
   const [result, setResult] = useState(null);
+  const [cutscene, setCutscene] = useState(null);
+  const [train, setTrain] = useState(false);
   const [cleared, setCleared] = useState(false);
 
   // Phaser luodaan kerran ja tuhotaan, kun pelinäkymä suljetaan (modaali, Esc, valikkoon)
@@ -50,9 +57,19 @@ export default function Game({ onExit }) {
     });
 
     game.events.on('zr-hud', setHud);
-    // Maalissa lasketaan pisteet ja tallennetaan ennätys (vain jos parempi kuin aiempi)
+    game.events.on('zr-train', setTrain);
     game.events.on('zr-finish', (stats) => {
-      const score = calcScore(stats);
+      setTrain(false);
+      // Välimaali: tiedot siirtyvät seuraavaan maailmaan ja välianimaatio alkaa
+      if (!stats.lastWorld) {
+        const next = stats.world + 1;
+        const { hp, time, orbs, totalOrbs, kills, totalZombies } = stats;
+        worldStartRef.current = { world: next, carry: { hp, time, orbs, totalOrbs, kills, totalZombies } };
+        setCutscene({ number: next + 1, name: WORLDS[next].name });
+        return;
+      }
+      // Koko pelin maali: pisteet ja ennätys (tallennetaan vain, jos parempi kuin aiempi)
+      const score = calcScore({ ...stats, worlds: WORLDS.length });
       const newRecord = saveRecord({
         score: score.total,
         time: formatTime(stats.time),
@@ -62,7 +79,10 @@ export default function Game({ onExit }) {
       setResult({ kind: 'finish', ...stats, score, newRecord, best: readRecord() });
     });
     // Kaatuessa ei tallenneta mitään
-    game.events.on('zr-dead', (stats) => setResult({ kind: 'dead', ...stats }));
+    game.events.on('zr-dead', (stats) => {
+      setTrain(false);
+      setResult({ kind: 'dead', ...stats });
+    });
     gameRef.current = game;
 
     return () => {
@@ -72,22 +92,45 @@ export default function Game({ onExit }) {
   }, []);
 
   // Loppuruudulla fokus Pelaa uudelleen -napissa, jotta Enter aloittaa heti. Pelin aikana
-  // fokus on pelinäkymässä: alkuanimaation Ohita-nappi poistui, eikä fokus saa jäädä sivulle.
+  // fokus on pelinäkymässä: animaation Ohita-nappi poistui, eikä fokus saa jäädä sivulle.
   useEffect(() => {
+    if (cutscene) return;
     (result ? replayRef : rootRef).current?.focus({ preventScroll: true });
-  }, [result]);
+  }, [result, cutscene]);
 
-  const replay = () => {
+  // Käynnistää maailman: { world, carry }. Sama scene käynnistyy uudelleen uusilla tiedoilla.
+  // Pysyvä funktio (vain refejä ja tilan asettajia), jotta välianimaation ajastin ei nollaudu.
+  const startWorld = useCallback((start) => {
     setResult(null);
+    setTrain(false);
+    setHud({ ...EMPTY_HUD, ...start.carry, world: start.world, worldName: WORLDS[start.world].name });
+    gameRef.current?.scene.getScene('level').scene.restart(start);
+  }, []);
+
+  // Uusi peli alusta (maali tai tallennusten tyhjennys)
+  const newGame = () => {
+    worldStartRef.current = FIRST_WORLD;
     setCleared(false);
-    setHud(EMPTY_HUD);
-    gameRef.current?.scene.getScene('level').scene.restart();
+    startWorld(FIRST_WORLD);
   };
+
+  // Kaatuessa: sama maailma uudelleen niillä tiedoilla, joilla siihen tultiin, mutta täydellä
+  // energialla – muuten vähällä energialla maailmaan tullut jäisi jumiin
+  const retry = () => {
+    const start = worldStartRef.current;
+    startWorld({ ...start, carry: { ...start.carry, hp: MAX_HP } });
+  };
+
+  // Välianimaation jälkeen seuraava maailma. Pysyvä funktio: animaation ajastin ei käynnisty uudelleen.
+  const endCutscene = useCallback(() => {
+    setCutscene(null);
+    startWorld(worldStartRef.current);
+  }, [startWorld]);
 
   // Tietosuojaselosteen lupaus: poistaa vain Z-Runnerin tallennukset ja peli alkaa alusta
   const clear = () => {
     clearSaves();
-    replay();
+    newGame();
     setCleared(true);
   };
 
@@ -116,8 +159,17 @@ export default function Game({ onExit }) {
             {hud.kills}/{hud.totalZombies}
           </span>
         </div>
+        <span className="zr-hud-world">
+          {hud.world + 1} · {hud.worldName}
+        </span>
         <span className="zr-hud-time">{formatTime(hud.time)}</span>
       </div>
+
+      {train && !result && (
+        <p className="zr-train-warning" role="alert">
+          Juna tulee!
+        </p>
+      )}
 
       {cleared && !result && <p className="zr-toast" role="status">Tallennukset tyhjennetty</p>}
 
@@ -146,6 +198,8 @@ export default function Game({ onExit }) {
           </div>
         ))}
       </div>
+
+      {cutscene && <MetroCutscene number={cutscene.number} worldName={cutscene.name} onDone={endCutscene} />}
 
       {result && (
         <div className={`zr-result zr-result--${result.kind}`} role="dialog" aria-label={result.kind === 'finish' ? 'Maali' : 'Kaaduit'}>
@@ -184,12 +238,19 @@ export default function Game({ onExit }) {
             </p>
           ) : (
             <p className="zr-result-score">
-              <span>Energia loppui. Pisteet lasketaan vain maaliin päästessä.</span>
+              <span>
+                Energia loppui maailmassa {result.world + 1} · {result.worldName}. Pisteet lasketaan vain maaliin päästessä.
+              </span>
             </p>
           )}
 
           <div className="zr-actions">
-            <button type="button" className="zr-btn zr-btn--start" ref={replayRef} onClick={replay}>
+            <button
+              type="button"
+              className="zr-btn zr-btn--start"
+              ref={replayRef}
+              onClick={result.kind === 'finish' ? newGame : retry}
+            >
               {result.kind === 'finish' ? 'Pelaa uudelleen' : 'Yritä uudelleen'}
             </button>
             <button type="button" className="zr-btn zr-btn--ghost" onClick={onExit}>

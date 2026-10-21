@@ -1,0 +1,169 @@
+/* ═══ Välianimaatio: alas metroon (MetroCutscene.jsx) ═══ */
+/* Aikajana (s): 0–0,6 kuva aukeaa · 0,3–3,3 pelaaja juoksee sisäänkäynnille ·
+   3,3–4,3 portaita alas · 4,1–4,9 kyltti välkkyy · 4,7–5,3 pimeys ·
+   5,4–7,0 junan valot lähestyvät · 7,0 välähdys · 7,2–8,8 maailman nimi */
+.zr-cut {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  background: #000;
+}
+
+.zr-cut-street {
+  position: absolute;
+  inset: 0;
+  animation: zr-cut-open 0.6s ease-out both;
+}
+
+.zr-cut-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Sisäänkäynti ── */
+.zr-cut-pillar { fill: #120c2a; }
+.zr-cut-roof { fill: #1c1540; }
+.zr-cut-roof-glow { fill: var(--magenta); filter: drop-shadow(0 0 6px var(--magenta)); }
+.zr-cut-cone { fill: var(--magenta); opacity: 0.08; }
+.zr-cut-hole { fill: #020106; }
+
+.zr-cut-sign-ring {
+  fill: #0b0818;
+  stroke: var(--magenta);
+  stroke-width: 6;
+  filter: drop-shadow(0 0 8px var(--magenta));
+}
+
+.zr-cut-sign-m {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px var(--text));
+}
+
+/* Kyltti välkkyy, kun pelaaja on kadonnut portaisiin */
+.zr-cut-sign {
+  animation: zr-cut-flicker 0.8s 4.1s steps(1, end) both;
+}
+
+.zr-cut-rail-glass { fill: rgb(12 8 30 / 0.92); }
+.zr-cut-rail-top { fill: var(--cyan); filter: drop-shadow(0 0 4px var(--cyan)); }
+
+/* ── Pelaaja ── */
+.zr-cut-frame { overflow: hidden; }
+
+.zr-cut-run {
+  animation: zr-cut-run 0.75s steps(12) infinite;
+}
+
+/* Juoksu x = -150 → 1110, sitten vino lasku portaita alas kaiteen taakse */
+.zr-cut-player {
+  animation: zr-cut-path 4.3s linear both;
+}
+
+/* ── Pimeä tunneli ja junan valot ── */
+.zr-cut-dark {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 55%, #0a0818, #000 70%);
+  opacity: 0;
+  animation: zr-cut-darken 0.6s 4.7s ease-in both;
+}
+
+.zr-cut-headlight {
+  position: absolute;
+  top: 58%;
+  width: 6cqw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  /* Hehku liukuvärinä: varjo (box-shadow) näyttäisi suurennettuna kulmikkaalta */
+  background: radial-gradient(circle, #fff 0 18%, color-mix(in srgb, var(--cyan) 70%, #fff) 30%, transparent 68%);
+  translate: -50% -50%;
+  opacity: 0;
+  animation: zr-cut-approach 1.6s 5.4s ease-in both;
+}
+
+.zr-cut-headlight--l { left: 44%; }
+.zr-cut-headlight--r { left: 56%; }
+
+.zr-cut-flash {
+  position: absolute;
+  inset: 0;
+  background: var(--text);
+  opacity: 0;
+  pointer-events: none;
+  animation: zr-cut-flash 0.6s 7s ease-out both;
+}
+
+/* ── Maailman nimi ── */
+.zr-cut-card {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.zr-cut-world {
+  padding: 0.8cqw 2.4cqw 0.8cqw 2.8cqw;
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 999px;
+  background: rgb(3 2 10 / 0.85);
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: 2.4cqw;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  text-shadow: 0 0 1cqw var(--cyan);
+  opacity: 0;
+  animation: zr-cut-card 1.6s 7.2s ease-out both;
+}
+
+/* ═══ Keyframet ═══ */
+@keyframes zr-cut-open {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zr-cut-run {
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--zr-step)); }
+}
+
+@keyframes zr-cut-path {
+  0%, 7% { transform: translate(-150px, 0); }
+  77% { transform: translate(1110px, 0); }
+  100% { transform: translate(1290px, 150px); }
+}
+
+@keyframes zr-cut-flicker {
+  0%, 30%, 55%, 100% { opacity: 1; }
+  15%, 45%, 70% { opacity: 0.15; }
+}
+
+@keyframes zr-cut-darken {
+  to { opacity: 1; }
+}
+
+@keyframes zr-cut-approach {
+  0% { opacity: 0; scale: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 1; scale: 3; }
+}
+
+@keyframes zr-cut-flash {
+  0% { opacity: 0; }
+  15% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+@keyframes zr-cut-card {
+  from { opacity: 0; letter-spacing: 0.8em; }
+  to { opacity: 1; letter-spacing: 0.35em; }
+}

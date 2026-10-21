@@ -1,10 +1,11 @@
 import * as Phaser from 'phaser';
-import mapData from './maps/maailma1.json';
 import { PLAYER_SHEET, PLAYER_ANIMS, JUMP_FRAME } from './player.js';
 import { createSkyline } from './skyline.js';
 import { Walker, ZOMBIE_BODY, createZombieAnims, preloadZombies } from './enemies.js';
 import { createOrbs, collectOrb } from './orbs.js';
 import { createEnergyPacks, collectPack } from './energy.js';
+import Train from './train.js';
+import { WORLDS } from './worlds.js';
 
 // Pelin sisäinen koko (16:9). Kartta on 12 laattaa x 64 px = 768 px korkea, joten
 // koko kartan korkeus mahtuu kuvaan eikä kamera liiku pystysuunnassa.
@@ -12,27 +13,19 @@ export const GAME_W = 1366;
 export const GAME_H = 768;
 export const MAX_HP = 5;
 
-const TILESET_FILE = '/games/zrunner/kaupunki.png';
 const T = 64;
 
-// Laattojen numerot Tiledin JSONissa (firstgid 1 → kuvan laatta + 1).
-// Katot ja metallitasot: niihin törmätään vain ylhäältä, alta voi hypätä läpi.
+// Laattojen numerot Tiledin JSONissa (firstgid 1 → kuvan laatta + 1). Kaikki tilesetit
+// noudattavat samaa järjestystä, joten säännöt pätevät jokaisessa maailmassa.
+// Katot, katokset ja tasot: niihin törmätään vain ylhäältä, alta voi hypätä läpi.
 const ONE_WAY = [9, 10, 11, 17, 18, 19];
+// Maa (rivi 1) ja esteet (rivi 3, kuvat 5–8) ovat kiinteitä myös Tausta-tasolla,
+// jos ne on piirretty sinne vahingossa
+const SOLID = [1, 2, 3, 4, 5, 6, 7, 8, 21, 22, 23, 24];
+const GROUND = [1, 2, 3, 4, 5, 6, 7, 8];
 // Lätäkkö on koriste, vaikka se olisi piirretty Maastoon
 const NO_COLLIDE = [32];
 
-// Zombien paikat, jos Tiledin Objektit-tasolla ei ole pisteitä nimellä "zombi":
-// sarake kadulla ja zombilaji. Paikat ovat kuoppien välisillä katuosuuksilla.
-const ZOMBIE_SPAWNS = [
-  [12, 'zombi1'],
-  [28, 'zombi4'],
-  [44, 'zombi2'],
-  [55, 'zombi3'],
-  [70, 'zombi1'],
-  [90, 'zombi4'],
-  [105, 'zombi2'],
-  [127, 'zombi3'],
-];
 const ZOMBIE_TYPES = ['zombi1', 'zombi2', 'zombi3', 'zombi4'];
 
 // Hahmo pienennetään laattoihin sopivaksi: noin 1,2 laattaa korkea.
@@ -60,14 +53,25 @@ const STOMP_BOUNCE = -620;
 const INVULNERABLE_MS = 1200; // osuman jälkeen hetki suojassa, ettei sama zombi osu heti uudelleen
 const STUN_MS = 350; // osuman jälkeen ohjaus palaa pienen hetken päästä
 
+// Aiemmista maailmoista kertyneet tiedot; ensimmäisessä maailmassa kaikki nollassa
+export const NEW_RUN = { hp: MAX_HP, orbs: 0, kills: 0, time: 0, totalOrbs: 0, totalZombies: 0 };
+
 export default class LevelScene extends Phaser.Scene {
   constructor() {
     super('level');
   }
 
+  // data: { world: maailman järjestysnumero, carry: aiemmista maailmoista kertyneet tiedot }
+  init(data) {
+    this.worldIndex = data?.world ?? 0;
+    this.world = WORLDS[this.worldIndex];
+    this.carry = data?.carry ?? NEW_RUN;
+  }
+
   preload() {
-    this.load.tilemapTiledJSON('maailma1', mapData);
-    this.load.image('kaupunki', TILESET_FILE);
+    const w = this.world;
+    this.load.tilemapTiledJSON(w.key, w.map);
+    this.load.image(`tiles-${w.tileset.name}`, w.tileset.file);
     this.load.spritesheet('pelaaja', PLAYER_SHEET.file, {
       frameWidth: PLAYER_SHEET.frameWidth,
       frameHeight: PLAYER_SHEET.frameHeight,
@@ -76,12 +80,13 @@ export default class LevelScene extends Phaser.Scene {
   }
 
   create() {
+    const w = this.world;
     this.controls = this.registry.get('controls');
-    this.updateSkyline = createSkyline(this);
+    this.updateSkyline = createSkyline(this, w.skyline);
 
     // ── Kartta: Tausta ja Maasto pelaajan takana, Edusta edessä ──
-    const map = this.make.tilemap({ key: 'maailma1' });
-    const tiles = map.addTilesetImage('kaupunki', 'kaupunki');
+    const map = this.make.tilemap({ key: w.key });
+    const tiles = map.addTilesetImage(w.tileset.name, `tiles-${w.tileset.name}`);
     const back = map.createLayer('Tausta', tiles).setDepth(1);
     const ground = map.createLayer('Maasto', tiles).setDepth(2);
     map.createLayer('Edusta', tiles).setDepth(4);
@@ -90,8 +95,8 @@ export default class LevelScene extends Phaser.Scene {
 
     // Kaikki Maaston laatat ovat kiinteitä paitsi koristeet
     ground.setCollisionByExclusion([-1, ...NO_COLLIDE]);
-    // Katot ja tasot vain ylhäältä, myös jos ne on piirretty Taustaan
-    back.setCollision(ONE_WAY);
+    // Taustassa törmäävät vain maa, esteet ja yksisuuntaiset katot/tasot
+    back.setCollision([...SOLID, ...ONE_WAY]);
     for (const layer of [ground, back]) {
       layer.forEachTile((tile) => {
         if (ONE_WAY.includes(tile.index)) tile.setCollision(false, false, true, false);
@@ -106,7 +111,7 @@ export default class LevelScene extends Phaser.Scene {
     // Aloituspiste ja maali Objektit-tasolta (nimet "pelaaja" ja "maali"),
     // muuten oletukset: alku vasemmasta reunasta, maali kartan lopusta
     const objects = map.getObjectLayer('Objektit')?.objects ?? [];
-    const spawn = objects.find((o) => o.name === 'pelaaja') ?? { x: 2 * T, y: 10 * T };
+    const spawn = objects.find((o) => o.name === 'pelaaja') ?? { x: 2 * T, y: this.groundY(2) };
     const goal = objects.find((o) => o.name === 'maali');
     this.goalX = goal ? goal.x : this.mapWidth - 4 * T;
 
@@ -138,7 +143,7 @@ export default class LevelScene extends Phaser.Scene {
     this.physics.add.overlap(p, this.zombies, this.touchZombie, (_, z) => z.state !== 'dead', this);
 
     // ── Valopallot ──
-    const orbs = createOrbs(this, objects);
+    const orbs = createOrbs(this, objects, w.itemRow);
     this.totalOrbs = orbs.total;
     this.physics.add.overlap(p, orbs.group, (_, orb) => {
       collectOrb(this, orb);
@@ -147,7 +152,7 @@ export default class LevelScene extends Phaser.Scene {
     });
 
     // ── Energiapakkaukset: +1 energia. Täydellä energialla pakkaus jää odottamaan. ──
-    const packs = createEnergyPacks(this, objects);
+    const packs = createEnergyPacks(this, objects, w.energy, w.itemRow);
     this.physics.add.overlap(
       p,
       packs,
@@ -159,6 +164,9 @@ export default class LevelScene extends Phaser.Scene {
       () => p.alive && this.hp < MAX_HP,
     );
 
+    // ── Metron juna ──
+    this.train = w.train ? new Train(this) : null;
+
     // ── Kamera seuraa pelaajaa, katsoo hieman eteenpäin ──
     const cam = this.cameras.main;
     cam.setBounds(0, 0, this.mapWidth, this.mapHeight);
@@ -166,6 +174,7 @@ export default class LevelScene extends Phaser.Scene {
     cam.setFollowOffset(-120, 0);
     cam.setDeadzone(80, 200);
     cam.setRoundPixels(true);
+    cam.fadeIn(500, 5, 3, 15);
 
     // ── Näppäimet: kuunnellaan window-tasolla (Phaserin oletus), Esc jää modaalille ──
     const K = Phaser.Input.Keyboard.KeyCodes;
@@ -174,7 +183,8 @@ export default class LevelScene extends Phaser.Scene {
       up: K.UP, w: K.W, space: K.SPACE, x: K.X, k: K.K,
     });
 
-    this.hp = MAX_HP;
+    // Energia jatkuu edellisestä maailmasta; pisteet ja aika lasketaan summary()-funktiossa
+    this.hp = this.carry.hp;
     this.orbs = 0;
     this.kills = 0;
     this.lastGround = 0;
@@ -223,18 +233,32 @@ export default class LevelScene extends Phaser.Scene {
     }
   }
 
-  // Zombien paikat Tiledistä tai oletuslistasta. Paikka siirretään oikealle,
-  // jos sarakkeessa on este (laatikko) tai kuoppa, jottei zombi synny niiden sisään.
+  // Sarakkeen maanpinta (rivit 9–11): kaupungissa katu rivillä 10, metrossa laituri
+  // rivillä 10 ja raiteet rivillä 11. Palauttaa pinnan y-koordinaatin tai null.
+  groundY(col) {
+    for (let row = 9; row < 12; row++) {
+      const t = this.ground.getTileAt(col, row);
+      if (t && GROUND.includes(t.index)) return row * T;
+    }
+    return null;
+  }
+
+  // Zombien paikat Tiledistä tai maailman listasta. Paikka siirretään oikealle,
+  // jos sarakkeessa on kuoppa tai este, jottei zombi synny niiden sisään.
   zombieSpawns(objects) {
     const fromMap = objects.filter((o) => o.name === 'zombi');
     if (fromMap.length) {
       return fromMap.map((o, i) => ({ x: o.x, y: o.y, type: ZOMBIE_TYPES[i % ZOMBIE_TYPES.length] }));
     }
-    return ZOMBIE_SPAWNS.map(([col, type]) => {
-      let c = col;
-      while (c < col + 6 && (!this.ground.getTileAt(c, 10)?.collides || this.ground.getTileAt(c, 9))) c += 1;
-      return { x: c * T + T / 2, y: 10 * T, type };
-    });
+    return this.world.zombies
+      .map(([col, type]) => {
+        for (let c = col; c < col + 6; c++) {
+          const y = this.groundY(c);
+          if (y !== null && !this.ground.getTileAt(c, y / T - 1)) return { x: c * T + T / 2, y, type };
+        }
+        return null;
+      })
+      .filter(Boolean);
   }
 
   releaseKeys() {
@@ -251,14 +275,19 @@ export default class LevelScene extends Phaser.Scene {
     this.game.events.emit('zr-hud', this.summary());
   }
 
+  // Koko pelin tiedot: aiempien maailmojen summat + tämän maailman tilanne
   summary() {
+    const c = this.carry;
     return {
-      time: this.elapsed,
+      world: this.worldIndex,
+      worldName: this.world.name,
+      lastWorld: this.worldIndex === WORLDS.length - 1,
       hp: this.hp,
-      orbs: this.orbs,
-      totalOrbs: this.totalOrbs,
-      kills: this.kills,
-      totalZombies: this.totalZombies,
+      time: c.time + this.elapsed,
+      orbs: c.orbs + this.orbs,
+      totalOrbs: c.totalOrbs + this.totalOrbs,
+      kills: c.kills + this.kills,
+      totalZombies: c.totalZombies + this.totalZombies,
     };
   }
 
@@ -292,8 +321,9 @@ export default class LevelScene extends Phaser.Scene {
     this.sendHud(true);
   }
 
-  // Zombin lyönti tai kuoppaan putoaminen vie yhden energian
-  hurtPlayer(source) {
+  // Zombin lyönti, juna tai kuoppaan putoaminen vie yhden energian.
+  // source: osuja (tönäisyn suunta), knock: tönäisyn voimakkuus (juna heittää kauemmas)
+  hurtPlayer(source, knock = { knockX: 260, knockY: -380 }) {
     const p = this.player;
     if (!p.alive || this.finished || this.elapsed < this.invulnerableUntil) return;
     this.hp -= 1;
@@ -306,10 +336,11 @@ export default class LevelScene extends Phaser.Scene {
       return;
     }
     if (source) {
-      // Tönäisy poispäin zombista
+      // Tönäisy poispäin osujasta; junan voima on etumerkillinen (juna kulkee vasemmalle)
       const away = p.x < source.x ? -1 : 1;
+      const vx = knock.knockX < 0 ? knock.knockX : away * knock.knockX;
       this.stunnedUntil = this.elapsed + STUN_MS;
-      p.body.setVelocity(away * 260, -380);
+      p.body.setVelocity(vx, knock.knockY);
       p.play('hurt');
     }
     // Vilkkuu suoja-ajan
@@ -333,6 +364,7 @@ export default class LevelScene extends Phaser.Scene {
     for (const z of [...this.zombies.getChildren()]) z.update(time);
     if (this.finished || !this.player.alive) return;
     this.elapsed += delta;
+    this.train?.update(this.elapsed, delta);
 
     const p = this.player;
     const body = p.body;
@@ -418,8 +450,8 @@ export default class LevelScene extends Phaser.Scene {
     const b = this.player.body;
     const x = dir > 0 ? b.right + 1 : b.left - 1;
     return [b.top + 4, b.center.y, b.bottom - 4].some((y) => {
-      const tile = this.ground.getTileAtWorldXY(x, y);
-      return tile && (dir > 0 ? tile.collideLeft : tile.collideRight);
+      const tile = this.ground.getTileAtWorldXY(x, y) ?? this.back.getTileAtWorldXY(x, y);
+      return tile?.collides && (dir > 0 ? tile.collideLeft : tile.collideRight);
     });
   }
 
