@@ -1,7 +1,7 @@
 /* ═══ Välianimaatio: alas metroon (MetroCutscene.jsx) ═══ */
-/* Aikajana (s): 0–0,6 kuva aukeaa · 0,3–3,3 pelaaja juoksee sisäänkäynnille ·
-   3,3–4,3 portaita alas · 4,1–4,9 kyltti välkkyy · 4,7–5,3 pimeys ·
-   5,4–7,0 junan valot lähestyvät · 7,0 välähdys · 7,2–8,8 maailman nimi */
+/* Aikajana (s): 0–0,6 kuva aukeaa · 0,3–3,0 pelaaja juoksee sisäänkäynnille, zombit perässä ·
+   2,9–3,8 kamera zoomaa ja laskeutuu kadun alle · 3,4–5,4 portaat alas askel kerrallaan ·
+   5,4–6,0 pimeys · 6,0–7,4 junan valot · 7,5 välähdys · 7,6–9,2 maailman nimi */
 .zr-cut {
   position: absolute;
   inset: 0;
@@ -10,10 +10,20 @@
   background: #000;
 }
 
+/* Kamera: koko katunäkymä zoomaa sisäänkäynnille (sen kohta n. 77 % / 95 % ruudusta)
+   ja nousee ylös, jolloin kadun alla oleva portaikko tulee näkyviin */
 .zr-cut-street {
   position: absolute;
   inset: 0;
-  animation: zr-cut-open 0.6s ease-out both;
+  transform-origin: 77% 95%;
+  animation:
+    zr-cut-open 0.6s ease-out both,
+    zr-cut-zoom 0.9s 2.9s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Kadun omat zombit piiloon: tässä kohtauksessa zombit tulevat pelaajan perässä */
+.zr-cut .zr-horde {
+  display: none;
 }
 
 .zr-cut-scene {
@@ -21,14 +31,34 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: visible;
 }
 
-/* ── Sisäänkäynti ── */
+/* ── Kadun alla: maaperä, kuilu ja aseman valo ── */
+.zr-cut-ground { fill: #07051a; }
+.zr-cut-ground-edge { fill: color-mix(in srgb, var(--cyan) 35%, transparent); }
+
+.zr-cut-station {
+  fill: var(--cyan);
+  opacity: 0.55;
+  filter: blur(6px);
+  animation: zr-cut-glow 1.2s ease-in-out infinite alternate;
+}
+
+/* ── Sisäänkäynti ja portaat ── */
 .zr-cut-pillar { fill: #120c2a; }
 .zr-cut-roof { fill: #1c1540; }
 .zr-cut-roof-glow { fill: var(--magenta); filter: drop-shadow(0 0 6px var(--magenta)); }
-.zr-cut-cone { fill: var(--magenta); opacity: 0.08; }
-.zr-cut-hole { fill: #020106; }
+.zr-cut-cone { fill: var(--magenta); opacity: 0.07; }
+.zr-cut-depth-top { stop-color: #0d0920; }
+.zr-cut-depth-low { stop-color: #000; }
+
+/* Askelmat: betonia, etureunassa syaani turvaviiva */
+.zr-cut-steps rect {
+  fill: #1b1636;
+  stroke: color-mix(in srgb, var(--cyan) 70%, transparent);
+  stroke-width: 2;
+}
 
 .zr-cut-sign-ring {
   fill: #0b0818;
@@ -46,13 +76,10 @@
   filter: drop-shadow(0 0 6px var(--text));
 }
 
-/* Kyltti välkkyy, kun pelaaja on kadonnut portaisiin */
+/* Kyltti välkkyy, kun pelaaja juoksee portaisiin */
 .zr-cut-sign {
-  animation: zr-cut-flicker 0.8s 4.1s steps(1, end) both;
+  animation: zr-cut-flicker 0.6s 3.4s steps(1, end) both;
 }
-
-.zr-cut-rail-glass { fill: rgb(12 8 30 / 0.92); }
-.zr-cut-rail-top { fill: var(--cyan); filter: drop-shadow(0 0 4px var(--cyan)); }
 
 /* ── Pelaaja ── */
 .zr-cut-frame { overflow: hidden; }
@@ -61,10 +88,27 @@
   animation: zr-cut-run 0.75s steps(12) infinite;
 }
 
-/* Juoksu x = -150 → 1110, sitten vino lasku portaita alas kaiteen taakse */
+/* Liike: juoksu vasemmalta sisäänkäynnille (x 1110), sitten kahdeksan askelta alas
+   portaita. Jokainen askel on oma pykälänsä (steps), jolloin pelaaja astuu askelmalta toiselle. */
 .zr-cut-player {
-  animation: zr-cut-path 4.3s linear both;
+  animation:
+    zr-cut-run-in 2.7s 0.3s cubic-bezier(0.3, 0, 0.6, 1) both,
+    zr-cut-descend 2s 3.4s steps(8, end) forwards; /* ei both: muuten ohittaisi juoksun ennen alkuaan */
 }
+
+/* Lopussa pelaaja häviää aseman valoon */
+.zr-cut-player-body {
+  animation: zr-cut-into-light 0.5s 5.1s ease-in both;
+}
+
+/* ── Zombit perässä: lähtevät vasemmalta myöhemmin ja hitaammin, pysähtyvät sisäänkäynnille ── */
+.zr-cut-chaser {
+  animation: zr-cut-chase 4.6s linear both;
+}
+
+.zr-cut-chaser--1 { --zr-from: -260px; --zr-to: 1040px; animation-delay: 0.6s; }
+.zr-cut-chaser--2 { --zr-from: -420px; --zr-to: 960px; animation-delay: 0.9s; }
+.zr-cut-chaser--3 { --zr-from: -560px; --zr-to: 860px; animation-delay: 1.2s; }
 
 /* ── Pimeä tunneli ja junan valot ── */
 .zr-cut-dark {
@@ -72,7 +116,7 @@
   inset: 0;
   background: radial-gradient(ellipse at 50% 55%, #0a0818, #000 70%);
   opacity: 0;
-  animation: zr-cut-darken 0.6s 4.7s ease-in both;
+  animation: zr-cut-darken 0.6s 5.5s ease-in both;
 }
 
 .zr-cut-headlight {
@@ -85,7 +129,7 @@
   background: radial-gradient(circle, #fff 0 18%, color-mix(in srgb, var(--cyan) 70%, #fff) 30%, transparent 68%);
   translate: -50% -50%;
   opacity: 0;
-  animation: zr-cut-approach 1.6s 5.4s ease-in both;
+  animation: zr-cut-approach 1.4s 6.1s ease-in both;
 }
 
 .zr-cut-headlight--l { left: 44%; }
@@ -97,7 +141,7 @@
   background: var(--text);
   opacity: 0;
   pointer-events: none;
-  animation: zr-cut-flash 0.6s 7s ease-out both;
+  animation: zr-cut-flash 0.6s 7.5s ease-out both;
 }
 
 /* ── Maailman nimi ── */
@@ -122,7 +166,7 @@
   text-transform: uppercase;
   text-shadow: 0 0 1cqw var(--cyan);
   opacity: 0;
-  animation: zr-cut-card 1.6s 7.2s ease-out both;
+  animation: zr-cut-card 1.5s 7.6s ease-out both;
 }
 
 /* ═══ Keyframet ═══ */
@@ -131,15 +175,39 @@
   to { opacity: 1; }
 }
 
+@keyframes zr-cut-zoom {
+  from { transform: none; }
+  to { transform: translateY(-52%) scale(1.45); }
+}
+
 @keyframes zr-cut-run {
   from { transform: translateX(0); }
   to { transform: translateX(var(--zr-step)); }
 }
 
-@keyframes zr-cut-path {
-  0%, 7% { transform: translate(-150px, 0); }
-  77% { transform: translate(1110px, 0); }
-  100% { transform: translate(1290px, 150px); }
+@keyframes zr-cut-run-in {
+  from { transform: translate(-150px, 0); }
+  to { transform: translate(1110px, 0); }
+}
+
+/* Kahdeksan askelta, kukin 28 yksikköä oikealle ja alas (STEP JSX:ssä) */
+@keyframes zr-cut-descend {
+  from { transform: translate(1128px, 0); }
+  to { transform: translate(1352px, 224px); }
+}
+
+@keyframes zr-cut-into-light {
+  to { opacity: 0; }
+}
+
+@keyframes zr-cut-glow {
+  from { opacity: 0.4; }
+  to { opacity: 0.7; }
+}
+
+@keyframes zr-cut-chase {
+  from { transform: translateX(var(--zr-from)); }
+  to { transform: translateX(var(--zr-to)); }
 }
 
 @keyframes zr-cut-flicker {
