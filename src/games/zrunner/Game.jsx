@@ -25,6 +25,7 @@ const CUTSCENES = { metro: MetroCutscene, park: ParkCutscene };
 
 export default function Game({ onExit }) {
   const rootRef = useRef(null);
+  const touchRef = useRef(null);
   const hostRef = useRef(null);
   const gameRef = useRef(null);
   const controlsRef = useRef({ left: false, right: false, jump: false, attack: false });
@@ -103,6 +104,20 @@ export default function Game({ onExit }) {
       game.destroy(true);
       gameRef.current = null;
     };
+  }, []);
+
+  // iPhone avaa pitkällä painalluksella suurennuslasin tai valintavalikon, vaikka teksti ei ole
+  // valittavissa. Sen estää vain kosketuksen alun preventDefault, ja Reactin onTouchStart on
+  // passiivinen (preventDefault ei tehoa), joten kuuntelija lisätään suoraan elementtiin.
+  // Napit toimivat pointer-tapahtumilla, joihin tämä ei vaikuta.
+  useEffect(() => {
+    const el = touchRef.current;
+    if (!el) return undefined;
+    const block = (e) => {
+      if (e.cancelable) e.preventDefault();
+    };
+    el.addEventListener('touchstart', block, { passive: false });
+    return () => el.removeEventListener('touchstart', block);
   }, []);
 
   // Loppuruudulla fokus Pelaa uudelleen -napissa, jotta Enter aloittaa heti. Pelin aikana
@@ -219,7 +234,7 @@ export default function Game({ onExit }) {
 
       {cleared && !result && <p className="zr-toast" role="status">Tallennukset tyhjennetty</p>}
 
-      <div className="zr-touch" aria-hidden="true">
+      <div className="zr-touch" ref={touchRef} aria-hidden="true">
         {['left', 'right'].map((side) => (
           <div key={side} className={`zr-touch-group zr-touch-group--${side}`}>
             {TOUCH_BUTTONS.filter((b) => b.side === side).map((b) => (
