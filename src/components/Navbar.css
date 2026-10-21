@@ -5,14 +5,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.1rem var(--gutter);
-  transition: padding 0.3s, border-color 0.3s;
+  /* Sama korkeus heron päällä ja rullatessa: vain tausta ja reunaviiva vaihtuvat */
+  padding: 0.7rem var(--gutter);
+  transition: border-color 0.3s;
   border-bottom: 1px solid transparent;
 }
 
 /* Rullatessa navista tulee himmennetty lasipaneeli */
 .nav--solid {
-  padding-block: 0.7rem;
   border-bottom-color: var(--line);
 }
 
