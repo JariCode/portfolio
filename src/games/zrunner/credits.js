@@ -14,6 +14,15 @@
 export const CREDITS = [
   {
     type: 'hahmo',
+    name: 'Free Medieval Bandit 4-Direction Character Pack (Thug)',
+    author: 'CraftPix.net',
+    url: 'https://craftpix.net/freebies/free-medieval-bandit-4-direction-character-pack/',
+    license: 'CraftPix Freebie License',
+    licenseUrl: 'https://craftpix.net/file-licenses/',
+    changes: 'Sivukuvat skaalattu ja koottu sprite-arkiksi',
+  },
+  {
+    type: 'hahmo',
     name: '2D Zombie Free Sprite',
     author: 'CraftPix.net',
     url: 'https://craftpix.net/freebies/2d-game-zombie-character-free-sprite-pack-1/',
