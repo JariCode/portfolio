@@ -208,16 +208,17 @@ function drawParkTrees(scene, h, c) {
   const crown = mix('#1d5a3e', '#05030f', 0.12);
   const trunk = '#080610';
 
-  // Puut arvotaan kuten talot: reunan yli menevä puu piirretään myös toiseen laitaan
+  // Puut arvotaan kuten talot. Reunan yli menevä puu piirretään myös toiseen laitaan
+  // (kumpaankin suuntaan), jolloin toistuva kuva jatkuu saumatta eikä puu katkea.
   let x = 20;
   while (x < TEX_W) {
     const r = 38 + rand() * 30;
     const height = 100 + rand() * 90;
     const blobs = Array.from({ length: 4 }, () => ({ dx: (rand() - 0.5) * r * 1.3, dy: (rand() - 0.5) * r * 0.7, r: r * (0.55 + rand() * 0.35) }));
     const lamp = rand() < 0.35;
-    for (const offset of [0, -TEX_W]) {
+    for (const offset of [-TEX_W, 0, TEX_W]) {
       const tx = x + offset;
-      if (tx + r * 2 < 0) continue;
+      if (tx + r * 3 + 40 < 0 || tx - r * 2 > TEX_W) continue;
       ctx.fillStyle = trunk;
       ctx.fillRect(tx - 7, ground - height + r * 0.5, 14, height - r * 0.5);
       ctx.fillStyle = crown;
@@ -228,13 +229,13 @@ function drawParkTrees(scene, h, c) {
         ctx.arc(tx + b.dx, ground - height + b.dy, b.r, 0, Math.PI * 2);
       });
       ctx.fill();
-      // Kuun valo latvuksen yläreunassa
-      ctx.globalAlpha = 0.18;
-      ctx.fillStyle = c.cyan;
+      // Kuun valo ohuena kaarena latvuksen yläreunassa (täytetty siivu näkyisi suorina viisteinä)
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = c.cyan;
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(tx, ground - height, r, Math.PI * 1.15, Math.PI * 1.85);
-      ctx.lineTo(tx, ground - height);
-      ctx.fill();
+      ctx.arc(tx, ground - height, r - 2, Math.PI * 1.2, Math.PI * 1.8);
+      ctx.stroke();
       ctx.globalAlpha = 1;
       if (lamp) {
         const lx = tx + r + 30;
