@@ -30,6 +30,40 @@ const NO_COLLIDE = [32];
 
 const ZOMBIE_TYPES = ['zombi1', 'zombi2', 'zombi3', 'zombi4'];
 
+// Laatan kuvan yläreunaan jäävä tyhjä tila, jota pienemmällä ei ole väliä (pikseleinä)
+const MIN_INSET = 3;
+
+// Kuinka monta pikseliä kunkin laatan kuvan yläreunassa on tyhjää. Mitataan tilesetin
+// kuvasta, joten uusi tai muutettu tileset ei vaadi muutoksia koodiin. Taulukon indeksi
+// on kuvan laatta (Tiledin numero - 1); tyhjä laatta saa arvon T.
+function tileInsets(scene, key) {
+  const img = scene.textures.get(key).getSourceImage();
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0);
+  const { data } = ctx.getImageData(0, 0, img.width, img.height);
+  const cols = Math.floor(img.width / T);
+  const rows = Math.floor(img.height / T);
+  const insets = [];
+  for (let i = 0; i < cols * rows; i++) {
+    const x0 = (i % cols) * T;
+    const y0 = Math.floor(i / cols) * T;
+    let inset = T;
+    for (let y = 0; y < T && inset === T; y++) {
+      for (let x = 0; x < T; x++) {
+        if (data[((y0 + y) * img.width + x0 + x) * 4 + 3] > 40) {
+          inset = y;
+          break;
+        }
+      }
+    }
+    insets.push(inset);
+  }
+  return insets;
+}
+
 // Hahmo pienennetään laattoihin sopivaksi: noin 1,2 laattaa korkea.
 // Arcade-fysiikka skaalaa törmäyslaatikon samalla kertoimella.
 const PLAYER_SCALE = 0.72;
@@ -107,6 +141,30 @@ export default class LevelScene extends Phaser.Scene {
       });
     }
 
+    // Matalat esteet ja tasot: laatta törmää koko korkeudeltaan, mutta esimerkiksi roska-astian
+    // kuva alkaa vasta laatan puolivälistä, jolloin pelaaja seisoisi ilmassa. Pelaajalle nämä
+    // laatat korvataan kuvan korkuisilla kappaleilla. Zombit ja reunatarkistukset käyttävät
+    // yhä laattoja, koska zombit eivät nouse esteiden päälle.
+    const insets = tileInsets(this, `tiles-${w.tileset.name}`);
+    const lowered = new Set();
+    const tops = this.physics.add.staticGroup();
+    for (const layer of [ground, back]) {
+      layer.forEachTile((tile) => {
+        const inset = tile.collides ? insets[tile.index - 1] : 0;
+        if (!(inset >= MIN_INSET && inset < T)) return;
+        lowered.add(tile);
+        const top = this.add.zone(tile.pixelX + T / 2, tile.pixelY + inset + (T - inset) / 2, T, T - inset);
+        tops.add(top);
+        // Samat törmäyssuunnat kuin laatalla: yksisuuntaisen tason läpi voi hypätä alta, eikä
+        // vierekkäisten laattojen välinen sauma pysäytä
+        const cc = top.body.checkCollision;
+        cc.up = tile.collideUp && tile.faceTop;
+        cc.down = tile.collideDown && tile.faceBottom;
+        cc.left = tile.collideLeft && tile.faceLeft;
+        cc.right = tile.collideRight && tile.faceRight;
+      });
+    }
+
     this.mapWidth = map.widthInPixels;
     this.mapHeight = map.heightInPixels;
     this.physics.world.setBounds(0, 0, this.mapWidth, this.mapHeight + 400);
@@ -131,8 +189,10 @@ export default class LevelScene extends Phaser.Scene {
     p.play('idle');
     p.alive = true;
     this.player = p;
-    this.physics.add.collider(p, ground);
-    this.physics.add.collider(p, back);
+    const notLowered = (_, tile) => !lowered.has(tile);
+    this.physics.add.collider(p, ground, null, notLowered);
+    this.physics.add.collider(p, back, null, notLowered);
+    this.physics.add.collider(p, tops);
 
     // ── Zombit ──
     createZombieAnims(this);
@@ -146,8 +206,16 @@ export default class LevelScene extends Phaser.Scene {
     // Kosketus ei satuta: zombi satuttaa vain lyömällä. Päälle hyppy kaataa zombin.
     this.physics.add.overlap(p, this.zombies, this.touchZombie, (_, z) => z.state !== 'dead', this);
 
-    // ── Valopallot ──
-    const orbs = createOrbs(this, objects, w.itemRow);
+    // ── Pakoauto viimeisen maailman lopussa: maali on auton ovella ──
+    this.car = null;
+    if (w.car) {
+      const col = this.ground.layer.width - 9;
+      this.car = new Car(this, col * T, this.groundY(col) ?? 10 * T);
+      this.goalX = this.car.doorX;
+    }
+
+    // ── Valopallot: vain maalin tällä puolen, muuten pallo jää saamatta ──
+    const orbs = createOrbs(this, objects, w.itemRow, this.goalX - T / 2);
     this.totalOrbs = orbs.total;
     this.physics.add.overlap(p, orbs.group, (_, orb) => {
       collectOrb(this, orb);
@@ -171,14 +239,6 @@ export default class LevelScene extends Phaser.Scene {
 
     // ── Metron juna ──
     this.train = w.train ? new Train(this) : null;
-
-    // ── Pakoauto viimeisen maailman lopussa: maali on auton ovella ──
-    this.car = null;
-    if (w.car) {
-      const col = this.ground.layer.width - 9;
-      this.car = new Car(this, col * T, this.groundY(col) ?? 10 * T);
-      this.goalX = this.car.doorX;
-    }
 
     // ── Kamera seuraa pelaajaa, katsoo hieman eteenpäin ──
     const cam = this.cameras.main;
@@ -403,7 +463,8 @@ export default class LevelScene extends Phaser.Scene {
     const right = !stunned && (k.right.isDown || k.d.isDown || c.right);
     const jump = k.up.isDown || k.w.isDown || k.space.isDown || c.jump;
     const attack = k.x.isDown || k.k.isDown || c.attack;
-    const onGround = body.blocked.down;
+    // blocked: laatta alla, touching: matala este tai taso alla (kappale, ei laatta)
+    const onGround = body.blocked.down || body.touching.down;
 
     if (onGround) {
       this.lastGround = time;
@@ -502,6 +563,9 @@ export default class LevelScene extends Phaser.Scene {
     // Juuri ennen maalia alkanut huuto hiljennetään, ettei se kuulu autossa tai välianimaatiossa
     this.stopAlert?.(0.3);
     const p = this.player;
+    // Osuman vilkkuminen pois: sen lopussa hahmo palautuisi näkyviin, vaikka se on jo autossa
+    this.tweens.killTweensOf(p);
+    p.setAlpha(1);
     p.body.setVelocity(0, 0);
     p.body.setAllowGravity(false);
     p.play('idle', true);

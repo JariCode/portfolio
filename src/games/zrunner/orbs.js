@@ -43,10 +43,13 @@ function autoPositions(ground, back, startRow) {
   return out;
 }
 
-export function createOrbs(scene, objects, startRow = 0) {
+// maxX: pallot vain tämän vasemmalla puolella (maali; sen jälkeen palloa ei ehdi ottaa)
+export function createOrbs(scene, objects, startRow = 0, maxX = Infinity) {
   drawOrb(scene);
   const placed = objects.filter((o) => o.name === 'valopallo').map((o) => ({ x: o.x, y: o.y }));
-  const positions = placed.length ? placed : autoPositions(scene.ground, scene.back, startRow);
+  const positions = (placed.length ? placed : autoPositions(scene.ground, scene.back, startRow)).filter(
+    (pos) => pos.x < maxX,
+  );
 
   const group = scene.physics.add.staticGroup();
   positions.forEach((pos, i) => {

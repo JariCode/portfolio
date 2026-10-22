@@ -40,8 +40,7 @@ export default function Games() {
     <section id="top" className="section games">
       <ScrambleText as="h1" className="section-title games-title" text="Pelialue" />
       <p className="games-intro">
-        Pieniä pelejä, jotka olen koodannut itse. Pelit pyörivät suoraan tällä sivulla
-        selaimessasi, eikä niitä tarvitse asentaa. Z-Runner on valmis, kaksi muuta on työn alla.
+      Pieniä selainpelejä, jotka toimivat suoraan selaimessa. Z-Runner on valmis, kaksi muuta työn alla.
       </p>
 
       <ul className="games-list">

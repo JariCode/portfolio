@@ -240,16 +240,18 @@
   to { background-position: 50% 100%, 0 0; }
 }
 
+/* Lamput lähtevät tien reunaviivan takaa (horisontissa noin 17cqw keskeltä) ja kulkevat
+   reunan suuntaisesti: viiva loittonee noin 5,4cqw jokaista alaspäin mentyä cqw:tä kohden */
 @keyframes zr-out-lamp-l {
-  0% { opacity: 0; transform: translate(-2cqw, 0) scale(0.08); }
+  0% { opacity: 0; transform: translate(-18cqw, 0) scale(0.08); }
   15% { opacity: 1; }
-  100% { opacity: 1; transform: translate(-40cqw, 10cqw) scale(1.5); }
+  100% { opacity: 1; transform: translate(-72cqw, 10cqw) scale(1.5); }
 }
 
 @keyframes zr-out-lamp-r {
-  0% { opacity: 0; transform: translate(2cqw, 0) scale(0.08); }
+  0% { opacity: 0; transform: translate(18cqw, 0) scale(0.08); }
   15% { opacity: 1; }
-  100% { opacity: 1; transform: translate(40cqw, 10cqw) scale(1.5); }
+  100% { opacity: 1; transform: translate(72cqw, 10cqw) scale(1.5); }
 }
 
 @keyframes zr-out-bump {
