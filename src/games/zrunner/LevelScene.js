@@ -143,16 +143,17 @@ export default class LevelScene extends Phaser.Scene {
 
     // Matalat esteet ja tasot: laatta törmää koko korkeudeltaan, mutta esimerkiksi roska-astian
     // kuva alkaa vasta laatan puolivälistä, jolloin pelaaja seisoisi ilmassa. Pelaajalle nämä
-    // laatat korvataan kuvan korkuisilla kappaleilla. Zombit ja reunatarkistukset käyttävät
-    // yhä laattoja, koska zombit eivät nouse esteiden päälle.
+    // laatat korvataan kuvan korkuisilla kappaleilla. Zombit käyttävät yhä laattoja, koska ne
+    // eivät nouse esteiden päälle. lowered: laatta → kuvan yläreunan tyhjä tila (wallAhead).
     const insets = tileInsets(this, `tiles-${w.tileset.name}`);
-    const lowered = new Set();
+    const lowered = new Map();
+    this.lowered = lowered;
     const tops = this.physics.add.staticGroup();
     for (const layer of [ground, back]) {
       layer.forEachTile((tile) => {
         const inset = tile.collides ? insets[tile.index - 1] : 0;
         if (!(inset >= MIN_INSET && inset < T)) return;
-        lowered.add(tile);
+        lowered.set(tile, inset);
         const top = this.add.zone(tile.pixelX + T / 2, tile.pixelY + inset + (T - inset) / 2, T, T - inset);
         tops.add(top);
         // Samat törmäyssuunnat kuin laatalla: yksisuuntaisen tason läpi voi hypätä alta, eikä
@@ -536,12 +537,15 @@ export default class LevelScene extends Phaser.Scene {
 
   // Onko kulkusuunnassa heti vartalon vieressä seinä? Katsotaan laatat suoraan eikä
   // body.blocked-tietoa, joka vaihtelee ruudusta toiseen, kun hahmo nojaa seinään.
+  // Matalan esteen laatassa seinää on vasta kuvan yläreunasta alaspäin: esteen päällä
+  // seisovan jalat ovat laatan yläosassa, eikä viereinen este saa pysäyttää kävelyä.
   wallAhead(dir) {
     const b = this.player.body;
     const x = dir > 0 ? b.right + 1 : b.left - 1;
     return [b.top + 4, b.center.y, b.bottom - 4].some((y) => {
       const tile = this.ground.getTileAtWorldXY(x, y) ?? this.back.getTileAtWorldXY(x, y);
-      return tile?.collides && (dir > 0 ? tile.collideLeft : tile.collideRight);
+      if (!tile?.collides || y < tile.pixelY + (this.lowered.get(tile) ?? 0)) return false;
+      return dir > 0 ? tile.collideLeft : tile.collideRight;
     });
   }
 
