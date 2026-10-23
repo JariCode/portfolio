@@ -173,27 +173,6 @@
   50% { opacity: 0.35; }
 }
 
-/* Lyhyt ilmoitus tallennusten tyhjennyksestä; häviää itsestään */
-.zr-toast {
-  position: absolute;
-  top: 7cqw;
-  left: 50%;
-  translate: -50% 0;
-  padding: 0.6cqw 1.6cqw;
-  border: 1px solid color-mix(in srgb, var(--cyan) 50%, transparent);
-  border-radius: 999px;
-  background: rgb(3 2 10 / 0.8);
-  color: var(--cyan);
-  font-size: max(10px, 1.2cqw);
-  pointer-events: none;
-  animation: zr-toast 2.6s ease-in both;
-}
-
-@keyframes zr-toast {
-  0%, 75% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
 /* ── Kosketusnapit: vain kosketusnäytöillä ── */
 .zr-touch {
   display: none;

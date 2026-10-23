@@ -37,7 +37,6 @@ export default function Game({ onExit }) {
   const [result, setResult] = useState(null);
   const [cutscene, setCutscene] = useState(null);
   const [train, setTrain] = useState(false);
-  const [cleared, setCleared] = useState(false);
   // Lopputekstit ennen maaliruutua; maaliruudun tiedot odottavat refissä
   const [outro, setOutro] = useState(false);
   const pendingRef = useRef(null);
@@ -137,10 +136,9 @@ export default function Game({ onExit }) {
     gameRef.current?.scene.getScene('level').scene.restart(start);
   }, []);
 
-  // Uusi peli alusta (maali tai tallennusten tyhjennys)
+  // Uusi peli alusta maaliruudulta
   const newGame = () => {
     worldStartRef.current = FIRST_WORLD;
-    setCleared(false);
     startWorld(FIRST_WORLD);
   };
 
@@ -164,11 +162,10 @@ export default function Game({ onExit }) {
     setResult(pendingRef.current);
   }, []);
 
-  // Tietosuojaselosteen lupaus: poistaa vain Z-Runnerin tallennukset ja peli alkaa alusta
+  // Poistaa vain Z-Runnerin tallennukset ja palaa alkuvalikkoon
   const clear = () => {
     clearSaves();
-    newGame();
-    setCleared(true);
+    onExit();
   };
 
   const Cutscene = cutscene ? CUTSCENES[cutscene.kind] ?? MetroCutscene : null;
@@ -231,8 +228,6 @@ export default function Game({ onExit }) {
           Juna tulee!
         </p>
       )}
-
-      {cleared && !result && <p className="zr-toast" role="status">Tallennukset tyhjennetty</p>}
 
       <div className="zr-touch" ref={touchRef} aria-hidden="true">
         {['left', 'right'].map((side) => (
