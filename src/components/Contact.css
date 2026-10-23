@@ -369,6 +369,10 @@
     gap: 3rem;
   }
 
+  .section.contact {
+    padding-bottom: 1rem;
+  }
+
   .contact-lead {
     margin-bottom: 1.5rem;
   }
