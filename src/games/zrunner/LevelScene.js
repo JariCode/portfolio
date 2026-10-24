@@ -552,15 +552,29 @@ export default class LevelScene extends Phaser.Scene {
 
   respawn() {
     const p = this.player;
-    // Siirretään hieman taaksepäin reunalta, jos siellä on maata
-    const back = p.flipX ? 48 : -48;
-    const tileBelow = this.ground.getTileAtWorldXY(this.safe.x + back, this.safe.y + 8);
-    const x = tileBelow?.collides ? this.safe.x + back : this.safe.x;
+    // Etsitään taaksepäin paikka, jossa koko hahmon alla on alusta
+    const direction = p.flipX ? 1 : -1;
+    let x = this.safe.x;
+    for (let distance = 48; distance <= this.mapWidth; distance += 48) {
+      const candidate = this.safe.x + direction * distance;
+      if (candidate < 0 || candidate > this.mapWidth || !this.hasRespawnSupport(candidate, this.safe.y)) continue;
+      x = candidate;
+      break;
+    }
     p.body.reset(x, this.safe.y);
     p.setVelocity(0, 0);
     this.cameras.main.flash(250, 255, 61, 200);
     this.invulnerableUntil = 0; // putoaminen vie energian aina, vaikka suoja-aika olisi päällä
     this.hurtPlayer(null);
+  }
+
+  hasRespawnSupport(x, y) {
+    const halfWidth = this.player.body.width / 2 - 4;
+    const supportY = y + 8;
+    return [-halfWidth, 0, halfWidth].every((offset) => {
+      const tile = this.ground.getTileAtWorldXY(x + offset, supportY) ?? this.back.getTileAtWorldXY(x + offset, supportY);
+      return tile?.collides;
+    });
   }
 
   finish() {
