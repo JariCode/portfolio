@@ -232,6 +232,7 @@ export default class LevelScene extends Phaser.Scene {
       packs,
       (_, pack) => {
         collectPack(this, pack);
+        play('collect', { volume: 0.5 });
         this.hp += 1;
         this.sendHud(true);
       },
