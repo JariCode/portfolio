@@ -52,5 +52,5 @@ export const socials = [
   { name: 'LinkedIn', handle: 'Jari Karri', href: 'https://fi.linkedin.com/in/jari-karri-04b09533b', icon: 'img/linkedin.svg', contact: true },
   { name: 'GitHub', handle: 'JariCode', href: 'https://github.com/JariCode', icon: 'img/github.svg', contact: true },
   { name: 'Instagram', handle: '@jari.karri', href: 'https://www.instagram.com/jari.karri/', icon: 'img/instagram.svg', contact: true },
-  { name: 'Facebook', handle: 'Jari Karri', href: 'https://fi-fi.facebook.com/public/Jari-Karri', icon: 'img/facebook.svg', contact: true },
+  { name: 'Facebook', handle: 'Jari Karri', href: 'https://fi-fi.facebook.com/jari.karri', icon: 'img/facebook.svg', contact: true },
 ];
