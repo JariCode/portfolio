@@ -184,6 +184,11 @@ export default class SpaceScene extends Phaser.Scene {
     this.input.on('pointerup', release);
     this.input.on('pointerupoutside', release);
 
+    // Pitkä hyperhypyn ääni hiljennetään, jos peli suljetaan tai sektori vaihtuu kesken
+    const stopSounds = () => this.stopJump?.(0.3);
+    this.events.once('shutdown', stopSounds);
+    this.events.once('destroy', stopSounds);
+
     this.hudKey = '';
     this.emitHud();
   }
@@ -661,6 +666,10 @@ export default class SpaceScene extends Phaser.Scene {
     this.ship.setAlpha(1);
     this.ship.setBoost(true);
     this.emitHud();
+    // Hyperhyppy alkaa samaan aikaan kuin alus kiihdyttää ruudun yläreunan yli
+    this.time.delayedCall(300, () => {
+      this.stopJump = play('hyperjump', { volume: 0.8 });
+    });
     this.tweens.add({
       targets: this.ship,
       y: this.cameras.main.scrollY - 120,

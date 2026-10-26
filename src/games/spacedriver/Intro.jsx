@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Starfield from './Starfield.jsx';
 import Ship from './Ship.jsx';
 import { Frame, Status } from './Hud.jsx';
+import { play } from './sound.js';
 import './Intro.css';
 
 // Alkuanimaation kesto millisekunteina. Ajoitukset ovat Intro.css:ssä (animation-delay);
@@ -43,12 +44,19 @@ export default function Intro({ onDone }) {
     // "Vähennä liikettä" -asetuksella animaatio ohitetaan kokonaan
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const done = setTimeout(onDone, reduce ? 0 : DURATION);
-    const warpTimer = setTimeout(() => setWarp(true), WARP_AT);
+    // Hyperhypyn ääni alkaa tähtien venymisen kanssa. Ohitettaessa (tai animaation
+    // päättyessä) ääni häivytetään, ettei se jää soimaan pelin päälle.
+    let stopJump;
+    const warpTimer = setTimeout(() => {
+      setWarp(true);
+      stopJump = play('hyperjump', { volume: 0.8 });
+    }, WARP_AT);
     // Ohita-nappi saa fokuksen, joten Enter ja välilyönti ohittavat animaation
     skipRef.current?.focus({ preventScroll: true });
     return () => {
       clearTimeout(done);
       clearTimeout(warpTimer);
+      stopJump?.(0.5);
     };
   }, [onDone]);
 
