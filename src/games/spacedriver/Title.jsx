@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Starfield from './Starfield.jsx';
 import Ship from './Ship.jsx';
 import { Frame, Status } from './Hud.jsx';
-import { readRecord, readResume } from './score.js';
+import { clearSaves, readRecord, readResume } from './score.js';
 import './Title.css';
 
 // Ohjaimet näytetään Ohjeet-paneelissa; sama lista kuin pelin näppäinkäsittelyssä
@@ -27,15 +27,27 @@ const digits = (score) => String(score).padStart(6, '0');
 // onResume(jatkokohta): keskeneräinen peli jatkuu tallennetusta kohdasta (score.js)
 export default function Title({ onStart, onResume }) {
   // Ennätys luetaan vain näytettäväksi; tallennus tapahtuu loppuruudussa (score.js)
-  const [record] = useState(readRecord);
-  const [resume] = useState(readResume);
+  const [record, setRecord] = useState(readRecord);
+  const [resume, setResume] = useState(readResume);
+  // Tyhjennyksen vahvistus: null = ei avattu, 'open' = kysytään, 'closed' = peruttu (fokus
+  // palaa tyhjennyslinkkiin). Kaksi painallusta, ettei ennätys katoa vahingossa.
+  const [confirm, setConfirm] = useState(null);
   const [help, setHelp] = useState(false);
   const startRef = useRef(null);
 
-  // Pääpainike (Jatka tai Aloita peli) saa fokuksen, joten Enter ja välilyönti käynnistävät heti
+  // Pääpainike (Jatka tai Aloita peli) saa fokuksen, joten Enter ja välilyönti käynnistävät heti.
+  // Myös tyhjennyksen jälkeen, kun Jatka-nappi poistui ja Aloita peli tuli tilalle.
   useEffect(() => {
     startRef.current?.focus({ preventScroll: true });
-  }, []);
+  }, [resume]);
+
+  // Poistaa tämän pelin ennätyksen ja jatkokohdan (score.js) ja päivittää näkymän heti
+  const clear = () => {
+    clearSaves();
+    setRecord(null);
+    setResume(null);
+    setConfirm(null);
+  };
 
   return (
     <div className={help ? 'sd-title sd-title--help' : 'sd-title'}>
@@ -105,6 +117,27 @@ export default function Title({ onStart, onResume }) {
           <span className="sd-record-label">Ennätys</span>
           <span className="sd-record-value">{record ? digits(record.score) : '------'}</span>
         </p>
+        {/* Tallennusten tyhjennys myös aloitusnäkymästä; näkyy vain, kun tallennettavaa on */}
+        {(record || resume) && (
+          <p className="sd-title-clear" role="group" aria-label="Tallennusten tyhjennys">
+            {confirm === 'open' ? (
+              <>
+                <span>Poistetaanko tallennukset?</span>
+                <button type="button" onClick={clear}>
+                  Kyllä
+                </button>
+                {/* Fokus Peru-napille: Enter ei poista mitään vahingossa */}
+                <button type="button" autoFocus onClick={() => setConfirm('closed')}>
+                  Peru
+                </button>
+              </>
+            ) : (
+              <button type="button" autoFocus={confirm === 'closed'} onClick={() => setConfirm('open')}>
+                Tyhjennä tallennukset
+              </button>
+            )}
+          </p>
+        )}
       </div>
 
       {help && (

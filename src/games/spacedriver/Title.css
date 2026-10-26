@@ -218,6 +218,38 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Tyhjennä tallennukset: tarkoituksella huomaamaton linkki, ettei sitä paina vahingossa.
+   Syttyy ennätyksen kanssa samaan aikaan. Vahvistuksen kysymys meripihkana. */
+.sd-title-clear {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6cqw 2cqw;
+  color: var(--sd-amber);
+  font-family: var(--sd-mono);
+  font-size: max(9px, 2.3cqw);
+  letter-spacing: 0.08em;
+  opacity: 0;
+  animation: sd-blink-in 0.4s 3s steps(1, start) forwards;
+}
+
+.sd-title-clear button {
+  padding: 0.6cqw 1.2cqw;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.sd-title-clear button:hover,
+.sd-title-clear button:focus-visible {
+  color: var(--text);
+}
+
 /* Ohjeiden ollessa auki logo, napit ja alus piilotetaan, etteivät ne pilkistä paneelin takaa */
 .sd-title--help .sd-title-content,
 .sd-title--help .sd-title-hero,
