@@ -185,15 +185,16 @@ Peli, tarina ja juoni sekä kartat ovat Jari Karrin. Tilesetit, taustat ja anima
 
 Peli ja sektorien kartat ovat Jari Karrin. Asteroidikentän tileset, HUD ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Tekijät: `src/games/spacedriver/credits.js`.
 
-**Alukset ja tehostimet (sprite-arkit).** Void-sarja, piirtäjä Baldur, julkaisija Foozle. Lisenssi: [CC0](https://creativecommons.org/publicdomain/zero/1.0/), eli vapaa käyttö ilman ehtoja. Valitut tiedostot on nimetty uudelleen, muuten ne ovat sellaisenaan.
+**Alukset ja tehostimet (sprite-arkit).** Lisenssi: [CC0](https://creativecommons.org/publicdomain/zero/1.0/), eli vapaa käyttö ilman ehtoja. Valitut tiedostot on nimetty uudelleen, muuten ne ovat sellaisenaan.
 
-| Käyttö | Paketti | Lähde |
-|---|---|---|
-| Pelaajan alus | Void – Main Ship | [itch.io](https://foozlecc.itch.io/void-main-ship) |
-| Vihollislaivasto 1 | Void – Fleet Pack 1 | [itch.io](https://foozlecc.itch.io/void-fleet-pack-1) |
-| Vihollislaivasto 2 | Void – Fleet Pack 2 | [itch.io](https://foozlecc.itch.io/void-fleet-pack-2) |
-| Vihollislaivasto 3 | Void – Fleet Pack 3 | [itch.io](https://foozlecc.itch.io/void-fleet-pack-3) |
-| Tehostimet | Void – Pickups Pack | [itch.io](https://foozlecc.itch.io/void-pickups-pack) |
+| Käyttö | Paketti | Tekijä | Lähde |
+|---|---|---|---|
+| Pelaajan alus | Void – Main Ship | Baldur (piirtäjä), Foozle (julkaisija) | [itch.io](https://foozlecc.itch.io/void-main-ship) |
+| Vihollislaivasto 1 | Void – Fleet Pack 1 | Baldur (piirtäjä), Foozle (julkaisija) | [itch.io](https://foozlecc.itch.io/void-fleet-pack-1) |
+| Vihollislaivasto 2 | Void – Fleet Pack 2 | Baldur (piirtäjä), Foozle (julkaisija) | [itch.io](https://foozlecc.itch.io/void-fleet-pack-2) |
+| Vihollislaivasto 3 | Void – Fleet Pack 3 | Baldur (piirtäjä), Foozle (julkaisija) | [itch.io](https://foozlecc.itch.io/void-fleet-pack-3) |
+| Tehostimet | Void – Pickups Pack | Baldur (piirtäjä), Foozle (julkaisija) | [itch.io](https://foozlecc.itch.io/void-pickups-pack) |
+| Asteroidikenttä (tileset) | `asteroidit.png` | Claude (Anthropic), piirretty koodilla | Tehty tätä peliä varten |
 
 **Musiikki ja äänet** (Pixabay, `public/audio/spacedriver/`). Taistelumusiikki ja intro on rekisteröity Content ID:hen.
 
