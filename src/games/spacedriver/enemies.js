@@ -29,7 +29,9 @@ export const BULLETS = {
 
 // Liikkeet
 const WAVE_AMPLITUDE = 110; // aalto: sivuttaisliikkeen laajuus (px)
-const SLIDE_SPEED = 160; // kiveen törmäävä vihollinen liukuu sivulle tätä nopeutta (px/s)
+const STEER_SPEED = 240; // kuinka nopeasti vihollinen kaartaa kivien välistä aukkoa kohti (px/s)
+const DIVE_STEER_SPEED = 420; // syöksyssä nopeammin, koska vauhtikin on kova
+const MAX_WAIT = 2.5; // kiven edessä odottanut vihollinen räjähtää tämän ajan jälkeen (s)
 const DIVE_STOP = 230; // sukellus: pysähtyy tälle korkeudelle ruudulla ennen syöksyä
 const DIVE_WAIT = 0.6; // s
 const DIVE_SPEED = 540;
@@ -134,7 +136,7 @@ export class Enemy {
     if (this.dead) return this.body.active;
     this.t += dt;
     const d = this.def;
-    // Haluttu uusi paikka liikkeen mukaan; kivet tarkistetaan alla (moveTo)
+    // Haluttu uusi paikka liikkeen mukaan; kivet huomioidaan alla (steer ja blocked)
     let nx = this.x;
     let ny = this.y;
     switch (this.move) {
@@ -166,40 +168,38 @@ export class Enemy {
       default:
         ny += d.speed * dt - scrolled;
     }
-    this.moveTo(nx, ny, dt);
+    if (this.move !== 'paikallaan') nx = this.steer(nx, ny, dt);
+    // Kivi suoraan edessä: vihollinen pysähtyy (pysyy kartalla paikallaan) ja ohjaa samalla
+    // sivulle. Syöksyvä tai jo kiveen osunut vihollinen räjähtää (SpaceScene.enemyCrashed).
+    if (this.blocked(nx, ny)) {
+      this.waited = (this.waited ?? 0) + dt;
+      if (this.diving || this.blocked(nx, this.y) || this.waited > MAX_WAIT) {
+        this.scene.enemyCrashed(this);
+        return true;
+      }
+      ny = this.y;
+    } else {
+      this.waited = 0;
+    }
+    this.x = nx;
+    this.y = ny;
     this.parts.forEach((p) => p.setPosition(this.x, this.y));
     const screenY = this.y - cam.scrollY;
     return screenY < cam.height + 140 && this.x > -120 && this.x < 888;
   }
 
-  // Siirtyy kohti uutta paikkaa, mutta ei kiven sisään. Kivet ovat kartalla paikallaan, joten
-  // pysähtynyt vihollinen ei voi joutua kiven sisään: se vain rullaa ruudulla kartan mukana.
-  moveTo(nx, ny, dt) {
-    if (!this.blocked(nx, ny)) {
-      this.x = nx;
-      this.y = ny;
-      return;
-    }
-    // Syöksy loppuu kiveen; jatketaan suoraan alas
-    if (this.diving) {
-      this.diving = null;
-      this.move = 'suora';
-    }
-    if (!this.blocked(this.x, ny)) {
-      // Pystysuunta vapaa: sivuttaisliike pysähtyy kiveen, aalto jatkuu tästä kohdasta
-      this.x0 += this.x - nx;
-      this.y = ny;
-      return;
-    }
-    // Kivi edessä: liu'u sille sivulle, jolla on enemmän tilaa
-    const left = this.blocked(this.x - 48, ny);
-    const right = this.blocked(this.x + 48, ny);
-    const dir = left && !right ? 1 : right && !left ? -1 : this.x < 384 ? 1 : -1;
-    const sx = this.x + dir * SLIDE_SPEED * dt;
-    if (!this.blocked(sx, this.y)) {
-      this.x = sx;
-      this.x0 += dir * SLIDE_SPEED * dt;
-    }
+  // Ohjaus kivien ohi: katsotaan eteen (SpaceScene.freeBand) ja kaarretaan ajoissa aukkoon.
+  // Liikkeen haluama x rajataan aukon sisään, ja vihollinen kääntyy sitä kohti rajatulla
+  // nopeudella, jolloin kaarros näyttää pehmeältä. Aallon keskikohta siirtyy aukon mukana.
+  steer(nx, ny, dt) {
+    const band = this.scene.freeBand(this.x, ny, this.def.rx, this.def.ry);
+    if (!band) return nx;
+    const target = band.pull ?? Phaser.Math.Clamp(nx, band.lo, band.hi);
+    if (this.move === 'aalto') this.x0 += target - nx;
+    // Syöksy jatkuu ohjauksen jälkeen uuteen suuntaan, ettei se käänny takaisin kiveä kohti
+    if (this.diving && target !== nx) this.diving.vx = 0;
+    const step = (this.diving ? DIVE_STEER_SPEED : STEER_SPEED) * dt;
+    return target === nx ? nx : this.x + Phaser.Math.Clamp(target - this.x, -step, step);
   }
 
   // Ampuu, kun on kunnolla ruudulla. Palauttaa uudet ammukset.

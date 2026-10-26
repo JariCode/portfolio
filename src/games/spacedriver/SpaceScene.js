@@ -58,6 +58,27 @@ const HIT_POINTS = [{ x: 0, y: 0 }].concat(
   }),
 );
 
+// Kaistat: jokaiselle kartan riville vapaat (kivettömät) vaakavälit pikseleinä [vasen, oikea].
+// Lasketaan kerran kartasta; viholliset ohjaavat niiden avulla kivien ohi (enemies.js).
+// Laatta lasketaan kiveksi kokonaan, vaikka kuva ei täyttäisi sitä: väistö jättää varaa.
+function findLanes(layer, cols, rows) {
+  const lanes = [];
+  for (let r = 0; r < rows; r++) {
+    const row = [];
+    let start = null;
+    for (let c = 0; c <= cols; c++) {
+      const free = c < cols && !layer.getTileAt(c, r);
+      if (free && start === null) start = c;
+      if (!free && start !== null) {
+        row.push([start * T, c * T]);
+        start = null;
+      }
+    }
+    lanes.push(row);
+  }
+  return lanes;
+}
+
 // Uuden pelin lähtötiedot; myöhemmin sektorista toiseen siirtyvät nämä
 export const NEW_RUN = { hp: MAX_HP, score: 0, bombs: 2, weapon: 1, kills: 0 };
 
@@ -107,6 +128,7 @@ export default class SpaceScene extends Phaser.Scene {
     map.createLayer('Edusta', tiles).setDepth(6);
     this.isSolid = createHitTest(this, `tiles-${s.tileset.name}`, obstacles);
     this.mapH = map.heightInPixels;
+    this.lanes = findLanes(obstacles, map.width, map.height);
 
     // Kamera alkaa kartan alareunasta ja nousee kohti yläreunaa
     const cam = this.cameras.main;
@@ -354,6 +376,57 @@ export default class SpaceScene extends Phaser.Scene {
       b.destroy();
       return false;
     });
+  }
+
+  // Vapaa vaakaväli vihollisen kohdalla ja edessä: vihollinen (keskipiste x, y, puolikoko
+  // rx, ry) katsoo omien rivien lisäksi kaksi riviä alaspäin ja valitsee kultakin riviltä
+  // lähimmän aukon. Omat rivit ovat mukana, ettei se kaarra kohti seuraavaa aukkoa, kun
+  // kivi on vielä kyljessä. Palauttaa rajat, joiden sisällä keskipiste mahtuu kulkemaan,
+  // tai null, jos kiviä ei ole. Jos edessä on umpikuja (seuraava aukko ei ole nykyisen
+  // kohdalla), palautetaan nykyinen väli ja pull: kohta, josta seuraavaan aukkoon pääsee.
+  freeBand(x, y, rx, ry) {
+    let lo = 0;
+    let hi = GAME_W;
+    let rocks = false;
+    let pull = null;
+    const bodyEnd = Math.floor((y + ry) / T);
+    for (let r = Math.floor((y - ry) / T); r <= bodyEnd + 2; r++) {
+      const row = this.lanes[r];
+      if (!row || (row.length === 1 && row[0][0] === 0 && row[0][1] === GAME_W)) continue;
+      rocks = true;
+      // Lähin aukko, johon vihollinen mahtuu (jossa se jo on, tai muuten lähin reuna).
+      // Liian kapea rako ei kelpaa; jos mikään ei mahdu, valitaan levein.
+      const dist = ([a, b]) => (x < a ? a - x : x > b ? x - b : 0);
+      const fits = row.filter(([a, b]) => b - a >= rx * 2 + 16);
+      const lane = fits.length
+        ? fits.reduce((best, l) => (dist(l) < dist(best) ? l : best))
+        : row.reduce((best, l) => (!best || l[1] - l[0] > best[1] - best[0] ? l : best), null);
+      if (!lane) return { lo: x, hi: x, pull: null };
+      const nlo = Math.max(lo, lane[0]);
+      const nhi = Math.min(hi, lane[1]);
+      // Edessä oleva aukko ei jatku nykyisestä: pysytään nykyisessä välissä ja hakeudutaan
+      // sen reunalle, joka on lähimpänä seuraavaa aukkoa
+      if (r > bodyEnd && nhi - nlo < rx * 2 + 12) {
+        pull = (lane[0] + lane[1]) / 2;
+        break;
+      }
+      lo = nlo;
+      hi = nhi;
+    }
+    if (!rocks) return null;
+    // Keskipisteen liikkumavara: aukko miinus vihollisen puolileveys ja pieni väli
+    const a = lo + rx + 6;
+    const b = hi - rx - 6;
+    const band = a <= b ? { lo: a, hi: b } : { lo: (lo + hi) / 2, hi: (lo + hi) / 2 };
+    band.pull = pull === null ? null : Phaser.Math.Clamp(pull, band.lo, band.hi);
+    return band;
+  }
+
+  // Vihollinen törmäsi kiveen: räjähtää ilman pisteitä
+  enemyCrashed(e) {
+    play('explosion', { volume: 0.4, gap: 0.05 });
+    this.burst(e.x, e.y, 0.5);
+    e.die();
   }
 
   damageEnemy(target, damage) {
