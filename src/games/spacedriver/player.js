@@ -17,7 +17,18 @@ export const MUZZLES = { 1: { x: -22, y: -30 }, 2: { x: 22, y: -30 } };
 // eivät osu, jotta kapeista väleistä pääsee läpi ilman, että osuma tuntuu epäreilulta
 export const HITBOX = { rx: 20, ry: 30 };
 
-const KEYS = ['pelaaja-ehja', 'pelaaja-vaurio1', 'pelaaja-vaurio2', 'pelaaja-vaurio3', 'pelaaja-moottori', 'pelaaja-liekki', 'pelaaja-liekki-teho', 'pelaaja-ase-tykki', 'pelaaja-ammus-tykki'];
+const KEYS = [
+  'pelaaja-ehja',
+  'pelaaja-vaurio1',
+  'pelaaja-vaurio2',
+  'pelaaja-vaurio3',
+  'pelaaja-moottori',
+  'pelaaja-liekki',
+  'pelaaja-liekki-teho',
+  'pelaaja-ase-tykki',
+  'pelaaja-ammus-tykki',
+  'pelaaja-kilpi',
+];
 
 export function preloadPlayer(scene) {
   for (const key of KEYS) {
@@ -37,6 +48,7 @@ export function createPlayerAnims(scene) {
   // 7 ruutua, kaksi laukausta kierroksella: 28 ruutua/s = 8 laukausta sekunnissa
   make('sd-tykki', 'pelaaja-ase-tykki', 28);
   make('sd-ammus-tykki', 'pelaaja-ammus-tykki', 12);
+  make('sd-kilpi', 'pelaaja-kilpi', 14);
 }
 
 export class PlayerShip {
@@ -47,18 +59,30 @@ export class PlayerShip {
     const add = (key) => scene.add.sprite(x, y, key).setScale(SHIP_SCALE).setDepth(4);
     this.flame = add('pelaaja-liekki').play('sd-liekki');
     this.engine = add('pelaaja-moottori');
-    this.weapon = add('pelaaja-ase-tykki').play('sd-tykki');
+    this.weapon = add('pelaaja-ase-tykki');
     this.hull = add('pelaaja-ehja');
+    // Kilpi rungon päällä, näkyy vain tehostimen ajan
+    this.shield = add('pelaaja-kilpi').setDepth(4.5).setVisible(false);
     this.parts = [this.flame, this.engine, this.weapon, this.hull];
     this.boost = false;
+    this.firing = false;
   }
 
-  // Laukaukset tulevat aseen animaation tahdissa, jolloin suuliekki ja ammus näkyvät yhtä aikaa
+  // Laukaukset tulevat aseen animaation tahdissa, jolloin suuliekki ja ammus näkyvät yhtä aikaa.
+  // callback(piippu, x, y): piippu 1 = vasen, 2 = oikea
   onShot(callback) {
     this.weapon.on('animationupdate', (anim, frame) => {
       const muzzle = MUZZLES[frame.index];
-      if (muzzle) callback(this.x + muzzle.x, this.y + muzzle.y);
+      if (muzzle) callback(frame.index, this.x + muzzle.x, this.y + muzzle.y);
     });
+  }
+
+  // Ase pyörii vain, kun ampumanappi on pohjassa
+  setFiring(on) {
+    if (on === this.firing) return;
+    this.firing = on;
+    if (on) this.weapon.play('sd-tykki');
+    else this.stopWeapon();
   }
 
   setHp(hp) {
@@ -72,24 +96,34 @@ export class PlayerShip {
     this.flame.play(on ? 'sd-liekki-teho' : 'sd-liekki');
   }
 
+  setShield(on) {
+    this.shield.setVisible(on).setAlpha(1);
+    if (on) this.shield.play('sd-kilpi');
+    else this.shield.stop();
+  }
+
   setAlpha(a) {
     this.parts.forEach((p) => p.setAlpha(a));
   }
 
   setVisible(v) {
     this.parts.forEach((p) => p.setVisible(v));
+    if (!v) this.setShield(false);
   }
 
   stopWeapon() {
+    this.firing = false;
     this.weapon.stop();
     this.weapon.setFrame(0);
   }
 
   sync() {
     this.parts.forEach((p) => p.setPosition(this.x, this.y));
+    this.shield.setPosition(this.x, this.y);
   }
 
   destroy() {
     this.parts.forEach((p) => p.destroy());
+    this.shield.destroy();
   }
 }

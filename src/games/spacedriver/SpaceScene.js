@@ -1,18 +1,25 @@
 import * as Phaser from 'phaser';
 import { SECTORS } from './sectors.js';
-import { createStarfield } from './starfield.js';
+import { createStarfield } from './parallax.js';
 import { createHitTest } from './obstacles.js';
 import { PlayerShip, HITBOX, createPlayerAnims, preloadPlayer } from './player.js';
-import { play } from './sound.js';
+import { Enemy, createFleetAnims, preloadFleet } from './enemies.js';
+import { Boss } from './boss.js';
+import { PICKUP_TYPES, Pickup, createPickupAnims, preloadPickups } from './pickups.js';
+import { play, playMusic } from './sound.js';
 
 // Pelin sisäinen koko (3:4). Kartta on 12 laattaa × 64 px = 768 px leveä, joten kartan
 // leveys mahtuu kuvaan ja kamera liikkuu vain pystysuunnassa.
 export const GAME_W = 768;
 export const GAME_H = 1024;
 export const MAX_HP = 5;
+export const MAX_BOMBS = 3;
+export const MAX_WEAPON = 3;
+
+const T = 64;
 
 // Kartta rullaa tällä nopeudella (px/s): 50 riviä × 64 px, josta ruudullinen näkyy heti,
-// joten sektori kestää noin 40 s
+// joten sektori kestää noin 40 s ennen pomoa
 const SCROLL_SPEED = 55;
 
 // Aluksen liike (px/s). Sormella vedettäessä alus seuraa sormea, mutta enintään DRAG_SPEED-
@@ -27,8 +34,15 @@ const MARGIN_TOP = 120; // HUD on yläreunassa
 const MARGIN_BOTTOM = 60;
 
 const BULLET_SPEED = 950;
-const INVULNERABLE_MS = 1600; // osuman jälkeen hetki suojassa, ettei sama kivi osu heti uudelleen
-const KNOCKBACK = 340; // osuma työntää alusta poispäin esteestä (px/s, vaimenee)
+const INVULNERABLE_MS = 1600; // osuman jälkeen hetki suojassa, ettei sama osuma toistu heti
+const KNOCKBACK = 340; // kiveen osuminen työntää alusta poispäin (px/s, vaimenee)
+const SHIELD_MS = 8000;
+const BOMB_DAMAGE = 20; // pommi tuhoaa pienet viholliset ja vie pomolta palan
+const RAM_DAMAGE = 3; // törmäys viholliseen vahingoittaa myös vihollista
+
+// Pisteet tehostimesta ja sektorin läpäisystä (jokaisesta jäljellä olevasta rungon palkista)
+const PICKUP_POINTS = 50;
+const HULL_BONUS = 200;
 
 // Osuma-alueen reunapisteet: soikion kehältä 12 pistettä + keskipiste
 const HIT_POINTS = [{ x: 0, y: 0 }].concat(
@@ -38,8 +52,8 @@ const HIT_POINTS = [{ x: 0, y: 0 }].concat(
   }),
 );
 
-// Uuden pelin lähtötiedot; myöhemmin sektorista toiseen siirtyvät energia ja pisteet
-export const NEW_RUN = { hp: MAX_HP, score: 0 };
+// Uuden pelin lähtötiedot; myöhemmin sektorista toiseen siirtyvät nämä
+export const NEW_RUN = { hp: MAX_HP, score: 0, bombs: 2, weapon: 1, kills: 0 };
 
 export default class SpaceScene extends Phaser.Scene {
   constructor() {
@@ -58,16 +72,24 @@ export default class SpaceScene extends Phaser.Scene {
     this.load.tilemapTiledJSON(s.key, s.map);
     this.load.image(`tiles-${s.tileset.name}`, s.tileset.file);
     preloadPlayer(this);
+    preloadFleet(this, s.fleet);
+    preloadPickups(this);
   }
 
   create() {
     const s = this.sector;
+    this.controls = this.registry.get('controls');
     this.hp = this.carry.hp;
     this.score = this.carry.score;
+    this.bombs = this.carry.bombs;
+    this.weapon = this.carry.weapon;
+    this.kills = this.carry.kills;
     this.finished = false;
     this.invulnerableUntil = 0;
+    this.shieldUntil = 0;
     this.knock = 0;
     this.elapsed = 0;
+    this.bombRequests = this.controls.bomb;
 
     this.updateStars = createStarfield(this, GAME_W, GAME_H);
 
@@ -85,29 +107,48 @@ export default class SpaceScene extends Phaser.Scene {
     cam.setBounds(0, 0, GAME_W, this.mapH);
     cam.scrollY = this.mapH - GAME_H;
 
+    // ── Viholliset ja tehostimet sectors.js:n listoista ──
+    createFleetAnims(this, s.fleet);
+    createPickupAnims(this);
+    // Vihollisen rivi kertoo, milloin se tulee: alimman rivin vihollinen heti alussa, ylimmän
+    // juuri ennen pomoa, ja tasaisesti siltä väliltä. Kaikki saapuvat ruudun yläreunasta.
+    // (Jos rivi ratkaisisi suoraan, ensimmäisen ruudullisen viholliset tulisivat kaikki kerralla.)
+    const sectorTime = (this.mapH - GAME_H) / SCROLL_SPEED;
+    this.waiting = s.enemies
+      .map(([row, col, type, move]) => ({ col, type, move, at: ((this.mapH - (row * T + T / 2)) / this.mapH) * sectorTime }))
+      .sort((a, b) => a.at - b.at);
+    this.waitingPickups = s.pickups.map(([row, col, type]) => ({ row, col, type }));
+    this.enemies = [];
+    this.enemyBullets = [];
+    this.pickups = [];
+    this.boss = null;
+
     // ── Alus ──
     createPlayerAnims(this);
     this.ship = new PlayerShip(this, GAME_W / 2, cam.scrollY + GAME_H - 200);
     this.ship.setHp(this.hp);
     this.ship.sync();
     this.bullets = [];
-    this.ship.onShot((x, y) => this.fire(x, y));
+    this.ship.onShot((barrel, x, y) => this.fire(barrel, x, y));
 
-    // ── Näppäimet: nuolet ja WASD ──
-    this.keys = this.input.keyboard.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D');
+    // ── Näppäimet: nuolet ja WASD liikkuvat, välilyönti ampuu, B pommittaa ──
+    this.keys = this.input.keyboard.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D,SPACE,B');
+    this.keys.B.on('down', () => this.useBomb());
 
     // ── Sormella vetäminen: alus liikkuu sormen liikkeen verran, ei hyppää sormen alle ──
+    // Vain ensimmäinen sormi ohjaa; toinen sormi voi samaan aikaan painaa ampumanappia.
     this.drag = null;
     this.input.on('pointerdown', (p) => {
-      this.drag = { px: p.x, py: p.y, sx: this.ship.x, sy: this.ship.y - cam.scrollY, tx: null, ty: null };
+      if (this.drag) return;
+      this.drag = { id: p.id, px: p.x, py: p.y, sx: this.ship.x, sy: this.ship.y - cam.scrollY, tx: null, ty: null };
     });
     this.input.on('pointermove', (p) => {
-      if (!this.drag || !p.isDown) return;
+      if (!this.drag || p.id !== this.drag.id || !p.isDown) return;
       this.drag.tx = this.drag.sx + (p.x - this.drag.px);
       this.drag.ty = this.drag.sy + (p.y - this.drag.py);
     });
-    const release = () => {
-      this.drag = null;
+    const release = (p) => {
+      if (this.drag && p.id === this.drag.id) this.drag = null;
     };
     this.input.on('pointerup', release);
     this.input.on('pointerupoutside', release);
@@ -116,19 +157,35 @@ export default class SpaceScene extends Phaser.Scene {
     this.emitHud();
   }
 
-  // Ammus lähtee piipusta suoraan ylös. Ammukset liikutetaan itse (ei fysiikkamoottoria):
-  // ne kulkevat suoraan, ja osuma kiveen tarkistetaan kuvan mukaan.
-  fire(x, y) {
+  // ── Ampuminen ──
+  // Aseen taso: 1 = vuorotellen piipuista, 2 = molemmista piipuista joka laukauksella,
+  // 3 = lisäksi kaksi vinoa ammusta keulasta
+  fire(barrel, x, y) {
     if (this.finished) return;
-    const b = this.add.sprite(x, y, 'pelaaja-ammus-tykki').setScale(2).setDepth(3).play('sd-ammus-tykki');
-    this.bullets.push(b);
+    const shots = [[x, y, 0]];
+    if (this.weapon >= 2) shots.push([this.ship.x - (x - this.ship.x), y, 0]);
+    if (this.weapon >= 3 && barrel === 1) shots.push([this.ship.x, y - 10, -0.2], [this.ship.x, y - 10, 0.2]);
+    for (const [bx, by, angle] of shots) {
+      const b = this.add.sprite(bx, by, 'pelaaja-ammus-tykki').setScale(2).setDepth(3).setRotation(angle).play('sd-ammus-tykki');
+      b.vx = Math.sin(angle) * BULLET_SPEED;
+      this.bullets.push(b);
+    }
     play('shot', { volume: 0.25, gap: 0.1 });
   }
 
-  // Pieni kipinä ammuksen osuessa kiveen
-  spark(x, y) {
-    const flash = this.add.circle(x, y, 10, 0xffd28a, 0.9).setDepth(5);
+  // Pieni kipinä ammuksen osuessa
+  spark(x, y, color = 0xffd28a) {
+    const flash = this.add.circle(x, y, 10, color, 0.9).setDepth(5);
     this.tweens.add({ targets: flash, scale: 2.2, alpha: 0, duration: 180, onComplete: () => flash.destroy() });
+  }
+
+  // Lyhyt teksti tapahtuman kohdalle (tehostin, pisteet)
+  popup(x, y, text, color = '#ffb547') {
+    const t = this.add
+      .text(x, y, text, { fontFamily: '"Orbitron Variable", sans-serif', fontSize: '26px', fontStyle: '700', color, stroke: '#04030c', strokeThickness: 5 })
+      .setOrigin(0.5)
+      .setDepth(8);
+    this.tweens.add({ targets: t, y: y - 60, alpha: 0, duration: 900, ease: 'Cubic.Out', onComplete: () => t.destroy() });
   }
 
   update(time, delta) {
@@ -136,26 +193,70 @@ export default class SpaceScene extends Phaser.Scene {
     const cam = this.cameras.main;
     this.elapsed += dt;
 
-    // ── Kartan rullaus: alus pysyy ruudulla samassa kohdassa, joten sitä siirretään samaa matkaa ──
+    // ── Kartan rullaus: alus pysyy ruudulla samassa kohdassa, joten sitä siirretään samaa matkaa.
+    // Pomon aikana kartta on pysähtynyt yläreunaan. ──
     const before = cam.scrollY;
-    if (!this.finished) cam.scrollY = Math.max(0, cam.scrollY - SCROLL_SPEED * dt);
+    if (!this.finished && !this.boss) cam.scrollY = Math.max(0, cam.scrollY - SCROLL_SPEED * dt);
     const scrolled = before - cam.scrollY;
     this.updateStars(cam.scrollY, this.elapsed);
 
     this.updateBullets(dt, cam);
+    this.updateEnemies(dt, scrolled, cam);
+    this.updatePickups(dt);
     if (this.finished) return;
 
-    this.ship.y -= scrolled;
-    this.moveShip(dt, cam);
-    this.checkObstacles(time);
+    this.moveShip(dt, cam, scrolled, time);
+    this.ship.setFiring(this.keys.SPACE.isDown || this.controls.fire);
+    // Kosketusnapin pommi: React kasvattaa laskuria, scene käyttää uudet painallukset
+    if (this.controls.bomb !== this.bombRequests) {
+      this.bombRequests = this.controls.bomb;
+      this.useBomb();
+    }
+    this.spawn(cam);
+    this.checkHits(time);
+    this.updateShield(time);
 
-    // Sektorin loppu: kartan yläreuna on ruudulla
-    if (cam.scrollY <= 0) this.clearSector();
+    // Kartan loppu: pomo saapuu
+    if (cam.scrollY <= 0 && !this.boss) {
+      this.boss = new Boss(this, this.sector.fleet, this.sector.boss, cam);
+      playMusic('boss');
+    }
 
     this.emitHud();
   }
 
-  moveShip(dt, cam) {
+  // Viholliset tulevat aikataulun mukaan; tehostimet ovat kartalla paikallaan ja ilmestyvät,
+  // kun niiden rivi tulee näkyviin ruudun yläreunassa
+  spawn(cam) {
+    const top = cam.scrollY - T;
+    while (this.waiting.length && this.waiting[0].at <= this.elapsed) {
+      const e = this.waiting.shift();
+      this.enemies.push(new Enemy(this, this.sector.fleet, e.type, e.move, e.col * T + T / 2, cam.scrollY - 40));
+    }
+    this.waitingPickups = this.waitingPickups.filter((p) => {
+      const y = p.row * T + T / 2;
+      if (y < top) return true;
+      this.pickups.push(new Pickup(this, p.type, p.col * T + T / 2, y));
+      return false;
+    });
+  }
+
+  // Osuuko alus kiveen, jos se olisi kohdassa (x, y)
+  blocked(x, y) {
+    return HIT_POINTS.some((p) => this.isSolid(x + p.x, y + p.y));
+  }
+
+  // Liike: kivet ovat kiinteitä, eli alus pysähtyy niihin eikä mene läpi edes suoja-aikana.
+  // Vaaka- ja pystyliike tarkistetaan erikseen, jolloin alus liukuu kiven reunaa pitkin.
+  moveShip(dt, cam, scrolled, time) {
+    const ship = this.ship;
+    let touching = false;
+
+    // Rullaus: alus pysyy ruudulla paikallaan, paitsi jos kivi tulee ylhäältä vastaan.
+    // Silloin kivi työntää alusta alaspäin.
+    if (!this.blocked(ship.x, ship.y - scrolled)) ship.y -= scrolled;
+    else touching = true;
+
     const k = this.keys;
     let vx;
     let vy;
@@ -185,21 +286,88 @@ export default class SpaceScene extends Phaser.Scene {
 
     const minY = cam.scrollY + MARGIN_TOP;
     const maxY = cam.scrollY + GAME_H - MARGIN_BOTTOM;
-    this.ship.x = Phaser.Math.Clamp(this.ship.x + vx * dt, MARGIN_X, GAME_W - MARGIN_X);
-    this.ship.y = Phaser.Math.Clamp(this.ship.y + vy * dt, minY, maxY);
-    this.ship.sync();
+    const nx = Phaser.Math.Clamp(ship.x + vx * dt, MARGIN_X, GAME_W - MARGIN_X);
+    if (!this.blocked(nx, ship.y)) ship.x = nx;
+    else if (nx !== ship.x) touching = true;
+    const ny = Phaser.Math.Clamp(ship.y + vy * dt, minY, maxY);
+    if (!this.blocked(ship.x, ny)) ship.y = ny;
+    else if (ny !== ship.y) touching = true;
+
+    // Kivi painoi aluksen ruudun alareunaan: alus puristuu ja liukuu lähimpään vapaaseen kohtaan
+    if (ship.y > maxY) {
+      ship.y = maxY;
+      if (this.blocked(ship.x, ship.y)) {
+        this.escape(ship);
+        touching = true;
+      }
+    }
+    ship.sync();
+
+    // Kiveen osuminen vie runkoa (suoja-ajan välein) ja työntää alusta poispäin kivestä
+    if (touching) {
+      const left = this.blocked(ship.x - 8, ship.y);
+      const right = this.blocked(ship.x + 8, ship.y);
+      this.damage(time, left && !right ? 1 : right && !left ? -1 : 0);
+    }
   }
 
+  // Etsii lähimmän vaakasuunnassa vapaan kohdan (puristustilanne ruudun alareunassa)
+  escape(ship) {
+    for (let d = 8; d < GAME_W; d += 8) {
+      for (const x of [ship.x - d, ship.x + d]) {
+        if (x >= MARGIN_X && x <= GAME_W - MARGIN_X && !this.blocked(x, ship.y)) {
+          ship.x = x;
+          return;
+        }
+      }
+    }
+  }
+
+  // Pelaajan ammukset: osuma viholliseen, pomoon tai kiveen
   updateBullets(dt, cam) {
     this.bullets = this.bullets.filter((b) => {
+      b.x += b.vx * dt;
       b.y -= BULLET_SPEED * dt;
-      // Ammuksen kärki osuu kiveen: kipinä ja ammus pois
-      if (this.isSolid(b.x, b.y - 12)) {
-        this.spark(b.x, b.y - 12);
-        b.destroy();
-        return false;
+      const tipY = b.y - 12;
+      const boss = this.boss && !this.boss.dead && this.boss.contains(b.x, tipY, 6) ? this.boss : null;
+      const target = this.enemies.find((e) => !e.dead && e.contains(b.x, tipY, 6)) ?? boss;
+      if (target) {
+        this.spark(b.x, tipY, 0xffffff);
+        this.damageEnemy(target, 1);
+      } else if (this.isSolid(b.x, tipY)) {
+        this.spark(b.x, tipY);
+      } else if (b.y > cam.scrollY - 40 && b.x > -20 && b.x < GAME_W + 20) {
+        return true;
       }
-      if (b.y < cam.scrollY - 40) {
+      b.destroy();
+      return false;
+    });
+  }
+
+  damageEnemy(target, damage) {
+    if (target === this.boss) {
+      if (this.boss.hit(damage)) this.bossDefeated();
+      return;
+    }
+    if (!target.hit(damage)) return;
+    this.score += target.def.points;
+    this.kills += 1;
+    play('explosion', { volume: 0.5, gap: 0.05 });
+    this.burst(target.x, target.y, 0.6);
+  }
+
+  updateEnemies(dt, scrolled, cam) {
+    this.enemies = this.enemies.filter((e) => {
+      const keep = e.update(dt, scrolled, cam, this.ship);
+      if (!keep) e.destroy();
+      else if (!this.finished) this.enemyBullets.push(...e.shoot(dt, cam, this.ship));
+      return keep;
+    });
+    if (this.boss && !this.finished) this.enemyBullets.push(...this.boss.update(dt, cam, this.ship));
+    this.enemyBullets = this.enemyBullets.filter((b) => {
+      b.update(dt, scrolled);
+      const sy = b.y - cam.scrollY;
+      if (this.isSolid(b.x, b.y) || sy > GAME_H + 40 || sy < -60 || b.x < -40 || b.x > GAME_W + 40) {
         b.destroy();
         return false;
       }
@@ -207,22 +375,87 @@ export default class SpaceScene extends Phaser.Scene {
     });
   }
 
-  // Osuuko jokin osuma-alueen pisteistä esteeseen
-  checkObstacles(time) {
-    if (time < this.invulnerableUntil) return;
-    const { x, y } = this.ship;
-    const hit = HIT_POINTS.find((p) => this.isSolid(x + p.x, y + p.y));
-    if (!hit) return;
-    this.damage(time, hit.x >= 0 ? -1 : 1);
+  updatePickups(dt) {
+    this.pickups = this.pickups.filter((p) => {
+      p.update(dt);
+      if (this.finished || !p.near(this.ship.x, this.ship.y)) {
+        // Ruudun alareunan alle jäänyt tehostin poistuu
+        if (p.y - this.cameras.main.scrollY < GAME_H + 80) return true;
+        p.destroy();
+        return false;
+      }
+      this.collect(p);
+      p.destroy();
+      return false;
+    });
   }
 
-  // Osuma: energia –1, alus työntyy poispäin esteestä ja vilkkuu suojan ajan
+  collect(p) {
+    play('pickup', { volume: 0.7 });
+    this.score += PICKUP_POINTS;
+    if (p.type === 'energia') this.hp = Math.min(MAX_HP, this.hp + 2);
+    if (p.type === 'pommi') this.bombs = Math.min(MAX_BOMBS, this.bombs + 1);
+    if (p.type === 'ase') this.weapon = Math.min(MAX_WEAPON, this.weapon + 1);
+    if (p.type === 'kilpi') {
+      this.shieldUntil = this.time.now + SHIELD_MS;
+      this.ship.setShield(true);
+    }
+    this.ship.setHp(this.hp);
+    this.popup(p.x, p.y - 30, PICKUP_TYPES[p.type].label.toUpperCase());
+  }
+
+  // Kilpi välkkyy viimeiset kaksi sekuntia ennen kuin se loppuu
+  updateShield(time) {
+    if (!this.shieldUntil) return;
+    const left = this.shieldUntil - time;
+    if (left <= 0) {
+      this.shieldUntil = 0;
+      this.ship.setShield(false);
+    } else if (left < 2000) {
+      this.ship.shield.setAlpha(Math.floor(left / 150) % 2 ? 0.3 : 1);
+    }
+  }
+
+  // Osumat alukseen: vihollisten ammukset ja törmäykset (kivet tarkistetaan liikkeessä)
+  checkHits(time) {
+    const { x, y } = this.ship;
+    const inside = (cx, cy, r) => {
+      const dx = (cx - x) / (HITBOX.rx + r);
+      const dy = (cy - y) / (HITBOX.ry + r);
+      return dx * dx + dy * dy <= 1;
+    };
+
+    // Ammus osuu: kilpi tai suoja-aika torjuu vahingon, mutta ammus katoaa silti
+    this.enemyBullets = this.enemyBullets.filter((b) => {
+      if (!inside(b.x, b.y, b.r)) return true;
+      this.spark(b.x, b.y, 0xff6b3d);
+      b.destroy();
+      this.damage(time, 0);
+      return false;
+    });
+
+    // Törmäys viholliseen tai pomoon
+    const targets = this.enemies.filter((e) => !e.dead);
+    if (this.boss && !this.boss.dead && !this.boss.entering) targets.push(this.boss);
+    const rammed = targets.find((e) => HIT_POINTS.some((p) => e.contains(x + p.x, y + p.y)));
+    if (rammed && time >= this.invulnerableUntil) {
+      if (rammed !== this.boss) this.damageEnemy(rammed, RAM_DAMAGE);
+      this.damage(time, rammed.x > x ? -1 : 1);
+    }
+  }
+
+  // Osuma: runko –1, alus työntyy sivuun ja vilkkuu suojan ajan. Kilpi torjuu osuman.
   damage(time, direction) {
+    if (time < this.invulnerableUntil || this.finished) return;
+    this.knock = direction * KNOCKBACK;
+    if (this.shieldUntil) {
+      this.invulnerableUntil = time + 400;
+      return;
+    }
     this.hp -= 1;
     this.ship.setHp(this.hp);
     play('hit', { volume: 0.6 });
     this.cameras.main.shake(180, 0.006);
-    this.knock = direction * KNOCKBACK;
     if (this.hp <= 0) {
       this.destroyShip();
       return;
@@ -239,14 +472,37 @@ export default class SpaceScene extends Phaser.Scene {
     });
   }
 
+  // Pommi: valkoinen välähdys ja paineaalto, kaikki ruudulla olevat viholliset saavat
+  // vahinkoa ja vihollisten ammukset katoavat
+  useBomb() {
+    if (this.finished || this.bombs <= 0) return;
+    this.bombs -= 1;
+    play('bomb', { volume: 0.9 });
+    const cam = this.cameras.main;
+    const flash = this.add.rectangle(0, 0, GAME_W, GAME_H, 0xffffff, 0.8).setOrigin(0).setScrollFactor(0).setDepth(9);
+    this.tweens.add({ targets: flash, alpha: 0, duration: 450, onComplete: () => flash.destroy() });
+    const wave = this.add.circle(this.ship.x, this.ship.y, 40).setStrokeStyle(8, 0xffb547).setDepth(8);
+    this.tweens.add({ targets: wave, scale: 18, alpha: 0, duration: 650, ease: 'Cubic.Out', onComplete: () => wave.destroy() });
+    cam.shake(300, 0.012);
+    this.enemyBullets.forEach((b) => b.destroy());
+    this.enemyBullets = [];
+    for (const e of this.enemies) {
+      const sy = e.y - cam.scrollY;
+      if (!e.dead && sy > -40 && sy < GAME_H + 20) this.damageEnemy(e, BOMB_DAMAGE);
+    }
+    if (this.boss && !this.boss.dead) this.damageEnemy(this.boss, BOMB_DAMAGE);
+    this.invulnerableUntil = Math.max(this.invulnerableUntil, this.time.now + 800);
+    this.emitHud();
+  }
+
   // Räjähdys kipinöinä (ei verta, ei palasia): rengas ja säteittäin lentävät pisteet
-  explode(x, y) {
-    play('explosion', { volume: 0.8 });
-    const ring = this.add.circle(x, y, 20).setStrokeStyle(4, 0xffb547).setDepth(7);
+  burst(x, y, size = 1) {
+    const ring = this.add.circle(x, y, 20 * size).setStrokeStyle(4, 0xffb547).setDepth(7);
     this.tweens.add({ targets: ring, scale: 4, alpha: 0, duration: 500, onComplete: () => ring.destroy() });
-    for (let i = 0; i < 18; i++) {
-      const a = (i / 18) * Math.PI * 2 + Math.random() * 0.3;
-      const d = 60 + Math.random() * 90;
+    const count = Math.round(18 * size);
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2 + Math.random() * 0.3;
+      const d = (60 + Math.random() * 90) * size;
       const p = this.add.rectangle(x, y, 6, 6, i % 3 ? 0xffb547 : 0xffffff).setDepth(7);
       this.tweens.add({
         targets: p,
@@ -265,17 +521,41 @@ export default class SpaceScene extends Phaser.Scene {
     this.tweens.killTweensOf(this.ship.parts);
     this.ship.stopWeapon();
     this.ship.setVisible(false);
-    this.explode(this.ship.x, this.ship.y);
+    play('explosion', { volume: 0.8 });
+    this.burst(this.ship.x, this.ship.y);
     this.emitHud();
-    this.time.delayedCall(1200, () => this.game.events.emit('sd-dead', { sector: this.sectorIndex, score: this.score }));
+    this.time.delayedCall(1200, () => this.game.events.emit('sd-dead', this.stats()));
   }
 
-  // Kartta loppui: alus kiitää ruudun yläreunan yli ja sektori on läpäisty
-  clearSector() {
+  // Pomo kaatui: räjähdysten sarja, pisteet ja sektori läpi
+  bossDefeated() {
+    const b = this.boss;
+    this.score += b.def.points;
+    this.kills += 1;
     this.finished = true;
+    this.enemyBullets.forEach((e) => e.destroy());
+    this.enemyBullets = [];
+    this.ship.stopWeapon();
+    this.cameras.main.shake(900, 0.01);
+    for (let i = 0; i < 6; i++) {
+      this.time.delayedCall(i * 180, () => {
+        play('explosion', { volume: 0.8, gap: 0.05 });
+        this.burst(b.x + (Math.random() - 0.5) * 160, b.y + (Math.random() - 0.5) * 180, 1.2);
+      });
+    }
+    this.popup(b.x, b.y, `+${b.def.points}`, '#29e0ff');
+    this.emitHud();
+    this.time.delayedCall(1600, () => {
+      b.destroy();
+      this.clearSector();
+    });
+  }
+
+  // Sektori läpi: bonus jäljellä olevasta rungosta ja alus kiitää ruudun yläreunan yli
+  clearSector() {
+    this.score += this.hp * HULL_BONUS;
     this.tweens.killTweensOf(this.ship.parts);
     this.ship.setAlpha(1);
-    this.ship.stopWeapon();
     this.ship.setBoost(true);
     this.emitHud();
     this.tweens.add({
@@ -285,18 +565,21 @@ export default class SpaceScene extends Phaser.Scene {
       delay: 300,
       ease: 'Cubic.In',
       onUpdate: () => this.ship.sync(),
-      onComplete: () => {
-        this.game.events.emit('sd-clear', { sector: this.sectorIndex, hp: this.hp, score: this.score });
-      },
+      onComplete: () => this.game.events.emit('sd-clear', this.stats()),
     });
+  }
+
+  stats() {
+    return { sector: this.sectorIndex, hp: Math.max(0, this.hp), score: this.score, kills: this.kills, bombs: this.bombs, weapon: this.weapon };
   }
 
   // HUD päivitetään Reactissa vain, kun jokin näkyvä arvo muuttuu
   emitHud() {
     const total = this.mapH - GAME_H;
     const progress = Math.round((1 - this.cameras.main.scrollY / total) * 100);
-    const hud = { hp: Math.max(0, this.hp), score: this.score, progress, sector: this.sectorIndex, name: this.sector.name };
-    const key = `${hud.hp}|${hud.score}|${hud.progress}`;
+    const boss = this.boss ? { name: this.boss.name, hp: this.boss.hp, max: this.boss.maxHp } : null;
+    const hud = { hp: Math.max(0, this.hp), score: this.score, progress, bombs: this.bombs, weapon: this.weapon, sector: this.sectorIndex, name: this.sector.name, boss };
+    const key = `${hud.hp}|${hud.score}|${hud.progress}|${hud.bombs}|${hud.weapon}|${boss?.hp}`;
     if (key === this.hudKey) return;
     this.hudKey = key;
     this.game.events.emit('sd-hud', hud);

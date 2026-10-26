@@ -372,6 +372,11 @@
     min-height: 26px;
     padding-block: 3px;
   }
+
+  /* Selitysteksti ei mahdu ilman rullausta: ohjaimet riittävät */
+  .sd-help-text {
+    display: none;
+  }
 }
 
 /* Matala näkymä (puhelin vaakatasossa: pystypeli jää pieneksi): tiiviimpi asettelu,

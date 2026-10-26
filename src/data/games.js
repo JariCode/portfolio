@@ -30,8 +30,8 @@ export const GAMES = [
     load: () => import('../games/spacedriver/SpaceDriver.jsx'),
     description: 'Lennä kolmen vihollislaivaston läpi, kerää tehostimia ja kaada pomo.',
     controls: {
-      desktop: 'Nuolet tai WASD, välilyönti (pommi)',
-      mobile: 'Vedä alusta sormella',
+      desktop: 'Nuolet tai WASD, välilyönti ampuu, B pommi',
+      mobile: 'Vedä alusta sormella, ammu ja pommita napeista',
     },
   },
   {

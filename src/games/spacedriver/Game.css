@@ -181,6 +181,148 @@
   transition: transform 0.3s linear;
 }
 
+/* Pommit ja aseen taso rungon alla */
+.sd-hud-gear {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+}
+
+.sd-hud-bombs {
+  display: flex;
+  gap: 0.9cqw;
+}
+
+/* Pommi: pyöreä merkkivalo, tyhjä paikka himmeänä renkaana */
+.sd-bomb-dot {
+  width: max(7px, 1.9cqw);
+  aspect-ratio: 1;
+  border: 1.5px solid color-mix(in srgb, var(--sd-amber) 55%, transparent);
+  border-radius: 50%;
+}
+
+.sd-bomb-dot.is-full {
+  border-color: var(--sd-amber);
+  background: radial-gradient(circle at 35% 35%, #fff 0 15%, var(--sd-amber) 40%);
+}
+
+.sd-hud-weapon {
+  color: color-mix(in srgb, var(--cyan) 85%, #fff);
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.1cqw);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Pomon energia etenemispalkin paikalla: nimi ja meripihkainen palkki */
+.sd-boss {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+}
+
+.sd-boss-name {
+  flex: none;
+  color: var(--sd-amber);
+  font-family: var(--sd-font);
+  font-size: max(8px, 2.3cqw);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sd-boss-bar {
+  flex: 1;
+  height: max(5px, 1.4cqw);
+  background: color-mix(in srgb, var(--sd-amber) 18%, transparent);
+  clip-path: polygon(0.8cqw 0, 100% 0, calc(100% - 0.8cqw) 100%, 0 100%);
+}
+
+.sd-boss-bar::before {
+  content: '';
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--sd-amber), #fb6b1d);
+  transform: scaleX(var(--sd-boss, 1));
+  transform-origin: left;
+  transition: transform 0.15s linear;
+}
+
+/* ── Kosketusnapit: vain kosketusnäytöillä, oikeassa alakulmassa ── */
+.sd-touch {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .sd-touch {
+    position: absolute;
+    right: 3cqw;
+    bottom: 3cqw;
+    display: flex;
+    align-items: flex-end;
+    gap: 3cqw;
+    pointer-events: none;
+  }
+}
+
+/* Viistetyt kulmat kuten muissa napeissa; sisus ::before-kerroksena ohuen reunan sisällä */
+.sd-touch-btn {
+  --sd-edge: color-mix(in srgb, var(--cyan) 70%, transparent);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: max(58px, 17cqw);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: var(--sd-edge);
+  color: var(--text);
+  font-family: var(--sd-font);
+  font-size: max(9px, 2.6cqw);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  clip-path: polygon(28% 0, 100% 0, 100% 72%, 72% 100%, 0 100%, 0 28%);
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.sd-touch-btn::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: rgb(7 5 20 / 0.7);
+  clip-path: inherit;
+}
+
+.sd-touch-btn:active::before {
+  background: color-mix(in srgb, var(--sd-edge) 40%, rgb(7 5 20 / 0.7));
+}
+
+/* Ampumanappi isompi ja meripihkainen: sitä painetaan koko ajan */
+.sd-touch-btn--fire {
+  --sd-edge: var(--sd-amber);
+  width: max(72px, 21cqw);
+  color: color-mix(in srgb, var(--sd-amber) 30%, #fff);
+}
+
+.sd-touch-btn--bomb small {
+  font-family: var(--sd-mono);
+  font-size: 1.2em;
+  color: var(--sd-amber);
+}
+
+.sd-touch-btn:disabled {
+  opacity: 0.4;
+}
+
 /* ── Ohjevihje pelin alussa: näppäimet tai sormi laitteen mukaan ── */
 .sd-hint {
   position: absolute;
@@ -287,6 +429,66 @@
     0.03em 0 color-mix(in srgb, var(--violet) 45%, transparent);
 }
 
+/* Pisteet ja tuhotut kuin mittarinäytössä */
+.sd-result-stats {
+  display: flex;
+  gap: 6cqw;
+}
+
+.sd-result-stats div {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0.6cqw;
+}
+
+.sd-result-stats dt {
+  color: var(--muted);
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.3cqw);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sd-result-stats dd {
+  margin: 0;
+  color: var(--cyan);
+  font-family: var(--sd-font);
+  font-size: max(14px, 5cqw);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sd-result-record {
+  color: var(--sd-amber);
+  font-family: var(--sd-font);
+  font-size: max(11px, 3.4cqw);
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  animation: sd-hull-warn 0.9s linear 4;
+}
+
+/* Tyhjennä tallennukset: tarkoituksella huomaamaton, ettei sitä paina vahingossa */
+.sd-clear {
+  padding: 1cqw 2cqw;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--sd-mono);
+  font-size: max(9px, 2.4cqw);
+  letter-spacing: 0.08em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.sd-clear:hover,
+.sd-clear:focus-visible {
+  color: var(--text);
+}
+
 .sd-result-text {
   max-width: 62ch;
   color: var(--muted);
@@ -350,6 +552,41 @@
     width: 24px;
   }
 
+  .sd-hud-gear {
+    gap: 4px;
+  }
+
+  .sd-bomb-dot {
+    width: 6px;
+  }
+
+  .sd-hud-weapon {
+    font-size: 7px;
+  }
+
+  .sd-boss-name {
+    font-size: 7px;
+  }
+
+  .sd-touch-btn {
+    width: 44px;
+    font-size: 7px;
+  }
+
+  .sd-touch-btn--fire {
+    width: 54px;
+  }
+
+  .sd-result-panel {
+    gap: 6px;
+    padding: 12px 10px;
+  }
+
+  /* Selitysteksti ei mahdu: pisteet, ennätys ja napit riittävät */
+  .sd-result-note {
+    display: none;
+  }
+
   .sd-hint {
     width: 88%;
     font-size: 8px;
@@ -368,6 +605,7 @@
 @media (prefers-reduced-motion: reduce) {
   .sd-hint,
   .sd-result,
+  .sd-result-record,
   .sd-hull-cell.is-full.is-low {
     animation: none;
   }

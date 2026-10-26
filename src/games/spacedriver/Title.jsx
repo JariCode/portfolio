@@ -8,7 +8,8 @@ import './Title.css';
 // Ohjaimet näytetään Ohjeet-paneelissa; sama lista kuin pelin näppäinkäsittelyssä
 const CONTROLS = [
   { keys: ['←', '↑', '↓', '→'], alt: 'WASD', label: 'Liiku' },
-  { keys: ['Välilyönti'], alt: '', label: 'Pommi' },
+  { keys: ['Välilyönti'], alt: '', label: 'Ammu' },
+  { keys: ['B'], alt: '', label: 'Pommi' },
   { keys: ['M'], alt: '', label: 'Äänet päälle/pois' },
   { keys: ['Esc'], alt: '', label: 'Sulje peli' },
 ];
@@ -115,7 +116,7 @@ export default function Title({ onStart }) {
             ))}
           </dl>
           <p className="sd-help-text">
-            Alus ampuu itse. Puhelimella vedä alusta sormella. Väistä esteitä ja ammuksia, kerää tehostimia ja selviä kolmen sektorin läpi.
+            Pidä välilyöntiä pohjassa, niin alus ampuu. Puhelimella vedä alusta sormella ja ammu Ammu-napista. Väistä kiviä ja ammuksia, kerää tehostimia ja kaada sektorin lopussa odottava pomo.
           </p>
           <button type="button" className="sd-btn sd-btn--ghost sd-help-close" onClick={() => setHelp(false)}>
             Selvä
