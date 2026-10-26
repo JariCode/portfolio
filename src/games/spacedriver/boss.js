@@ -32,6 +32,9 @@ export class Boss {
     this.x = this.center;
     this.y = cam.scrollY - 200;
     this.t = 0;
+    // Heilunnan vaihe kasvaa vasta saapumisen jälkeen ja nopeuden mukaan: pomo lähtee
+    // heilumaan keskeltä eikä hyppää, kun saapuminen päättyy tai raivo muuttaa nopeutta
+    this.phase = 0;
     this.entering = true;
     this.dead = false;
     this.attack = 0;
@@ -91,7 +94,10 @@ export class Boss {
   update(dt, cam, ship) {
     if (this.dead) return [];
     this.t += dt;
-    if (!this.entering) this.x = this.center + Math.sin(this.t * (this.rage ? 0.9 : 0.6)) * this.sway;
+    if (!this.entering) {
+      this.phase += dt * (this.rage ? 0.9 : 0.6);
+      this.x = this.center + Math.sin(this.phase) * this.sway;
+    }
     this.parts.forEach((p) => p.setPosition(this.x, this.y));
     if (this.entering) return [];
 

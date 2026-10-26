@@ -52,10 +52,11 @@ export const SECTORS = [
       [2, 3, 'fighter', 'suora'],
       [2, 8, 'fighter', 'suora'],
     ],
+    // Ensimmäinen pommi vasta kolmanneksen jälkeen ja lisäase puolivälissä (kanjonissa)
     pickups: [
-      [43, 6, 'pommi'],
-      [38, 6, 'ase'],
-      [24, 5, 'energia'],
+      [31, 6, 'pommi'],
+      [25, 5, 'ase'],
+      [20, 6, 'energia'],
       [17, 7, 'pommi'],
       [13, 6, 'kilpi'],
       [9, 4, 'energia'],
