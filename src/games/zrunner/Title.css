@@ -186,6 +186,12 @@
   letter-spacing: 0.08em;
 }
 
+/* Ennätys ja tyhjennyslinkki hieman alemmas: muuten syaanit luvut osuvat taustan 24H-kylttiin */
+.zr-record,
+.zr-title-clear {
+  translate: 0 2cqw;
+}
+
 .zr-record strong {
   color: var(--cyan);
 }
