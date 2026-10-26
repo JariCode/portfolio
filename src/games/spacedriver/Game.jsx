@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Phaser from 'phaser';
 import SpaceScene, { GAME_W, GAME_H, MAX_BOMBS, MAX_HP, MAX_WEAPON, NEW_RUN } from './SpaceScene.js';
 import { WEAPON_NAMES } from './player.js';
@@ -7,7 +7,8 @@ import { Frame } from './Hud.jsx';
 import HyperJump from './HyperJump.jsx';
 import Outro from './Outro.jsx';
 import { clearSaves, readRecord, saveRecord } from './score.js';
-import { isMuted, onMuteChange, playMusic, setMuted } from './sound.js';
+import { playMusic } from './sound.js';
+import MuteButton from './MuteButton.jsx';
 import './Game.css';
 
 const EMPTY_HUD = { hp: MAX_HP, score: 0, progress: 0, bombs: NEW_RUN.bombs, weapon: NEW_RUN.weapon, sector: 0, name: SECTORS[0].name, boss: null };
@@ -45,8 +46,6 @@ export default function Game({ onExit }) {
   // Nykyisen sektorin alku: kaatuessa yritetään uudelleen tästä, ei koko pelin alusta
   const sectorStartRef = useRef(FIRST_SECTOR);
   const [hint, setHint] = useState(true);
-  // Mykistys on sound.js:ssä, jotta M-näppäin (SpaceDriver.jsx) ja nappi pysyvät samassa tilassa
-  const muted = useSyncExternalStore(onMuteChange, isMuted);
 
   // Phaser luodaan kerran ja tuhotaan, kun pelinäkymä suljetaan (modaali, Esc, valikkoon)
   useEffect(() => {
@@ -222,26 +221,7 @@ export default function Game({ onExit }) {
 
         <div className="sd-hud-right">
           <span className="sd-hud-score">{digits(hud.score)}</span>
-          {/* Hiiren painallus ei vie fokusta napille, ettei välilyönti (ampuminen) paina nappia */}
-          <button
-            type="button"
-            className={`sd-mute${muted ? ' is-muted' : ''}`}
-            aria-pressed={muted}
-            aria-label="Mykistä äänet (M)"
-            title="Mykistä äänet (M)"
-            tabIndex={-1}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => setMuted(!muted)}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path className="sd-mute-speaker" d="M4 9h4l5-4v14l-5-4H4z" />
-              {muted ? (
-                <path className="sd-mute-wave" d="M16 9l6 6M22 9l-6 6" />
-              ) : (
-                <path className="sd-mute-wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" />
-              )}
-            </svg>
-          </button>
+          <MuteButton />
         </div>
 
         {/* Sektorin eteneminen; pomon aikana tilalla pomon energia */}
@@ -286,6 +266,8 @@ export default function Game({ onExit }) {
 
       {jump && <HyperJump from={jump.from} to={jump.to} onDone={endJump} />}
       {outro && <Outro onDone={endOutro} />}
+      {/* Animaatiot peittävät HUDin, joten niiden ajaksi mykistysnappi kelluu päällä */}
+      {(jump || outro) && <MuteButton className="sd-mute--float" />}
 
       {hint && !result && (
         <p className="sd-hint" aria-hidden="true">

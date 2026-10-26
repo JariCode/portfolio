@@ -11,12 +11,16 @@ const ENTER_Y = 320; // pomon keskikohta ruudulla taistelun aikana (HUDin alapuo
 const ROCK_MARGIN = 10;
 const ENTER_MS = 2600;
 const SWAY = 210; // sivuttaisliikkeen enimmäislaajuus (px); kivet voivat kaventaa sitä
+// Hyökkäysten väli oletuksena (sektorin 1 pomo); sectors.js voi antaa omat
 const ATTACK_MS = 1700;
 const RAGE_ATTACK_MS = 1050;
 
 export class Boss {
-  // def: { type, name, hp, points, rx?, ry? }, sectors.js. rx/ry: osuma-alueen soikio, jos
-  // pomon kuva on eri kokoinen kuin risteilijän (oletus 68 × 84)
+  // def: { type, name, hp, points, rx?, ry?, attack?, rage?, speed? }, sectors.js.
+  // rx/ry: osuma-alueen soikio, jos pomon kuva on eri kokoinen kuin risteilijän (oletus 68 × 84).
+  // attack/rage: hyökkäysten väli (ms) normaalisti ja raivossa, speed: heilunnan nopeus
+  // (kerroin). Myöhempien sektorien pomot ovat näillä nopeampia, koska pelaajalla on niitä
+  // vastaan parempi ase.
   constructor(scene, fleet, def, cam) {
     this.scene = scene;
     this.fleet = fleet;
@@ -26,6 +30,9 @@ export class Boss {
     this.maxHp = def.hp;
     this.rx = def.rx ?? 68;
     this.ry = def.ry ?? 84;
+    this.attackMs = def.attack ?? ATTACK_MS;
+    this.rageMs = def.rage ?? RAGE_ATTACK_MS;
+    this.speed = def.speed ?? 1;
     // Pomo pysyy kivien välissä: haetaan taistelukorkeudelta vapaa leveys ja heilutaan sen sisällä
     const span = this.freeSpan(cam.scrollY + ENTER_Y);
     this.center = (span.min + span.max) / 2;
@@ -39,7 +46,7 @@ export class Boss {
     this.entering = true;
     this.dead = false;
     this.attack = 0;
-    this.nextAttack = ATTACK_MS / 1000;
+    this.nextAttack = this.attackMs / 1000;
 
     const base = `${fleet}-${def.type}`;
     this.key = base;
@@ -96,7 +103,7 @@ export class Boss {
     if (this.dead) return [];
     this.t += dt;
     if (!this.entering) {
-      this.phase += dt * (this.rage ? 0.9 : 0.6);
+      this.phase += dt * (this.rage ? 0.9 : 0.6) * this.speed;
       this.x = this.center + Math.sin(this.phase) * this.sway;
     }
     this.parts.forEach((p) => p.setPosition(this.x, this.y));
@@ -104,7 +111,7 @@ export class Boss {
 
     this.nextAttack -= dt;
     if (this.nextAttack > 0) return [];
-    this.nextAttack = (this.rage ? RAGE_ATTACK_MS : ATTACK_MS) / 1000;
+    this.nextAttack = (this.rage ? this.rageMs : this.attackMs) / 1000;
     this.weapons.play(`${this.key}-aseet`);
     const kind = this.attack++ % 3;
     const aim = Math.atan2(ship.x - this.x, ship.y - this.y);

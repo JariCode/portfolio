@@ -110,60 +110,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Mykistysnappi viistetyin kulmin kuin muut napit. HUD ei ota painalluksia vastaan,
-   joten nappi sallii ne erikseen. */
-.sd-mute {
-  display: grid;
-  place-items: center;
-  width: max(30px, 7.4cqw);
-  aspect-ratio: 1;
-  padding: 0;
-  border: 0;
-  background: color-mix(in srgb, var(--cyan) 50%, transparent);
-  color: var(--cyan);
-  cursor: pointer;
-  pointer-events: auto;
-  clip-path: polygon(30% 0, 100% 0, 100% 70%, 70% 100%, 0 100%, 0 30%);
-  transition: background 0.2s, color 0.2s;
-}
-
-/* Tumma sisus ohuen reunan sisällä (sama tekniikka kuin .sd-btn) */
-.sd-mute::before {
-  content: '';
-  grid-area: 1 / 1;
-  width: calc(100% - 3px);
-  height: calc(100% - 3px);
-  background: #070514;
-  clip-path: inherit;
-}
-
-.sd-mute svg {
-  grid-area: 1 / 1;
-  z-index: 1;
-  width: 55%;
-  height: 55%;
-}
-
-.sd-mute:hover {
-  background: var(--cyan);
-}
-
-.sd-mute.is-muted {
-  background: color-mix(in srgb, var(--sd-amber) 60%, transparent);
-  color: var(--sd-amber);
-}
-
-.sd-mute-speaker {
-  fill: currentColor;
-}
-
-.sd-mute-wave {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: square;
-}
-
 /* Etenemispalkki HUDin alla: koko leveys = koko sektori */
 .sd-progress {
   grid-column: 1 / -1;
@@ -572,7 +518,7 @@
     letter-spacing: 0.06em;
   }
 
-  .sd-mute {
+  .sd-hud .sd-mute {
     width: 24px;
   }
 
