@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Starfield from './Starfield.jsx';
 import Ship from './Ship.jsx';
 import { Frame, Status } from './Hud.jsx';
-import { readRecord } from './score.js';
+import { readRecord, readResume } from './score.js';
 import './Title.css';
 
 // Ohjaimet näytetään Ohjeet-paneelissa; sama lista kuin pelin näppäinkäsittelyssä
@@ -24,13 +24,15 @@ const DRIFTERS = [
 // Ennätys mittarinäytön tapaan aina kuusinumeroisena
 const digits = (score) => String(score).padStart(6, '0');
 
-export default function Title({ onStart }) {
+// onResume(jatkokohta): keskeneräinen peli jatkuu tallennetusta kohdasta (score.js)
+export default function Title({ onStart, onResume }) {
   // Ennätys luetaan vain näytettäväksi; tallennus tapahtuu loppuruudussa (score.js)
   const [record] = useState(readRecord);
+  const [resume] = useState(readResume);
   const [help, setHelp] = useState(false);
   const startRef = useRef(null);
 
-  // Aloita-nappi saa fokuksen, joten Enter ja välilyönti käynnistävät pelin heti
+  // Pääpainike (Jatka tai Aloita peli) saa fokuksen, joten Enter ja välilyönti käynnistävät heti
   useEffect(() => {
     startRef.current?.focus({ preventScroll: true });
   }, []);
@@ -74,8 +76,19 @@ export default function Title({ onStart }) {
         </p>
 
         <div className="sd-actions">
-          <button ref={startRef} type="button" className="sd-btn sd-btn--start" onClick={onStart}>
-            Aloita peli
+          {/* Keskeneräinen peli: Jatka on pääpainike ja Uusi peli aloittaa alusta */}
+          {resume && (
+            <button ref={startRef} type="button" className="sd-btn sd-btn--start" onClick={() => onResume(resume)}>
+              Jatka · Sektori {resume.sector + 1}
+            </button>
+          )}
+          <button
+            ref={resume ? null : startRef}
+            type="button"
+            className={`sd-btn ${resume ? 'sd-btn--ghost' : 'sd-btn--start'}`}
+            onClick={onStart}
+          >
+            {resume ? 'Uusi peli' : 'Aloita peli'}
           </button>
           <button
             type="button"

@@ -6,7 +6,7 @@ import { SECTORS } from './sectors.js';
 import { Frame } from './Hud.jsx';
 import HyperJump from './HyperJump.jsx';
 import Outro from './Outro.jsx';
-import { clearSaves, readRecord, saveRecord } from './score.js';
+import { clearResume, clearSaves, readRecord, saveRecord, saveResume } from './score.js';
 import { playMusic } from './sound.js';
 import MuteButton from './MuteButton.jsx';
 import './Game.css';
@@ -25,7 +25,10 @@ function endResult(kind, stats) {
   return { kind, ...stats, newRecord, best: readRecord() };
 }
 
-export default function Game({ onExit }) {
+// resume: jatkokohta { sector, carry } (Jatka-nappi) tai null, jolloin peli alkaa alusta
+export default function Game({ onExit, resume }) {
+  // Tallennettu sektori tarkistetaan: jos sitä ei ole (esim. vanha tallennus), aloitetaan alusta
+  const first = resume && SECTORS[resume.sector] ? resume : FIRST_SECTOR;
   const rootRef = useRef(null);
   const hostRef = useRef(null);
   const touchRef = useRef(null);
@@ -35,7 +38,7 @@ export default function Game({ onExit }) {
   // fire: ampumanappi pohjassa, bomb: pommin painallusten laskuri (scene käyttää uudet),
   // hold: seuraava sektori odottaa hyperhypyn takana.
   const controlsRef = useRef({ fire: false, bomb: 0, hold: false });
-  const [hud, setHud] = useState(EMPTY_HUD);
+  const [hud, setHud] = useState({ ...EMPTY_HUD, ...first.carry, sector: first.sector, name: SECTORS[first.sector].name });
   // result: { kind: 'clear' | 'dead', sector, score, kills, newRecord, best }
   const [result, setResult] = useState(null);
   // Hyperhyppy sektorien välissä: { from, to: { index, name } }
@@ -44,7 +47,7 @@ export default function Game({ onExit }) {
   const [outro, setOutro] = useState(false);
   const finalRef = useRef(null);
   // Nykyisen sektorin alku: kaatuessa yritetään uudelleen tästä, ei koko pelin alusta
-  const sectorStartRef = useRef(FIRST_SECTOR);
+  const sectorStartRef = useRef(first);
   const [hint, setHint] = useState(true);
 
   // Phaser luodaan kerran ja tuhotaan, kun pelinäkymä suljetaan (modaali, Esc, valikkoon)
@@ -63,11 +66,13 @@ export default function Game({ onExit }) {
       loader: { imageLoadType: 'HTMLImageElement' },
       // Phaserin oma ääni pois: äänet soitetaan sound.js:llä, jota myös animaatiot käyttävät
       audio: { noAudio: true },
-      scene: [SpaceScene],
       callbacks: {
         preBoot: (g) => g.registry.set('controls', controlsRef.current),
       },
     });
+
+    // Scene lisätään erikseen, jotta se alkaa oikeasta sektorista (alusta tai jatkokohdasta)
+    game.scene.add('space', SpaceScene, true, sectorStartRef.current);
 
     game.events.on('sd-hud', setHud);
     // Sektori läpi: seuraavaan sektoriin hyperhypyllä, viimeisen jälkeen lopputekstit ja
@@ -75,6 +80,8 @@ export default function Game({ onExit }) {
     game.events.on('sd-clear', (stats) => {
       const next = stats.sector + 1;
       if (!SECTORS[next]) {
+        // Peli on pelattu loppuun, joten jatkokohtaa ei enää tarvita
+        clearResume();
         finalRef.current = stats;
         setOutro(true);
         // Sama musiikki kuin alkuanimaatiossa
@@ -84,6 +91,8 @@ export default function Game({ onExit }) {
       const { hp, score, bombs, weapon, kills } = stats;
       const start = { sector: next, carry: { hp, score, bombs, weapon, kills } };
       sectorStartRef.current = start;
+      // Jatkokohta talteen: peliä voi jatkaa tästä myöhemmin (myös sivun päivityksen jälkeen)
+      saveResume(start);
       setJump({ from: stats.sector, to: { index: next, name: SECTORS[next].name } });
       playMusic('intro', { loop: false, fadeIn: 0.3 });
       // Seuraava sektori latautuu jo välianimaation aikana (uuden laivaston kuvat), jottei

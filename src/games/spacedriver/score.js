@@ -1,9 +1,9 @@
-// Space Driverin ennätyksen tallennus. Yhteinen aloitusnäkymälle ja loppuruudulle.
-// Pisteiden laskenta lisätään, kun viholliset ovat mukana (vaihe 5).
+// Space Driverin ennätyksen ja jatkokohdan tallennus. Yhteinen aloitusnäkymälle ja pelikentälle.
 // localStorage-kutsut ovat try/catchissa: selain voi estää tallennuksen (esim. yksityinen selaus).
 
 const SAVE_PREFIX = 'jaricode:spacedriver:';
 const RECORD_KEY = `${SAVE_PREFIX}ennatys`;
+const RESUME_KEY = `${SAVE_PREFIX}jatko`;
 
 // Ennätys: { score, sector, kills }. Väärän muotoinen tallennus ohitetaan.
 export function readRecord() {
@@ -24,6 +24,37 @@ export function saveRecord(result) {
     return true;
   } catch {
     return false;
+  }
+}
+
+// Jatkokohta: { sector, carry } eli sektorin alku, josta keskeneräistä peliä voi jatkaa
+// myöhemmin (sama kohta, josta kaatuessa yritetään uudelleen). Tallennetaan, kun ensimmäinen
+// sektori on läpäisty, ja poistetaan, kun peli on pelattu loppuun tai aloitetaan alusta.
+// Väärän muotoinen tallennus ohitetaan: Game.jsx tarkistaa vielä, että sektori on olemassa.
+export function readResume() {
+  try {
+    const resume = JSON.parse(localStorage.getItem(RESUME_KEY));
+    const { sector, carry } = resume ?? {};
+    const valid = Number.isInteger(sector) && sector > 0 && carry && Object.values(carry).every(Number.isFinite);
+    return valid ? resume : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveResume(start) {
+  try {
+    localStorage.setItem(RESUME_KEY, JSON.stringify(start));
+  } catch {
+    // Tallennus estetty: jatkaminen ei vain ole mahdollista
+  }
+}
+
+export function clearResume() {
+  try {
+    localStorage.removeItem(RESUME_KEY);
+  } catch {
+    // Tallennus estetty: ei mitään poistettavaa
   }
 }
 
