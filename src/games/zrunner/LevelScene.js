@@ -455,6 +455,7 @@ export default class LevelScene extends Phaser.Scene {
     if (this.finished || !this.player.alive) return;
     this.elapsed += delta;
     this.train?.update(this.elapsed, delta);
+    if (!this.player.alive) return;
 
     const p = this.player;
     const body = p.body;
