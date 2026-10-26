@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import CityScape from './CityScape.jsx';
-import { readRecord } from './score.js';
+import { readRecord, readResume } from './score.js';
 import './Title.css';
 
 // Ohjaimet näytetään Ohjeet-paneelissa; sama lista kuin pelin näppäinkäsittelyssä
@@ -8,16 +8,19 @@ const CONTROLS = [
   { keys: ['←', '→'], alt: 'A / D', label: 'Liiku' },
   { keys: ['Välilyönti'], alt: '↑ / W', label: 'Hyppää' },
   { keys: ['X'], alt: 'K', label: 'Lyö' },
+  { keys: ['M'], alt: '', label: 'Äänet päälle/pois' },
   { keys: ['Esc'], alt: '', label: 'Sulje peli' },
 ];
 
-export default function Title({ onStart }) {
+// onResume(jatkokohta): keskeneräinen peli jatkuu tallennetusta kohdasta (score.js)
+export default function Title({ onStart, onResume }) {
   // Ennätys luetaan vain näytettäväksi; tallennus tapahtuu maalissa (score.js)
   const [record] = useState(readRecord);
+  const [resume] = useState(readResume);
   const [help, setHelp] = useState(false);
   const startRef = useRef(null);
 
-  // Aloita-nappi saa fokuksen, joten Enter ja välilyönti käynnistävät pelin heti
+  // Pääpainike (Jatka tai Aloita peli) saa fokuksen, joten Enter ja välilyönti käynnistävät heti
   useEffect(() => {
     startRef.current?.focus({ preventScroll: true });
   }, []);
@@ -41,9 +44,21 @@ export default function Title({ onStart }) {
         <p className="zr-sub">Kolme maailmaa · yksi yö · liikaa zombeja</p>
 
         <div className="zr-actions">
-          <button ref={startRef} type="button" className="zr-btn zr-btn--start" onClick={onStart}>
-            <span className="zr-btn-play" aria-hidden="true" />
-            Aloita peli
+          {/* Keskeneräinen peli: Jatka on pääpainike ja Uusi peli aloittaa alusta */}
+          {resume && (
+            <button ref={startRef} type="button" className="zr-btn zr-btn--start" onClick={() => onResume(resume)}>
+              <span className="zr-btn-play" aria-hidden="true" />
+              Jatka · Maailma {resume.world + 1}
+            </button>
+          )}
+          <button
+            ref={resume ? null : startRef}
+            type="button"
+            className={`zr-btn ${resume ? 'zr-btn--ghost' : 'zr-btn--start'}`}
+            onClick={onStart}
+          >
+            {!resume && <span className="zr-btn-play" aria-hidden="true" />}
+            {resume ? 'Uusi peli' : 'Aloita peli'}
           </button>
           <button
             type="button"
