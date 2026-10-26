@@ -41,7 +41,7 @@ export const profile = {
   // Kuvat ja video
   aboutImg: 'img/esittely.webp',
   contactImg: 'img/yhteys.webp',
-  cvPhoto: 'img/autossa.webp',
+  cvPhoto: 'img/cv.webp',
   videoCv: 'video/VideoCv.mp4',
 };
 
