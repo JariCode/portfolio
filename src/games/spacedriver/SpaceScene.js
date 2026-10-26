@@ -184,8 +184,7 @@ export default class SpaceScene extends Phaser.Scene {
     this.input.on('pointerup', release);
     this.input.on('pointerupoutside', release);
 
-    // Pitkä hyperhypyn ääni hiljennetään, jos peli suljetaan kesken. Sektorin vaihtuessa se
-    // saa soida loppuun, koska välianimaatio jatkaa samaa hyppyä.
+    // Pitkä hyperhypyn ääni hiljennetään, jos peli suljetaan kesken
     this.events.once('destroy', () => this.stopJump?.(0.3));
 
     this.hudKey = '';
@@ -483,10 +482,19 @@ export default class SpaceScene extends Phaser.Scene {
     });
   }
 
+  // Täydellä rungolla, täysillä pommeilla tai parhaalla aseella tehostinta ei kerätä:
+  // se jäisi hyödyttä käyttämättä, joten se jää paikalleen myöhempää varten
+  needs(type) {
+    if (type === 'energia') return this.hp < MAX_HP;
+    if (type === 'pommi') return this.bombs < MAX_BOMBS;
+    if (type === 'ase') return this.weapon < MAX_WEAPON;
+    return true;
+  }
+
   updatePickups(dt) {
     this.pickups = this.pickups.filter((p) => {
       p.update(dt);
-      if (this.finished || !p.near(this.ship.x, this.ship.y)) {
+      if (this.finished || !p.near(this.ship.x, this.ship.y) || !this.needs(p.type)) {
         // Ruudun alareunan alle jäänyt tehostin poistuu
         if (p.y - this.cameras.main.scrollY < GAME_H + 80) return true;
         p.destroy();
@@ -667,10 +675,13 @@ export default class SpaceScene extends Phaser.Scene {
     this.ship.setAlpha(1);
     this.ship.setBoost(true);
     this.emitHud();
-    // Hyperhyppy alkaa samaan aikaan kuin alus kiihdyttää ruudun yläreunan yli
-    this.time.delayedCall(300, () => {
-      this.stopJump = play('hyperjump', { volume: 0.45 });
-    });
+    // Viimeisen sektorin jälkeen hyppyääni soi tässä, kun alus kiihdyttää ruudun yläreunan yli.
+    // Muuten ääni soi seuraavan sektorin välianimaatiossa (HyperJump.jsx).
+    if (!SECTORS[this.sectorIndex + 1]) {
+      this.time.delayedCall(300, () => {
+        this.stopJump = play('hyperjump', { volume: 0.45 });
+      });
+    }
     this.tweens.add({
       targets: this.ship,
       y: this.cameras.main.scrollY - 120,

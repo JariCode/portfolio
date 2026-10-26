@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import Starfield from './Starfield.jsx';
 import Ship from './Ship.jsx';
 import { Frame, Status } from './Hud.jsx';
+import { play } from './sound.js';
 import './HyperJump.css';
 
 // Hyperhyppy sektorista seuraavaan: tähdet viiruina, alus täysillä moottoreilla, ja
@@ -16,9 +17,20 @@ export default function HyperJump({ from, to, onDone }) {
     // "Vähennä liikettä" -asetuksella välianimaatio ohitetaan
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const done = setTimeout(onDone, reduce ? 0 : DURATION);
+    // Hypyn ääni alkaa tähtien venyessä. Ajastimen kautta, jotta React StrictModen kaksoisajo
+    // (kehitystilassa) ei soita ääntä kahdesti tai katkaise sitä heti alussa.
+    let stopJump;
+    const sound = setTimeout(() => {
+      stopJump = play('hyperjump', { volume: 0.45 });
+    }, 100);
     // Ohita-nappi saa fokuksen, joten Enter ja välilyönti ohittavat animaation
     skipRef.current?.focus({ preventScroll: true });
-    return () => clearTimeout(done);
+    return () => {
+      clearTimeout(done);
+      clearTimeout(sound);
+      // Ohitettaessa ääni häivytetään, ettei se jää soimaan sektorin päälle
+      stopJump?.(0.6);
+    };
   }, [onDone]);
 
   const done = `Sektori ${from + 1} selvitetty`;
