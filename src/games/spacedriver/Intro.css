@@ -165,21 +165,39 @@
   max-width: none;
   color: var(--text);
   font-family: var(--sd-font);
-  font-size: 10cqw;
+  font-size: 8cqw;
   font-weight: 900;
   letter-spacing: 0.14em;
   text-align: center;
   text-transform: uppercase;
-  /* Viivat kummallakin puolella tekstiä */
-  background:
-    linear-gradient(var(--cyan), var(--cyan)) left 4% center / 9% 2px no-repeat,
-    linear-gradient(var(--cyan), var(--cyan)) right 4% center / 9% 2px no-repeat;
+  /* Viivat kummallakin puolella tekstiä (::before ja ::after): flex jakaa tekstin viereen
+     jäävän tilan viivoille, joten ne eivät mene tekstin alle fontin leveydestä riippumatta */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3cqw;
+  padding: 0 4%;
   text-shadow:
     -0.04em 0 color-mix(in srgb, var(--cyan) 55%, transparent),
     0.03em 0 color-mix(in srgb, var(--sd-amber) 45%, transparent),
     0 0 0.4em color-mix(in srgb, var(--cyan) 40%, transparent);
   clip-path: inset(0 100% 0 0);
   animation: sd-wipe-in 0.6s 1.4s cubic-bezier(0.7, 0, 0.3, 1) forwards, sd-wipe-out 0.5s 3.1s ease-in forwards;
+}
+
+.sd-intro-year::before,
+.sd-intro-year::after {
+  content: '';
+  flex: 1;
+  min-width: 3cqw;
+  height: 2px;
+  background: var(--cyan);
+}
+
+/* letter-spacing jättää viimeisen merkin perään tyhjää: oikea viiva siirretään sen verran
+   lähemmäs, jotta kummallekin puolelle jää yhtä suuri väli */
+.sd-intro-year::after {
+  margin-left: -0.14em;
 }
 
 /* Varoituspalkki: meripihkaiset vinoraidat ylä- ja alareunassa, teksti vilkkuu */
