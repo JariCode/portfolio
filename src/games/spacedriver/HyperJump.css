@@ -156,9 +156,9 @@
   right: 6cqw;
   bottom: 3.4cqw;
   height: max(3px, 0.9cqw);
-  background: repeating-linear-gradient(90deg, var(--sd-amber) 0 3cqw, transparent 3cqw 3.8cqw);
+  background: repeating-linear-gradient(90deg, var(--cyan) 0 3cqw, transparent 3cqw 3.8cqw);
   transform-origin: left;
-  animation: sd-jump-progress 5s linear both;
+  animation: sd-jump-progress 5s steps(10, end) both;
 }
 
 /* Kaksi luokkaa: yhteinen .sd-btn (SpaceDriver.css) tulee buildissa tämän tiedoston jälkeen */
