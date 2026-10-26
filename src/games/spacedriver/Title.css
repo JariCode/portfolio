@@ -218,21 +218,33 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Ohjeiden ollessa auki logo, napit ja alus piilotetaan, etteivät ne pilkistä paneelin takaa */
+.sd-title--help .sd-title-content,
+.sd-title--help .sd-title-hero,
+.sd-title--help .sd-title-drifters {
+  visibility: hidden;
+}
+
 /* ── Ohjeet-paneeli ohjaamon näyttönä ── */
+/* Paneeli on sisältönsä korkuinen ja keskellä näkymää (inset 0 + margin auto); rullautuu
+   vasta, jos sisältö ei mahdu. Teksti skaalautuu näkymän leveyden mukaan rajojen sisällä. */
 .sd-help {
   position: absolute;
-  inset: 12% 6%;
+  inset: 0;
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 3cqw;
-  padding: 0 6cqw 5cqw;
+  gap: 3.4cqw;
+  height: fit-content;
+  max-height: 92%;
+  margin: auto 5%;
+  padding: 0 5cqw 5cqw;
   overflow-y: auto;
   border: 1px solid color-mix(in srgb, var(--cyan) 55%, transparent);
   background:
     repeating-linear-gradient(to bottom, rgb(41 224 255 / 0.04) 0 1px, transparent 1px 4px),
     rgb(5 4 14 / 0.96);
-  font-size: max(10px, 3.1cqw);
+  font-size: clamp(11px, 3.6cqw, 18px);
   clip-path: polygon(var(--sd-cut) 0, 100% 0, 100% calc(100% - var(--sd-cut)), calc(100% - var(--sd-cut)) 100%, 0 100%, 0 var(--sd-cut));
   animation: sd-open 0.25s ease-out both;
 }
@@ -241,14 +253,14 @@
 .sd-help-head {
   display: flex;
   justify-content: space-between;
-  margin-inline: -6cqw;
-  padding: 2.2cqw 6cqw;
+  margin-inline: -5cqw;
+  padding: 2.4cqw 5cqw;
   max-width: none;
   background: color-mix(in srgb, var(--cyan) 16%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
   color: var(--cyan);
   font-family: var(--sd-font);
-  font-size: max(11px, 3.6cqw);
+  font-size: 1.15em;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -263,17 +275,17 @@
 
 .sd-help dl {
   display: grid;
-  gap: 2.2cqw;
+  grid-template-columns: max-content 1fr;
+  align-items: center;
+  gap: 2.4cqw 3.4cqw;
 }
 
+/* Rivit taulukoksi: nimet omaan sarakkeeseen, näppäimet toiseen samalle linjalle */
 .sd-help dl div {
-  display: flex;
-  align-items: center;
-  gap: 3cqw;
+  display: contents;
 }
 
 .sd-help dt {
-  min-width: 8.5em;
   color: var(--muted);
   font-family: var(--sd-mono);
   font-size: 0.9em;
@@ -285,8 +297,15 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1.2cqw;
+  gap: 0.4em;
   margin: 0;
+}
+
+/* Näppäinryhmä pysyy yhdellä rivillä; vain "tai WASD" saa rivittyä alle */
+.sd-help-keys {
+  display: inline-flex;
+  gap: 0.4em;
+  white-space: nowrap;
 }
 
 /* Näppäimet kantikkaina kuin ohjaamon kytkimet */
@@ -310,32 +329,43 @@
 .sd-help-text {
   max-width: none;
   color: var(--muted);
+  line-height: 1.5;
 }
 
 .sd-help-close {
   align-self: flex-start;
 }
 
-/* Pieni näkymä (puhelin vaakatasossa): ohjeet koko alueelle ja tiiviimmin */
-@container (max-width: 360px) {
+/* Hyvin pieni näkymä (puhelin vaakatasossa, pystypeli jää kapeaksi): tiiviimmin ja
+   lähes koko alueelle. Puhelin pystyssä ei osu tähän, joten siellä teksti pysyy isona. */
+@container (max-width: 300px) {
   .sd-help {
-    inset: 3%;
-    gap: 6px;
-    padding: 0 12px 10px;
+    gap: 7px;
+    max-height: 96%;
+    margin: auto 3%;
+    padding: 0 10px 10px;
     font-size: 10px;
   }
 
   .sd-help-head {
-    margin-inline: -12px;
-    padding: 6px 12px;
+    margin-inline: -10px;
+    padding: 6px 10px;
   }
 
   .sd-help dl {
-    gap: 4px;
+    gap: 5px 8px;
   }
 
+  /* Nimi- ja näppäinsarake mahtuvat rinnakkain vain tiiviimpinä */
   .sd-help dt {
-    min-width: 7.5em;
+    font-size: 0.85em;
+    letter-spacing: 0;
+  }
+
+  .sd-help kbd {
+    min-width: 1.4em;
+    padding: 0.1em 0.3em;
+    font-size: 0.8em;
   }
 
   .sd-help .sd-btn {

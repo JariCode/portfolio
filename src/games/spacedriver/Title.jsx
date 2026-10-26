@@ -35,7 +35,7 @@ export default function Title({ onStart }) {
   }, []);
 
   return (
-    <div className="sd-title">
+    <div className={help ? 'sd-title sd-title--help' : 'sd-title'}>
       <Starfield />
 
       <div className="sd-title-drifters" aria-hidden="true">
@@ -104,9 +104,11 @@ export default function Title({ onStart }) {
               <div key={c.label}>
                 <dt>{c.label}</dt>
                 <dd>
-                  {c.keys.map((k) => (
-                    <kbd key={k}>{k}</kbd>
-                  ))}
+                  <span className="sd-help-keys">
+                    {c.keys.map((k) => (
+                      <kbd key={k}>{k}</kbd>
+                    ))}
+                  </span>
                   {c.alt && <span className="sd-help-alt">tai {c.alt}</span>}
                 </dd>
               </div>
