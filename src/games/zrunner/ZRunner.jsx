@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import Title from './Title.jsx';
 import Intro from './Intro.jsx';
+import MuteButton from './MuteButton.jsx';
 import { isMuted, playMusic, setMuted, stopMusic, unlock } from './sound.js';
 import './ZRunner.css';
 
@@ -44,6 +45,8 @@ export default function ZRunner() {
     <div className="zr">
       {phase === 'title' && <Title onStart={start} />}
       {phase === 'intro' && <Intro onDone={play} />}
+      {/* Äänet saa pois jo ennen alkuanimaation musiikkia; pelissä nappi on HUDissa */}
+      {phase !== 'play' && <MuteButton className="zr-mute--float" />}
       {phase === 'play' && (
         <Suspense fallback={<p className="zr-loading">Ladataan…</p>}>
           <Game onExit={toTitle} />

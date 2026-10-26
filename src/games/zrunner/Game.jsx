@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Phaser from 'phaser';
 import LevelScene, { GAME_W, GAME_H, MAX_HP, NEW_RUN } from './LevelScene.js';
 import MetroCutscene from './MetroCutscene.jsx';
@@ -6,7 +6,8 @@ import ParkCutscene from './ParkCutscene.jsx';
 import Outro from './Outro.jsx';
 import { WORLDS } from './worlds.js';
 import { calcScore, clearSaves, formatTime, readRecord, saveRecord } from './score.js';
-import { isMuted, onMuteChange, playMusic, setMuted } from './sound.js';
+import { playMusic } from './sound.js';
+import MuteButton from './MuteButton.jsx';
 import './Game.css';
 
 // Kosketusnapit kirjoittavat samaan olioon, jota scene lukee joka ruudulla
@@ -40,8 +41,6 @@ export default function Game({ onExit }) {
   // Lopputekstit ennen maaliruutua; maaliruudun tiedot odottavat refissä
   const [outro, setOutro] = useState(false);
   const pendingRef = useRef(null);
-  // Mykistys on sound.js:ssä, jotta M-näppäin (ZRunner.jsx) ja nappi pysyvät samassa tilassa
-  const muted = useSyncExternalStore(onMuteChange, isMuted);
 
   // Phaser luodaan kerran ja tuhotaan, kun pelinäkymä suljetaan (modaali, Esc, valikkoon)
   useEffect(() => {
@@ -200,26 +199,7 @@ export default function Game({ onExit }) {
         </span>
         <div className="zr-hud-right">
           <span className="zr-hud-time">{formatTime(hud.time)}</span>
-          {/* Hiiren painallus ei vie fokusta napille: muuten välilyönti (hyppy) painaisi nappia */}
-          <button
-            type="button"
-            className={`zr-mute${muted ? ' is-muted' : ''}`}
-            aria-pressed={muted}
-            aria-label="Mykistä äänet (M)"
-            title="Mykistä äänet (M)"
-            tabIndex={-1}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => setMuted(!muted)}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path className="zr-mute-speaker" d="M4 9h4l5-4v14l-5-4H4z" />
-              {muted ? (
-                <path className="zr-mute-wave" d="M16 9l6 6M22 9l-6 6" />
-              ) : (
-                <path className="zr-mute-wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" />
-              )}
-            </svg>
-          </button>
+          <MuteButton />
         </div>
       </div>
 
@@ -258,6 +238,8 @@ export default function Game({ onExit }) {
       {Cutscene && <Cutscene number={cutscene.number} worldName={cutscene.name} onDone={endCutscene} />}
 
       {outro && <Outro onDone={endOutro} />}
+      {/* Animaatiot peittävät HUDin, joten niiden ajaksi mykistysnappi kelluu päällä */}
+      {(Cutscene || outro) && <MuteButton className="zr-mute--float" />}
 
       {result && (
         <div className={`zr-result zr-result--${result.kind}`} role="dialog" aria-label={result.kind === 'finish' ? 'Maali' : 'Kaaduit'}>
