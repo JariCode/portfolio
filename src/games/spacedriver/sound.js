@@ -151,7 +151,7 @@ export function play(name, { volume = SFX_VOLUME, rate = 1, duration, gap = 0.08
 }
 
 // Taustamusiikki: vaihtaa kappaleen pehmeästi. Sama kappale jatkuu katkeamatta.
-export async function playMusic(name, { loop = true, fadeIn = 1 } = {}) {
+export async function playMusic(name, { loop = true, fadeIn = 1, volume = MUSIC_VOLUME } = {}) {
   if (!ctx || wanted === name) return;
   stopMusic(0.6);
   wanted = name;
@@ -162,7 +162,7 @@ export async function playMusic(name, { loop = true, fadeIn = 1 } = {}) {
   source.buffer = buffer;
   source.loop = loop;
   gain.gain.setValueAtTime(0, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(MUSIC_VOLUME * (levels.get(name) ?? 1), ctx.currentTime + fadeIn);
+  gain.gain.linearRampToValueAtTime(volume * (levels.get(name) ?? 1), ctx.currentTime + fadeIn);
   source.connect(gain).connect(master);
   // Kertasoitto (intro) loppuu itsestään: sama kappale voidaan soittaa myöhemmin uudelleen
   source.onended = () => {

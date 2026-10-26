@@ -49,7 +49,7 @@ export default function Intro({ onDone }) {
     let stopJump;
     const warpTimer = setTimeout(() => {
       setWarp(true);
-      stopJump = play('hyperjump', { volume: 0.8 });
+      stopJump = play('hyperjump', { volume: 0.45 });
     }, WARP_AT);
     // Ohita-nappi saa fokuksen, joten Enter ja välilyönti ohittavat animaation
     skipRef.current?.focus({ preventScroll: true });

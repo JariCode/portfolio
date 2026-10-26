@@ -261,7 +261,7 @@ export default class SpaceScene extends Phaser.Scene {
     // Kartan loppu: pomo saapuu
     if (cam.scrollY <= 0 && !this.boss) {
       this.boss = new Boss(this, this.sector.fleet, this.sector.boss, cam);
-      playMusic('boss');
+      playMusic('boss', { volume: 0.8 });
     }
 
     this.emitHud();
@@ -668,7 +668,7 @@ export default class SpaceScene extends Phaser.Scene {
     this.emitHud();
     // Hyperhyppy alkaa samaan aikaan kuin alus kiihdyttää ruudun yläreunan yli
     this.time.delayedCall(300, () => {
-      this.stopJump = play('hyperjump', { volume: 0.8 });
+      this.stopJump = play('hyperjump', { volume: 0.45 });
     });
     this.tweens.add({
       targets: this.ship,
