@@ -1,0 +1,52 @@
+/* ═══ Mykistysnappi (MuteButton.jsx) ═══ */
+/* HUDissa painallukset on estetty (pointer-events), joten nappi sallii ne erikseen */
+.zr-mute {
+  display: grid;
+  place-items: center;
+  width: max(28px, 2.8cqw);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 50%;
+  background: rgb(3 2 10 / 0.6);
+  color: var(--cyan);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.zr-mute:hover {
+  border-color: var(--cyan);
+}
+
+.zr-mute.is-muted {
+  border-color: color-mix(in srgb, var(--magenta) 55%, transparent);
+  color: var(--magenta);
+}
+
+.zr-mute svg {
+  width: 60%;
+  height: 60%;
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+.zr-mute-speaker {
+  fill: currentColor;
+}
+
+.zr-mute-wave {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Kelluva nappi aloitusnäkymässä ja animaatioissa: vasemmassa alakulmassa Ohita-napin
+   peilikuvana, kaikkien vaiheiden päällä */
+.zr-mute--float {
+  position: absolute;
+  left: 2.4cqw;
+  bottom: 2.4cqw;
+  z-index: 5;
+  width: max(32px, 3.2cqw);
+}
