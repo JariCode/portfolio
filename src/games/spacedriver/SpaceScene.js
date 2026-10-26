@@ -45,6 +45,9 @@ const KNOCKBACK = 340; // kiveen osuminen työntää alusta poispäin (px/s, vai
 const SHIELD_MS = 8000;
 const BOMB_DAMAGE = 20; // pommi tuhoaa pienet viholliset ja vie pomolta palan
 const RAM_DAMAGE = 3; // törmäys viholliseen vahingoittaa myös vihollista
+// Osuma viholliseen tai pomoon: korkeampana ja hiljaisempana kuin oma osuma, ja enintään
+// kerran 0,12 sekunnissa, ettei jatkuva tulitus kuulosta pärinältä
+const HIT_SOUND = { volume: 0.35, rate: 1.5, gap: 0.12 };
 
 // Pisteet tehostimesta ja sektorin läpäisystä (jokaisesta jäljellä olevasta rungon palkista)
 const PICKUP_POINTS = 50;
@@ -429,26 +432,40 @@ export default class SpaceScene extends Phaser.Scene {
     e.die();
   }
 
-  damageEnemy(target, damage) {
+  // loud: räjähdysääni kaatuneelle viholliselle. Pommin kaatamille ei soiteta omaa ääntä,
+  // jotta pommin ääni kuuluu eikä hukku räjähdysten alle.
+  damageEnemy(target, damage, loud = true) {
     if (target === this.boss) {
       if (this.boss.hit(damage)) this.bossDefeated();
+      else if (loud && !this.boss.entering) play('enemyHit', HIT_SOUND);
       return;
     }
-    if (!target.hit(damage)) return;
+    if (!target.hit(damage)) {
+      if (loud) play('enemyHit', HIT_SOUND);
+      return;
+    }
     this.score += target.def.points;
     this.kills += 1;
-    play('explosion', { volume: 0.5, gap: 0.05 });
+    if (loud) play('explosion', { volume: 0.5, gap: 0.05 });
     this.burst(target.x, target.y, 0.6);
+  }
+
+  // Vihollisen laukaus: ääni vain, kun ammuksia todella syntyi. Pomon laukaus on samaa ääntä
+  // matalampana ja kovempana, joten pomo ei tarvitse omaa tiedostoa.
+  enemyShots(bullets, boss = false) {
+    if (!bullets.length) return;
+    this.enemyBullets.push(...bullets);
+    play('enemyShot', boss ? { volume: 0.5, rate: 0.7, gap: 0.1 } : { volume: 0.3, gap: 0.1 });
   }
 
   updateEnemies(dt, scrolled, cam) {
     this.enemies = this.enemies.filter((e) => {
       const keep = e.update(dt, scrolled, cam, this.ship);
       if (!keep) e.destroy();
-      else if (!this.finished) this.enemyBullets.push(...e.shoot(dt, cam, this.ship));
+      else if (!this.finished) this.enemyShots(e.shoot(dt, cam, this.ship));
       return keep;
     });
-    if (this.boss && !this.finished) this.enemyBullets.push(...this.boss.update(dt, cam, this.ship));
+    if (this.boss && !this.finished) this.enemyShots(this.boss.update(dt, cam, this.ship), true);
     this.enemyBullets = this.enemyBullets.filter((b) => {
       b.update(dt, scrolled);
       const sy = b.y - cam.scrollY;
@@ -574,9 +591,9 @@ export default class SpaceScene extends Phaser.Scene {
     this.enemyBullets = [];
     for (const e of this.enemies) {
       const sy = e.y - cam.scrollY;
-      if (!e.dead && sy > -40 && sy < GAME_H + 20) this.damageEnemy(e, BOMB_DAMAGE);
+      if (!e.dead && sy > -40 && sy < GAME_H + 20) this.damageEnemy(e, BOMB_DAMAGE, false);
     }
-    if (this.boss && !this.boss.dead) this.damageEnemy(this.boss, BOMB_DAMAGE);
+    if (this.boss && !this.boss.dead) this.damageEnemy(this.boss, BOMB_DAMAGE, false);
     this.invulnerableUntil = Math.max(this.invulnerableUntil, this.time.now + 800);
     this.emitHud();
   }
