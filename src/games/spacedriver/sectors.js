@@ -23,7 +23,7 @@ import sektori3 from './maps/sektori3.json';
 //          type: battlecruiser tai dreadnought; rx/ry vain, jos kuva on eri kokoinen.
 //          attack/rage/speed: hyökkäystahti ja heilunta (boss.js). Pelaajalla on sektorissa 2
 //          Salama ja sektorissa 3 Plasma, joten niiden pomoilla on enemmän energiaa ja ne
-//          ampuvat tiheämmin: taistelu kestää hieman pidempään kuin sektorin 1 pomoa vastaan.
+//          ampuvat hieman tiheämmin. Taistelu on silti hieman lyhyempi kuin sektorissa 1.
 export const SECTORS = [
   {
     key: 'sektori1',
@@ -123,7 +123,7 @@ export const SECTORS = [
       [13, 6, 'pommi'],
       [9, 5, 'energia'],
     ],
-    boss: { type: 'battlecruiser', name: 'Rynnäkköristeilijä', hp: 340, points: 6000, attack: 1550, rage: 1150, speed: 1.15 },
+    boss: { type: 'battlecruiser', name: 'Rynnäkköristeilijä', hp: 280, points: 6000, attack: 1650, rage: 1250, speed: 1.1 },
   },
   {
     key: 'sektori3',
@@ -182,6 +182,6 @@ export const SECTORS = [
       [13, 7, 'pommi'],
       [9, 6, 'energia'],
     ],
-    boss: { type: 'dreadnought', name: 'Lippulaiva', hp: 600, points: 8000, rx: 70, ry: 94, attack: 1400, rage: 1000, speed: 1.3 },
+    boss: { type: 'dreadnought', name: 'Lippulaiva', hp: 460, points: 8000, rx: 70, ry: 94, attack: 1550, rage: 1150, speed: 1.15 },
   },
 ];
