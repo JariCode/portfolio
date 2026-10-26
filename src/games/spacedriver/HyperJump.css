@@ -1,7 +1,8 @@
 /* ═══ Hyperhyppy sektorista seuraavaan (HyperJump.jsx) ═══ */
 /* Aikajana (s): 0,1 kehys ja tilarivi · 0,2 ilmoitus "Sektori N selvitetty" · 0,3 alus
    nousee · 1,6 valoviiva · 1,9 seuraavan sektorin numero · 2,3 nimi kirjoittuu · 3,0
-   koordinaatit · 4,1 alus kiitää ylös · 4,4 näyttö sulkeutuu · 5,0 loppu (DURATION) */
+   koordinaatit · 3,6 hyperhyppy: tähdet viiruiksi, ääni ja tärinä (HyperJump.jsx WARP_AT) ·
+   4,1 alus kiitää ylös · 4,4 näyttö sulkeutuu · 5,0 loppu (DURATION) */
 .sd-jump {
   position: absolute;
   inset: 0;
@@ -70,6 +71,10 @@
 .sd-jump-ship {
   width: 22cqw;
   filter: drop-shadow(0 1.5cqw 2.5cqw color-mix(in srgb, var(--cyan) 45%, transparent));
+}
+
+/* Hypyn alettua alus tärisee voimasta */
+.sd-jump--warp .sd-jump-ship {
   animation: sd-jump-shake 0.12s linear infinite;
 }
 
@@ -217,7 +222,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sd-jump-ship {
+  .sd-jump--warp .sd-jump-ship {
     animation: none;
   }
 }
