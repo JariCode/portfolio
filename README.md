@@ -50,13 +50,21 @@ Portfoliosivusto, joka kokoaa esittelyn, projektit, CV:n ja yhteydenottolomakkee
 - Somekortit seuraavat hiirtä magneettimaisesti
 
 ### Pelialue (`/pelit/`)
-Kolme selaimessa pelattavaa peliä. Z-Runner on valmis, kaksi muuta ovat tulossa.
+Kolme selaimessa pelattavaa peliä. Z-Runner ja Space Driver 2026 ovat valmiita, Shadow Builder on tulossa.
 
 - **Z-Runner:** tasohyppely neonvaloisessa yökaupungissa (valmis)
-- **Space Driver 2026:** pystysuuntainen avaruusammuskelu (tulossa)
+- **Space Driver 2026:** pystysuuntainen avaruusammuskelu (valmis)
 - **Shadow Builder:** kaupunginrakennus (tulossa)
 
-Peli käynnistyy samalle sivulle pelinäkymään, eikä kävijää ohjata muualle. Pelin koodi ladataan vasta, kun peli avataan, joten se ei hidasta sivun latautumista. Pelinäkymän muoto tulee pelin kuvasuhteesta: pystysuuntainen ammuskelu ja vaakasuuntainen tasohyppely mahtuvat kumpikin kerralla näytölle. Jos peli kaatuu, virhe näkyy pelinäkymässä ja muu sivu toimii normaalisti.
+Peli käynnistyy samalle sivulle kelluvaan pelinäkymään, eikä kävijää ohjata muualle. Pelin koodi ladataan vasta, kun peli avataan, joten se ei hidasta sivun latautumista. Pelinäkymän muoto tulee pelin kuvasuhteesta: pystysuuntainen ammuskelu ja vaakasuuntainen tasohyppely mahtuvat kumpikin kerralla näytölle. Jos peli kaatuu, virhe näkyy pelinäkymässä ja muu sivu toimii normaalisti.
+
+Jokaisella pelillä on oma ilmeensä: omat fontit, värit, napit ja animaatiot. Yhteistä valmiille peleille:
+
+- **Aloitusnäkymä:** Aloita peli, ohjeet ja ennätys. Keskeneräistä peliä voi jatkaa Jatka-napista sen maailman tai sektorin alusta, johon pääsi, myös myöhemmin tai sivun päivityksen jälkeen. Tallennukset voi tyhjentää jo aloitusnäkymässä (vahvistus estää vahinkopoiston).
+- **Animaatiot:** alkuanimaatio, välianimaatiot ja lopputekstit on tehty Reactilla, SVG:llä ja CSS-animaatioilla pelin päälle. Ne voi ohittaa, ja "Vähennä liikettä" -asetus ohittaa ne kokonaan.
+- **Äänet:** Web Audio API:lla. Jokainen äänitiedosto tasataan latauksessa samaan voimakkuuteen, koska eri lähteiden tiedostot on tallennettu hyvin eri tasoilla. Mykistysnappi näkyy jo aloitusnäkymässä ja animaatioissa, pelissä HUDissa, ja M-näppäin mykistää missä vaiheessa tahansa.
+- **Kaatuminen:** uusi yritys alkaa saman maailman tai sektorin alusta ehjällä energialla.
+- **Puhelin:** kosketusnapit ruudulla. Pitkä painallus ei avaa iPhonen suurennuslasia tai valintavalikkoa, eikä tuplanapautus zoomaa.
 
 ### Z-Runner
 Zombitasohyppely kolmessa maailmassa: pelaaja pakenee yön yli kaupungin halki ja pääsee lopulta karkuun autolla.
@@ -68,11 +76,33 @@ Zombitasohyppely kolmessa maailmassa: pelaaja pakenee yön yli kaupungin halki j
 - **Pelattavuus:** juoksu, hyppy (lyhyt painallus = matala hyppy), lyönti ja päälle hyppy. Zombit partioivat, huomaavat pelaajan ja jahtaavat sitä, mutta eivät kävele kuoppiin. Lapsizombit ovat nopeampia mutta kestävät vähemmän.
 - **Kerättävät:** valopallot pisteiksi ja energiapakkaukset lisäenergiaksi. Energia ja pisteet siirtyvät maailmasta toiseen.
 - **Pisteet:** valopallot, kaadetut zombit ja aikabonus. Paras tulos tallennetaan ennätykseksi.
+- **Jatkaminen:** kun maailma on läpäisty, peliä voi jatkaa myöhemmin seuraavan maailman alusta aloitusnäkymän Jatka-napista.
 - **Välianimaatiot:** alkuanimaatio, laskeutuminen metroon ja nousu metrosta puistoon. Kaikki on piirretty SVG:llä ja CSS-animaatioilla, ja ne voi ohittaa.
 - **Lopputekstit:** kuvakulma auton sisältä yöllä kaupungissa ajaessa. Tekijät luetaan tiedostosta `credits.js`.
-- **Äänet:** taustamusiikki, efektit ja mykistys (nappi tai M-näppäin). Ääni alkaa vasta Aloita peli -painalluksesta, koska selaimet estävät automaattisen äänen.
+- **Äänet:** taustamusiikki ja efektit. Ääni alkaa vasta Aloita peli -painalluksesta, koska selaimet estävät automaattisen äänen.
 - **Ohjaus:** nuolet tai A/D, hyppy ylänuolella, W:llä tai välilyönnillä, lyönti X:llä tai K:lla. Puhelimella ruudulle tulevat kosketusnapit.
 - **Rakenne:** kartat on piirretty Tiledissä kolmelle tasolle (Tausta, Maasto, Edusta). Kaikki tilesetit noudattavat samaa laattajärjestystä, joten törmäyssäännöt toimivat jokaisessa maailmassa ilman muutoksia. Taustan parallaksikerrokset, juna, auto ja kerättävät piirretään koodilla canvasille.
+- **Ilme:** neonkyltit, Unbounded-fontti, magenta ja syaani, pyöreät hehkuvat napit.
+
+### Space Driver 2026
+Pystysuuntainen avaruusammuskelu kolmessa sektorissa: yksi alus lähtee kolmea rajan ylittänyttä vihollislaivastoa vastaan. Jokaisen sektorin lopussa odottaa pomo.
+
+- **Sektorit:**
+  1. **Asteroidikenttä:** kivikenttä, jossa lennetään perusaseella
+  2. **Aseman raunio:** telakan suu, käytävän mutka ja reaktorisali
+  3. **Avaruussumu:** kallioharjanteet, kaksoiskallion sola ja kristallikenttä
+- **Pelattavuus:** kartta rullaa alhaalta ylös, ja alus liikkuu vapaasti ruudulla. Kivet ja seinät ovat kiinteitä: alus pysähtyy ja liukuu niiden reunaa pitkin, ja kosketus vie runkoa. Törmäys mitataan laatan kuvan pikseleistä, joten esteen muoto ratkaisee eikä koko laatta.
+- **Viholliset:** kuusi tyyppiä, joilla on omat liikkeet ja ampumatavat. Jokaisella sektorilla on oma laivastonsa ja omat ammuksensa. Viholliset tulevat sektorin edetessä aikataulun mukaan ja väistävät kiviä.
+- **Pomot:** kun kartta loppuu, pomo saapuu. Se heiluu kivien välissä, vuorottelee kolmea hyökkäystä ja raivostuu, kun energiasta on alle puolet jäljellä.
+- **Aseet:** sektorissa 1 lennetään tykillä. Sektorin 2 ase-tehostin antaa Salaman (säteet molemmista piipuista) ja sektorin 3 Plasman (säteiden lisäksi plasmapallo).
+- **Tehostimet:** ase, kilpi (8 s), energia (+2 rungon palkkia) ja pommi. Täydellä rungolla tai pommeilla tehostin jää kartalle myöhempää varten. Pommi tuhoaa ruudulla olevat viholliset ja niiden ammukset ja vie pomolta palan.
+- **Pisteet:** kaadetut viholliset ja pomot, tehostimet sekä bonus jokaisesta rungon palkista, joka on jäljellä sektorin lopussa. Paras tulos tallennetaan ennätykseksi.
+- **Jatkaminen:** kun sektori on läpäisty, peliä voi jatkaa myöhemmin seuraavan sektorin alusta aloitusnäkymän Jatka-napista. Runko, pisteet, pommit ja ase säilyvät.
+- **Välianimaatiot:** alkuanimaatio, jossa vihollislaivasto saapuu ja alus lähtee hyperhyppyyn, ja hyperhyppy sektorista seuraavaan. Seuraava sektori latautuu jo hypyn aikana.
+- **Lopputekstit:** Star Wars -tyylinen rullaus kaukaisuuteen intron tähtitaivaan ja musiikin päällä. Tekijät luetaan tiedostosta `credits.js`.
+- **Ohjaus:** nuolet tai WASD liikuttavat, välilyönti ampuu ja B pudottaa pommin. Puhelimella alusta ohjataan vetämällä sormella, ja ammunta ja pommi ovat napeissa. Kaksi sormea toimii yhtä aikaa.
+- **Rakenne:** kartat on piirretty Tiledissä kolmelle tasolle (Tausta, Esteet, Edusta). Viholliset, tehostimet ja pomo ovat listoina tiedostossa `sectors.js`, joten niitä ei merkitä karttaan. Tähtitausta piirretään koodilla.
+- **Ilme:** aluksen ohjaamon näyttö: kulmakiinnikkeet, tilarivit, mittarinäytön lukemat, Orbitron-fontti, syaani ja meripihka, viistetyt napit. Pikseligrafiikka näytetään terävänä kaksinkertaisena.
 
 ### Muuta
 - Hiireen reagoiva partikkelitausta canvasilla
@@ -100,6 +130,7 @@ src/
   pages/         pelialueen käynnistys ja sivun rakenne
   games/
     zrunner/     Z-Runner: pelikenttä (Phaser), välianimaatiot, äänet, kartat (maps/) ja tekijät
+    spacedriver/ Space Driver 2026: pelikenttä (Phaser), HUD, animaatiot, äänet, kartat (maps/) ja tekijät
   main.jsx       etusivun käynnistys, fontit ja liikkeen vähennysasetus
   App.jsx        etusivun rakenne ja yhteinen tila
   index.css      väripaletti, typografia, perustyylit
@@ -110,7 +141,7 @@ src/
 
 **Kaksi sivua, yhteiset komponentit.** Etusivu ja pelialue ovat Viten monisivutilassa omia HTML-sivujaan, joilla on kummallakin oma käynnistystiedosto. Navigaatio, footer, tausta ja modaali ovat yhteisiä, ja ne saavat tiedon sivusta propina. Etusivun osiot eivät lataudu pelialueelle, eikä pelien koodi lataudu etusivulle.
 
-**Sisältö on erotettu komponenteista.** Kaikki tekstit, projektit, CV:n tiedot ja pelit ovat `src/data/`-tiedostoissa tavallisina JavaScript-olioina. Uusi projekti lisätään yhdellä oliolla, eikä komponentteihin tarvitse koskea. Komponentit päättelevät esitystavan datasta: esimerkiksi YouTube-linkistä tulee traileri-nappi ja muista linkeistä sivustolinkki. Navigaation linkit ovat yhdessä tiedostossa, josta sekä navi että footer ne lukevat. Samoin Z-Runnerin maailmat ovat yhdessä listassa (`worlds.js`): uusi maailma on kartta ja yksi olio.
+**Sisältö on erotettu komponenteista.** Kaikki tekstit, projektit, CV:n tiedot ja pelit ovat `src/data/`-tiedostoissa tavallisina JavaScript-olioina. Uusi projekti lisätään yhdellä oliolla, eikä komponentteihin tarvitse koskea. Komponentit päättelevät esitystavan datasta: esimerkiksi YouTube-linkistä tulee traileri-nappi ja muista linkeistä sivustolinkki. Navigaation linkit ovat yhdessä tiedostossa, josta sekä navi että footer ne lukevat. Samoin Z-Runnerin maailmat (`worlds.js`) ja Space Driverin sektorit (`sectors.js`) ovat listoja: uusi maailma tai sektori on kartta ja yksi olio.
 
 **Yksi yhteinen modaali** (`Modal.jsx`) palvelee trailereita, video-CV:tä, CV:tä, sertifikaatteja, tietosuojaselostetta ja pelejä. Se renderöidään portaalilla suoraan `body`-elementtiin, sulkeutuu Esc-näppäimellä, palauttaa fokuksen ja estää taustan rullauksen.
 
@@ -124,11 +155,12 @@ src/
 - Automaattisesti vaihtuvat esittelyteksti ja projektit voi pysäyttää napista
 - Pelin avautuessa fokus siirtyy pelinäkymään, ja suljettaessa se palaa pelin korttiin
 - Pelin animaatiot voi ohittaa näppäimistöllä (Ohita-nappi saa fokuksen)
+- Aloitusnäkymässä pääpainike (Jatka tai Aloita peli) saa fokuksen, ja tallennusten tyhjennyksessä fokus on Peru-napissa
 - Pääpainikkeiden kosketusalueet vähintään 44 × 44 px
 
 ## Responsiivisuus
 
-Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakatilassa. Mobiilissa navigaatio muuttuu koko ruudun valikoksi, ja videot sekä projektikuvat mitoittuvat matalalle näytölle. Pelialue mahtuu tavallisella näytöllä footereineen kerralla näkyviin. Peli skaalautuu pelinäkymään kuvasuhteensa mukaan, ja kosketusnäytöillä näkyvät ohjausnapit.
+Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakatilassa. Mobiilissa navigaatio muuttuu koko ruudun valikoksi, ja videot sekä projektikuvat mitoittuvat matalalle näytölle. Pelialue mahtuu tavallisella näytöllä footereineen kerralla näkyviin. Peli skaalautuu pelinäkymään kuvasuhteensa mukaan (Z-Runner 16:9, Space Driver 3:4), ja kosketusnäytöillä näkyvät ohjausnapit. Pelien tekstit ja napit mitoitetaan pelinäkymän koon mukaan (container query -yksiköt), ei ikkunan.
 
 ## Tietoturva ja yksityisyys
 
@@ -144,7 +176,7 @@ Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakati
   - liian suuret pyynnöt hylätään
 - Ei evästeitä, analytiikkaa eikä ulkoisia fontteja
 - Pelit toteutetaan kokonaan selaimessa: ei palvelinta, ei API-avaimia eikä ulkoisia lähteitä
-- Pelit tallentavat vain ennätyksen selaimen omaan muistiin (`localStorage`, avaimet muotoa `jaricode:<peli>:<nimi>`). Tallennus tehdään vasta pelatessa, ja pelin lopussa olevalla Tyhjennä tallennukset -napilla sen saa poistettua. Äänten mykistys on vain muistissa, eikä sitä tallenneta.
+- Pelit tallentavat selaimen omaan muistiin (`localStorage`, avaimet muotoa `jaricode:<peli>:<nimi>`) vain ennätyksen ja keskeneräisen pelin jatkokohdan. Tallennus tehdään vasta pelatessa, ja pelin aloitus- tai loppuruudun Tyhjennä tallennukset -napilla ne saa poistettua. Äänten mykistys on vain muistissa, eikä sitä tallenneta.
 - YouTube-upotus ladataan vasta, kun kävijä käynnistää videon, ja se käyttää yksityisyyttä parantavaa tilaa
 - Repossa ei ole salaisuuksia
 
