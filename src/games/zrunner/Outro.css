@@ -154,7 +154,9 @@
   mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
 }
 
-/* Alkaa alueen alapuolelta ja päättyy, kun viimeinen rivi on noussut yläreunan yli */
+/* Alkaa alueen alapuolelta ja päättyy, kun viimeinen rivi on noussut yläreunan yli.
+   Liike tehdään pelkällä transformilla: top-arvon animointi laskee asettelun joka ruudulla
+   uudelleen ja pyöristää tekstin kokonaisiin pikseleihin, jolloin teksti värisee (Edge). */
 .zr-out-roll {
   position: absolute;
   left: 0;
@@ -165,6 +167,7 @@
   line-height: 1.5;
   text-align: center;
   text-shadow: 0 0 0.6cqw #000, 0 0 1.2cqw #000;
+  will-change: transform;
   animation: zr-out-roll var(--zr-roll) 1s linear both;
 }
 
@@ -269,7 +272,8 @@
   to { transform: rotate(3deg); }
 }
 
+/* Loppu: oma korkeus (-100 %) + tekstialueen korkeus (52 % pelinäkymästä = 52cqh) */
 @keyframes zr-out-roll {
-  from { top: 100%; transform: translateY(0); }
-  to { top: 0; transform: translateY(-100%); }
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - 52cqh)); }
 }

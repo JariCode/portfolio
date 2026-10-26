@@ -131,7 +131,7 @@
 }
 
 .zr-pk-flip {
-  animation: zr-pk-flip 0.01s 5.5s steps(1, end) both;
+  animation: zr-pk-flip 5.5s steps(1, end) both;
 }
 
 .zr-pk-park {
