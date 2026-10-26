@@ -65,4 +65,10 @@ export const CREDITS = [
     licenseUrl: CC0_URL,
     changes: VOID_CHANGES,
   },
+  {
+    type: 'tileset',
+    name: 'Asteroidikenttä (asteroidit.png)',
+    author: 'Claude (Anthropic) · Piirretty koodilla',
+    license: 'Tehty tätä peliä varten',
+  },
 ];

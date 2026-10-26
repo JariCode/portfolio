@@ -101,31 +101,15 @@
   100% { transform: translateX(110%); }
 }
 
-/* ── Välisivu: pelikenttä tulee vaiheessa 3 ── */
-.sd-soon {
+/* ── Latausteksti, kun Phaser latautuu vielä alkuanimaation jälkeen ── */
+.sd-loading {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-}
-
-.sd-soon-box {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 3cqw;
-  padding: 6cqw;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--cyan) 75%, transparent);
   font-family: var(--sd-mono);
   font-size: max(10px, 3cqw);
-  text-align: center;
-}
-
-.sd-soon-title {
-  color: var(--cyan);
-  font-family: var(--sd-font);
-  font-size: max(16px, 7cqw);
-  font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }

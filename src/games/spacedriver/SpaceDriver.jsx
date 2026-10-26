@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import '@fontsource-variable/orbitron';
 import Title from './Title.jsx';
 import Intro from './Intro.jsx';
-import Starfield from './Starfield.jsx';
-import { Frame, Status } from './Hud.jsx';
 import { isMuted, playMusic, setMuted, stopMusic, unlock } from './sound.js';
 import './SpaceDriver.css';
 
+// Phaser on iso kirjasto: ladataan vasta, kun pelaaja aloittaa. Aloitusnäkymä ja
+// alkuanimaatio aukeavat heti, ja lataus ehtii yleensä valmiiksi animaation aikana.
+const Game = lazy(() => import('./Game.jsx'));
+const preloadGame = () => import('./Game.jsx');
+
 // Space Driverin vaiheet: aloitusnäkymä → alkuanimaatio → peli.
-// Pelikenttä (Phaser) tulee vaiheessa 3; siihen asti peli-vaiheessa on välisivu.
+// Pelikenttä (Phaser ja Tiled-kartta) on Game.jsx:ssä; se tuhoutuu, kun vaihe vaihtuu.
 // Orbitron-fontti tuodaan täällä eikä koko sivulle: se ladataan vasta, kun peli avataan.
 export default function SpaceDriver() {
   const [phase, setPhase] = useState('title');
@@ -30,6 +33,7 @@ export default function SpaceDriver() {
   const start = useCallback(() => {
     unlock();
     playMusic('intro', { loop: false, fadeIn: 0.3 });
+    preloadGame();
     setPhase('intro');
   }, []);
   const play = useCallback(() => setPhase('play'), []);
@@ -43,18 +47,9 @@ export default function SpaceDriver() {
       {phase === 'title' && <Title onStart={start} />}
       {phase === 'intro' && <Intro onDone={play} />}
       {phase === 'play' && (
-        <div className="sd-soon">
-          <Starfield />
-          <Frame />
-          <Status left="Sektori 1" right="Odottaa" />
-          <div className="sd-soon-box">
-            <p className="sd-soon-title">Sektori 1</p>
-            <p>Lentäminen tulee seuraavassa vaiheessa.</p>
-            <button type="button" className="sd-btn sd-btn--ghost" onClick={toTitle}>
-              Valikkoon
-            </button>
-          </div>
-        </div>
+        <Suspense fallback={<p className="sd-loading">Ladataan…</p>}>
+          <Game onExit={toTitle} />
+        </Suspense>
       )}
     </div>
   );
