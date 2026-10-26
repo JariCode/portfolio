@@ -1,0 +1,178 @@
+/* ═══ Space Driverin lopputekstit (Outro.jsx) ═══ */
+/* Tekstit rullaavat kallistetulla tasolla alhaalta kaukaisuuteen ja haalistuvat yläreunassa.
+   Liike vain transformilla, ettei teksti värise (Z-Runnerin opit). */
+.sd-out {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  background: #000;
+}
+
+.sd-out-frame {
+  opacity: 0;
+  animation: sd-out-on 0.6s 0.2s linear forwards;
+}
+
+/* Näyttämö antaa perspektiivin: kauempana oleva teksti pienenee ja kapenee */
+.sd-out-stage {
+  position: absolute;
+  inset: 0;
+  perspective: 120cqh;
+  perspective-origin: 50% 20%;
+  overflow: hidden;
+  /* Teksti häipyy ennen kuin se katoaa kaukaisuuteen */
+  mask-image: linear-gradient(to bottom, transparent 4%, #000 34%);
+}
+
+.sd-out-roll {
+  position: absolute;
+  top: 0;
+  left: 18%;
+  right: 18%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6cqw;
+  text-align: center;
+  transform-origin: 50% 0;
+  animation: sd-out-roll var(--sd-roll) linear forwards;
+}
+
+/* ── Alku: tunniste, logo ja tarina ── */
+.sd-out-episode {
+  max-width: none;
+  color: var(--cyan);
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.6cqw);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.sd-out-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: none;
+  font-family: var(--sd-font);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.sd-out-logo-space {
+  font-size: 12cqw;
+  letter-spacing: 0.06em;
+  color: var(--cyan);
+  text-shadow:
+    -0.04em 0 color-mix(in srgb, var(--sd-amber) 55%, transparent),
+    0.03em 0 color-mix(in srgb, var(--violet) 45%, transparent);
+}
+
+.sd-out-logo-driver {
+  margin-top: 0.12em;
+  font-size: 9.4cqw;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  text-shadow:
+    -0.04em 0 color-mix(in srgb, var(--cyan) 50%, transparent),
+    0.03em 0 color-mix(in srgb, var(--sd-amber) 45%, transparent);
+}
+
+/* Tarina meripihkana kuin elokuvan alkuteksteissä */
+.sd-out-story {
+  display: flex;
+  flex-direction: column;
+  gap: 4cqw;
+}
+
+.sd-out-story p {
+  max-width: none;
+  color: var(--sd-amber);
+  font-family: var(--sd-font);
+  font-size: 4cqw;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+}
+
+/* ── Tekijät ── */
+.sd-out-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.6cqw;
+}
+
+.sd-out-section h3 {
+  color: var(--cyan);
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.6cqw);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.sd-out-section p {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6cqw;
+  max-width: none;
+}
+
+.sd-out-section strong {
+  color: var(--text);
+  font-family: var(--sd-font);
+  font-size: 3.6cqw;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.sd-out-section span {
+  color: var(--sd-amber);
+  font-family: var(--sd-font);
+  font-size: 2.8cqw;
+}
+
+.sd-out-section small {
+  color: var(--muted);
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.2cqw);
+  letter-spacing: 0.08em;
+}
+
+.sd-out-thanks {
+  max-width: none;
+  margin-top: 8cqw;
+  color: var(--sd-amber);
+  font-family: var(--sd-font);
+  font-size: 4.6cqw;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Kaksi luokkaa: yhteinen .sd-btn (SpaceDriver.css) tulee buildissa tämän tiedoston jälkeen */
+.sd-btn.sd-out-skip {
+  position: absolute;
+  right: 6cqw;
+  bottom: 6cqw;
+  z-index: 2;
+  min-height: 28px;
+  padding: max(4px, 1.2cqw) max(12px, 4cqw);
+  font-size: max(9px, 2.5cqw);
+}
+
+/* ═══ Keyframet ═══ */
+/* Kallistettu taso: rotateX ensin, joten translateY liikuttaa tekstiä tason suuntaisesti.
+   Alku ruudun alareunan alla, loppu kun viimeinenkin rivi on kadonnut kaukaisuuteen. */
+@keyframes sd-out-roll {
+  from { transform: rotateX(30deg) translateY(100cqh); }
+  to { transform: rotateX(30deg) translateY(-100%); }
+}
+
+@keyframes sd-out-on {
+  0%, 24% { opacity: 0; }
+  25%, 49% { opacity: 1; }
+  50%, 69% { opacity: 0.3; }
+  70%, 100% { opacity: 1; }
+}

@@ -5,6 +5,7 @@ import { WEAPON_NAMES } from './player.js';
 import { SECTORS } from './sectors.js';
 import { Frame } from './Hud.jsx';
 import HyperJump from './HyperJump.jsx';
+import Outro from './Outro.jsx';
 import { clearSaves, readRecord, saveRecord } from './score.js';
 import { isMuted, onMuteChange, playMusic, setMuted } from './sound.js';
 import './Game.css';
@@ -16,6 +17,12 @@ const HINT_MS = 5000;
 
 // Pisteet mittarinäytön tapaan aina kuusinumeroisina
 const digits = (n) => String(n).padStart(6, '0');
+
+// Pelin loppu (tuho tai viimeinen sektori läpi): ennätys tallennetaan vain, jos se parani
+function endResult(kind, stats) {
+  const newRecord = saveRecord({ score: stats.score, sector: stats.sector + 1, kills: stats.kills });
+  return { kind, ...stats, newRecord, best: readRecord() };
+}
 
 export default function Game({ onExit }) {
   const rootRef = useRef(null);
@@ -32,6 +39,9 @@ export default function Game({ onExit }) {
   const [result, setResult] = useState(null);
   // Hyperhyppy sektorien välissä: { from, to: { index, name } }
   const [jump, setJump] = useState(null);
+  // Lopputekstit viimeisen sektorin jälkeen; loppuruudun tiedot odottavat refissä
+  const [outro, setOutro] = useState(false);
+  const finalRef = useRef(null);
   // Nykyisen sektorin alku: kaatuessa yritetään uudelleen tästä, ei koko pelin alusta
   const sectorStartRef = useRef(FIRST_SECTOR);
   const [hint, setHint] = useState(true);
@@ -40,11 +50,6 @@ export default function Game({ onExit }) {
 
   // Phaser luodaan kerran ja tuhotaan, kun pelinäkymä suljetaan (modaali, Esc, valikkoon)
   useEffect(() => {
-    // Ennätys tallennetaan pelin päättyessä vain, jos se parani
-    const finish = (kind) => (stats) => {
-      const newRecord = saveRecord({ score: stats.score, sector: stats.sector + 1, kills: stats.kills });
-      setResult({ kind, ...stats, newRecord, best: readRecord() });
-    };
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: hostRef.current,
@@ -66,12 +71,15 @@ export default function Game({ onExit }) {
     });
 
     game.events.on('sd-hud', setHud);
-    // Sektori läpi: seuraavaan sektoriin hyperhypyllä, viimeisen jälkeen loppuruutu.
-    // Runko, pisteet, pommit, ase ja tuhotut siirtyvät mukana.
+    // Sektori läpi: seuraavaan sektoriin hyperhypyllä, viimeisen jälkeen lopputekstit ja
+    // loppuruutu. Runko, pisteet, pommit, ase ja tuhotut siirtyvät mukana.
     game.events.on('sd-clear', (stats) => {
       const next = stats.sector + 1;
       if (!SECTORS[next]) {
-        finish('clear')(stats);
+        finalRef.current = stats;
+        setOutro(true);
+        // Sama musiikki kuin alkuanimaatiossa
+        playMusic('intro', { loop: false, fadeIn: 0.6 });
         return;
       }
       const { hp, score, bombs, weapon, kills } = stats;
@@ -86,7 +94,7 @@ export default function Game({ onExit }) {
       setHud({ ...EMPTY_HUD, ...start.carry, sector: next, name: SECTORS[next].name });
       game.scene.getScene('space').scene.restart(start);
     });
-    game.events.on('sd-dead', finish('dead'));
+    game.events.on('sd-dead', (stats) => setResult(endResult('dead', stats)));
     gameRef.current = game;
     playMusic('music');
 
@@ -117,11 +125,11 @@ export default function Game({ onExit }) {
 
   // Loppuruudulla fokus pääpainikkeessa, jotta Enter jatkaa heti. Pelin aikana fokus on
   // pelinäkymässä, ettei se jää sivulle (myös hyperhypyn Ohita-napin poistuttua).
-  // Hyperhypyn aikana fokus on sen Ohita-napissa.
+  // Hyperhypyn ja lopputekstien aikana fokus on niiden Ohita-napissa.
   useEffect(() => {
-    if (jump) return;
+    if (jump || outro) return;
     (result ? actionRef : rootRef).current?.focus({ preventScroll: true });
-  }, [result, jump]);
+  }, [result, jump, outro]);
 
   // Hyppy päättyi (tai ohitettiin): valmiiksi ladattu sektori lähtee liikkeelle ja
   // taistelumusiikki alkaa. Pysyvä funktio, jotta hyperhypyn ajastin ei nollaudu.
@@ -129,6 +137,13 @@ export default function Game({ onExit }) {
     controlsRef.current.hold = false;
     setJump(null);
     playMusic('music');
+  }, []);
+
+  // Lopputekstien jälkeen (tai ohitettaessa) loppuruutu pisteineen. Pysyvä funktio, jotta
+  // lopputekstien efekti ei käynnisty uudelleen.
+  const endOutro = useCallback(() => {
+    setOutro(false);
+    setResult(endResult('clear', finalRef.current));
   }, []);
 
   // Kaatuessa sama sektori uudelleen niillä tiedoilla, joilla siihen tultiin, mutta ehjällä
@@ -270,6 +285,7 @@ export default function Game({ onExit }) {
       </div>
 
       {jump && <HyperJump from={jump.from} to={jump.to} onDone={endJump} />}
+      {outro && <Outro onDone={endOutro} />}
 
       {hint && !result && (
         <p className="sd-hint" aria-hidden="true">
@@ -279,10 +295,10 @@ export default function Game({ onExit }) {
       )}
 
       {result && (
-        <div className="sd-result" role="dialog" aria-label={result.kind === 'clear' ? 'Sektori läpäisty' : 'Alus tuhoutui'}>
+        <div className="sd-result" role="dialog" aria-label={result.kind === 'clear' ? 'Peli läpäisty' : 'Alus tuhoutui'}>
           <Frame />
           <div className={`sd-result-panel sd-result-panel--${result.kind}`}>
-            <p className="sd-result-tag">Sektori {result.sector + 1}</p>
+            <p className="sd-result-tag">{result.kind === 'clear' ? `Sektorit 1–${SECTORS.length}` : `Sektori ${result.sector + 1}`}</p>
             <p className="sd-result-title">{result.kind === 'clear' ? 'Läpäisty' : 'Alus tuhoutui'}</p>
 
             <dl className="sd-result-stats">
@@ -303,7 +319,7 @@ export default function Game({ onExit }) {
             )}
             <p className="sd-result-text sd-result-note">
               {result.kind === 'clear'
-                ? `${SECTORS[result.sector].boss.name} kaatui ja sektori on selvitetty. Seuraavat sektorit ovat vielä rakenteilla.`
+                ? 'Kaikki kolme vihollislaivastoa on lyöty ja raja on taas turvassa. Hyvä lento!'
                 : 'Runko ei kestänyt. Väistä esteitä ja ammuksia, ja kerää energiaa matkalta.'}
             </p>
 

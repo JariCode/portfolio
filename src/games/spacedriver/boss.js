@@ -15,7 +15,8 @@ const ATTACK_MS = 1700;
 const RAGE_ATTACK_MS = 1050;
 
 export class Boss {
-  // def: { type, name, hp, points }, sectors.js
+  // def: { type, name, hp, points, rx?, ry? }, sectors.js. rx/ry: osuma-alueen soikio, jos
+  // pomon kuva on eri kokoinen kuin risteilijän (oletus 68 × 84)
   constructor(scene, fleet, def, cam) {
     this.scene = scene;
     this.fleet = fleet;
@@ -23,8 +24,8 @@ export class Boss {
     this.name = def.name;
     this.hp = def.hp;
     this.maxHp = def.hp;
-    this.rx = 68;
-    this.ry = 84;
+    this.rx = def.rx ?? 68;
+    this.ry = def.ry ?? 84;
     // Pomo pysyy kivien välissä: haetaan taistelukorkeudelta vapaa leveys ja heilutaan sen sisällä
     const span = this.freeSpan(cam.scrollY + ENTER_Y);
     this.center = (span.min + span.max) / 2;

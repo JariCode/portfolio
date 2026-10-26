@@ -1,5 +1,6 @@
 import sektori1 from './maps/sektori1.json';
 import sektori2 from './maps/sektori2.json';
+import sektori3 from './maps/sektori3.json';
 
 // Sektorit pelijärjestyksessä. Kartta (Tiled) sisältää vain laatat: Tausta, Esteet ja Edusta.
 // Viholliset ja tehostimet ovat tässä listoina kuten Z-Runnerin zombit (worlds.js), joten
@@ -13,11 +14,13 @@ import sektori2 from './maps/sektori2.json';
 // ovat pomon taistelualuetta (kartta pysähtyy niihin), joten tehostimet rivistä 9 alaspäin.
 //
 // enemies: [rivi, sarake, tyyppi, liike]
-//   tyyppi: scout, fighter, bomber, torpedo, frigate, support, battlecruiser
+//   tyyppi: scout, fighter, bomber, torpedo, frigate, support
 //   liike:  suora, aalto, sukellus, paikallaan
 // pickups: [rivi, sarake, tyyppi]   tyyppi: ase, kilpi, energia, pommi
+//   ase antaa sektorin oman aseen: sektori 2 Salama, sektori 3 Plasma (sektorissa 1 ei asetta)
 // fleet:   vihollislaivasto (sprites.js), sama kuin sektorin numero
 // boss:    pomo, joka saapuu, kun kartta loppuu (boss.js). Sektori on läpäisty, kun se kaatuu.
+//          type: battlecruiser tai dreadnought; rx/ry vain, jos kuva on eri kokoinen.
 export const SECTORS = [
   {
     key: 'sektori1',
@@ -53,10 +56,9 @@ export const SECTORS = [
       [2, 3, 'fighter', 'suora'],
       [2, 8, 'fighter', 'suora'],
     ],
-    // Ensimmäinen pommi vasta kolmanneksen jälkeen ja lisäase puolivälissä (kanjonissa)
+    // Ensimmäinen pommi vasta kolmanneksen jälkeen. Ei asetta: sektorissa 1 lennetään tykillä.
     pickups: [
       [31, 6, 'pommi'],
-      [25, 5, 'ase'],
       [20, 6, 'energia'],
       [17, 7, 'pommi'],
       [13, 6, 'kilpi'],
@@ -107,7 +109,7 @@ export const SECTORS = [
       [4, 3, 'fighter', 'suora'],
       [4, 8, 'fighter', 'suora'],
     ],
-    // Ase käytävän mutkassa, kilpi reaktorisalissa ennen pomoa
+    // Salama käytävän mutkassa, kilpi reaktorisalissa ennen pomoa
     pickups: [
       [44, 6, 'energia'],
       [34, 5, 'pommi'],
@@ -118,5 +120,63 @@ export const SECTORS = [
       [9, 5, 'energia'],
     ],
     boss: { type: 'battlecruiser', name: 'Rynnäkköristeilijä', hp: 200, points: 6000 },
+  },
+  {
+    key: 'sektori3',
+    name: 'Avaruussumu',
+    map: sektori3,
+    tileset: { name: 'sumu', file: '/games/spacedriver/sumu.png' },
+    fleet: 'laivasto3',
+    // Kartta: sumun reuna (rivit 40–49), kallioharjanteet (30–39), kaksoiskallion sola (20–29),
+    // kristallikenttä energiapalloineen (10–19) ja pomoareena (0–9). Viimeinen sektori on
+    // vaikein: enemmän fregatteja ja pommittajia.
+    enemies: [
+      [48, 3, 'scout', 'suora'],
+      [48, 6, 'scout', 'suora'],
+      [48, 9, 'scout', 'suora'],
+      [46, 4, 'fighter', 'aalto'],
+      [46, 8, 'fighter', 'aalto'],
+      [44, 6, 'bomber', 'suora'],
+      [42, 2, 'scout', 'sukellus'],
+      [42, 9, 'scout', 'sukellus'],
+      [40, 5, 'frigate', 'suora'],
+      [38, 8, 'fighter', 'suora'],
+      [38, 9, 'fighter', 'suora'],
+      [36, 7, 'torpedo', 'paikallaan'],
+      [35, 3, 'scout', 'aalto'],
+      [34, 5, 'bomber', 'aalto'],
+      [32, 3, 'fighter', 'suora'],
+      [32, 5, 'fighter', 'suora'],
+      [30, 6, 'support', 'paikallaan'],
+      [28, 5, 'scout', 'sukellus'],
+      [28, 6, 'scout', 'sukellus'],
+      [26, 5, 'fighter', 'suora'],
+      [26, 6, 'fighter', 'suora'],
+      [24, 6, 'frigate', 'suora'],
+      [21, 5, 'bomber', 'suora'],
+      [19, 3, 'fighter', 'aalto'],
+      [19, 8, 'fighter', 'aalto'],
+      [17, 6, 'torpedo', 'paikallaan'],
+      [15, 5, 'frigate', 'suora'],
+      [13, 2, 'scout', 'sukellus'],
+      [13, 5, 'scout', 'sukellus'],
+      [13, 9, 'scout', 'sukellus'],
+      [11, 8, 'support', 'paikallaan'],
+      [8, 4, 'bomber', 'aalto'],
+      [6, 3, 'frigate', 'suora'],
+      [4, 3, 'fighter', 'suora'],
+      [4, 8, 'fighter', 'suora'],
+    ],
+    // Plasma kallioharjanteiden välissä, kilpi solassa, energiaa ennen pomoa
+    pickups: [
+      [45, 6, 'energia'],
+      [38, 6, 'pommi'],
+      [34, 7, 'ase'],
+      [25, 5, 'kilpi'],
+      [20, 6, 'energia'],
+      [13, 7, 'pommi'],
+      [9, 6, 'energia'],
+    ],
+    boss: { type: 'dreadnought', name: 'Lippulaiva', hp: 260, points: 8000, rx: 70, ry: 94 },
   },
 ];

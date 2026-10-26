@@ -30,11 +30,16 @@ export const BULLETS = {
 // Laivastojen omat ammuskuvat: sama ammustyyppi näyttää eri laivastoissa erilaiselta.
 // Laivasto 1 käyttää BULLETSin kuvia sellaisenaan; muilla korvataan vain se, mikä eroaa.
 // Laivasto 2:lla ei ole aaltoa, joten tukialuksen aalto on iso hidas salamapallo.
+// Laivasto 3: iso luoti on sykkivä pommi ja torpedo raketti.
 const FLEET_BULLETS = {
   laivasto2: {
     luoti: { sheet: 'ammus-salama' },
     iso: { sheet: 'ammus-raketti' },
     aalto: { sheet: 'ammus-salama', r: 14, scale: 4 },
+  },
+  laivasto3: {
+    iso: { sheet: 'ammus-pommi', r: 9 },
+    torpedo: { sheet: 'ammus-raketti', r: 10, scale: 1.5 },
   },
 };
 

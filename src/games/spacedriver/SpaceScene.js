@@ -162,7 +162,7 @@ export default class SpaceScene extends Phaser.Scene {
     this.bullets = [];
     this.ship.onShot((barrel, x, y) => this.fire(barrel, x, y));
 
-    // ── Näppäimet: nuolet ja WASD liikkuvat, välilyönti ampuu, B pommittaa ──
+    // ── Näppäimet: nuolet ja WASD liikuttavat, välilyönti ampuu, B pommittaa ──
     this.keys = this.input.keyboard.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D,SPACE,B');
     this.keys.B.on('down', () => this.useBomb());
 
@@ -482,12 +482,18 @@ export default class SpaceScene extends Phaser.Scene {
     });
   }
 
-  // Täydellä rungolla, täysillä pommeilla tai parhaalla aseella tehostinta ei kerätä:
+  // Ase-tehostin antaa sektorin oman aseen: sektori 2 Salama, sektori 3 Plasma. Jos Salama
+  // jäi sektorissa 2 keräämättä, sektorin 3 tehostin antaa silti suoraan Plasman.
+  sectorWeapon() {
+    return Math.min(MAX_WEAPON, this.sectorIndex + 1);
+  }
+
+  // Täydellä rungolla, täysillä pommeilla tai jo saadulla aseella tehostinta ei kerätä:
   // se jäisi hyödyttä käyttämättä, joten se jää paikalleen myöhempää varten
   needs(type) {
     if (type === 'energia') return this.hp < MAX_HP;
     if (type === 'pommi') return this.bombs < MAX_BOMBS;
-    if (type === 'ase') return this.weapon < MAX_WEAPON;
+    if (type === 'ase') return this.weapon < this.sectorWeapon();
     return true;
   }
 
@@ -511,7 +517,7 @@ export default class SpaceScene extends Phaser.Scene {
     this.score += PICKUP_POINTS;
     if (p.type === 'energia') this.hp = Math.min(MAX_HP, this.hp + 2);
     if (p.type === 'pommi') this.bombs = Math.min(MAX_BOMBS, this.bombs + 1);
-    if (p.type === 'ase') this.weapon = Math.min(MAX_WEAPON, this.weapon + 1);
+    if (p.type === 'ase') this.weapon = this.sectorWeapon();
     if (p.type === 'kilpi') {
       this.shieldUntil = this.time.now + SHIELD_MS;
       this.ship.setShield(true);

@@ -13,7 +13,8 @@
 // changes:    vapaaehtoinen; mitä muokattiin (CC BY vaatii kertomaan muutoksista)
 
 // Void-sarjan paketit: piirtäjä Baldur (tilaustyö), julkaisija Foozle. Lisenssi CC0 ei
-// vaadi mainintaa, mutta tekijät kerrotaan silti lopputeksteissä.
+// vaadi mainintaa, mutta tekijät kerrotaan silti lopputeksteissä. Vihollispakettien
+// keksittyjä laivastojen nimiä ei käytetä pelissä, joten paketit ovat numeroilla.
 const VOID_AUTHOR = 'Baldur · Foozle';
 const CC0 = 'CC0';
 const CC0_URL = 'https://creativecommons.org/publicdomain/zero/1.0/';
@@ -38,7 +39,7 @@ export const CREDITS = [
   },
   {
     type: 'vihollinen',
-    name: "Void – Fleet Pack 1 – Kla'ed",
+    name: 'Void – Fleet Pack 1',
     author: VOID_AUTHOR,
     url: 'https://foozlecc.itch.io/void-fleet-pack-1',
     license: CC0,
@@ -47,7 +48,7 @@ export const CREDITS = [
   },
   {
     type: 'vihollinen',
-    name: 'Void – Fleet Pack 2 – Nairan',
+    name: 'Void – Fleet Pack 2',
     author: VOID_AUTHOR,
     url: 'https://foozlecc.itch.io/void-fleet-pack-2',
     license: CC0,
@@ -56,7 +57,7 @@ export const CREDITS = [
   },
   {
     type: 'vihollinen',
-    name: 'Void – Fleet Pack 3 – Nautolan',
+    name: 'Void – Fleet Pack 3',
     author: VOID_AUTHOR,
     url: 'https://foozlecc.itch.io/void-fleet-pack-3',
     license: CC0,
@@ -81,6 +82,12 @@ export const CREDITS = [
   {
     type: 'tileset',
     name: 'Aseman raunio (asema.png)',
+    author: 'Claude (Anthropic) · Piirretty koodilla',
+    license: 'Tehty tätä peliä varten',
+  },
+  {
+    type: 'tileset',
+    name: 'Avaruussumu (sumu.png)',
     author: 'Claude (Anthropic) · Piirretty koodilla',
     license: 'Tehty tätä peliä varten',
   },
