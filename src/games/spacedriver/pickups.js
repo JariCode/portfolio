@@ -5,7 +5,7 @@ import { SPRITE_BASE, sprite } from './sprites.js';
 // Tehostin pysyy kartalla paikallaan ja keinuu hieman, jotta se erottuu kivistä.
 
 export const PICKUP_TYPES = {
-  ase: { key: 'tehostin-ase-iso', label: 'Ase +1' },
+  ase: { key: 'tehostin-ase-iso', label: 'Ase' },
   kilpi: { key: 'tehostin-kilpi', label: 'Kilpi' },
   energia: { key: 'sd-energia', label: 'Runko +2' },
   pommi: { key: 'sd-pommi', label: 'Pommi +1' },

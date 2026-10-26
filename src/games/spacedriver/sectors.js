@@ -8,7 +8,8 @@ import sektori1 from './maps/sektori1.json';
 // Peli alkaa kartan alareunasta ja etenee ylöspäin.
 // Vihollisen rivi kertoo ajankohdan: rivi 49 heti alussa, rivi 0 juuri ennen pomoa
 // (SpaceScene.js). Viholliset tulevat aina ruudun yläreunasta sarakkeensa kohdalta.
-// Tehostin on kartalla rivinsä kohdalla ja tulee näkyviin, kun kartta rullaa sinne.
+// Tehostin on kartalla rivinsä kohdalla ja tulee näkyviin, kun kartta rullaa sinne. Rivit 0–8
+// ovat pomon taistelualuetta (kartta pysähtyy niihin), joten tehostimet rivistä 9 alaspäin.
 //
 // enemies: [rivi, sarake, tyyppi, liike]
 //   tyyppi: scout, fighter, bomber, torpedo, frigate, support, battlecruiser
@@ -55,9 +56,9 @@ export const SECTORS = [
       [43, 6, 'pommi'],
       [38, 6, 'ase'],
       [24, 5, 'energia'],
-      [11, 6, 'kilpi'],
-      [5, 5, 'pommi'],
-      [3, 6, 'energia'],
+      [17, 7, 'pommi'],
+      [13, 6, 'kilpi'],
+      [9, 4, 'energia'],
     ],
     boss: { type: 'battlecruiser', name: 'Raskas risteilijä', hp: 160, points: 5000 },
   },

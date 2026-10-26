@@ -6,9 +6,11 @@ import { EnemyBullet } from './enemies.js';
 // Hyökkäykset vuorottelevat. Kun energiaa on alle puolet, pomo raivostuu ja ampuu tiheämmin.
 
 const BOSS_SCALE = 2;
-const ENTER_Y = 250; // pomon keskikohta ruudulla taistelun aikana
+const ENTER_Y = 320; // pomon keskikohta ruudulla taistelun aikana (HUDin alapuolella)
+// Kiviin pidetään väli: kuvan siivet ulottuvat hieman osuma-alueen yli
+const ROCK_MARGIN = 10;
 const ENTER_MS = 2600;
-const SWAY = 210; // sivuttaisliikkeen laajuus (px)
+const SWAY = 210; // sivuttaisliikkeen enimmäislaajuus (px); kivet voivat kaventaa sitä
 const ATTACK_MS = 1700;
 const RAGE_ATTACK_MS = 1050;
 
@@ -23,7 +25,11 @@ export class Boss {
     this.maxHp = def.hp;
     this.rx = 68;
     this.ry = 84;
-    this.x = 384;
+    // Pomo pysyy kivien välissä: haetaan taistelukorkeudelta vapaa leveys ja heilutaan sen sisällä
+    const span = this.freeSpan(cam.scrollY + ENTER_Y);
+    this.center = (span.min + span.max) / 2;
+    this.sway = Math.min(SWAY, (span.max - span.min) / 2);
+    this.x = this.center;
     this.y = cam.scrollY - 200;
     this.t = 0;
     this.entering = true;
@@ -51,6 +57,32 @@ export class Boss {
     });
   }
 
+  // Osuuko pomo kiveen kohdassa (x, y): soikion kehä ja keskipiste
+  blocked(x, y) {
+    if (this.scene.isSolid(x, y)) return true;
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      if (this.scene.isSolid(x + Math.cos(a) * (this.rx + ROCK_MARGIN), y + Math.sin(a) * (this.ry + ROCK_MARGIN))) return true;
+    }
+    return false;
+  }
+
+  // Leveimmän kiviltä vapaan välin rajat (pomon keskipisteen x) annetulla korkeudella.
+  // Jos tilaa ei ole lainkaan, pomo pysyy keskellä.
+  freeSpan(y) {
+    let best = { min: 384, max: 384 };
+    let start = null;
+    for (let x = this.rx; x <= 768 - this.rx + 8; x += 8) {
+      const free = x <= 768 - this.rx && !this.blocked(x, y);
+      if (free && start === null) start = x;
+      if (!free && start !== null) {
+        if (x - 8 - start > best.max - best.min) best = { min: start, max: x - 8 };
+        start = null;
+      }
+    }
+    return best;
+  }
+
   get rage() {
     return this.hp < this.maxHp / 2;
   }
@@ -59,7 +91,7 @@ export class Boss {
   update(dt, cam, ship) {
     if (this.dead) return [];
     this.t += dt;
-    if (!this.entering) this.x = 384 + Math.sin(this.t * (this.rage ? 0.9 : 0.6)) * SWAY;
+    if (!this.entering) this.x = this.center + Math.sin(this.t * (this.rage ? 0.9 : 0.6)) * this.sway;
     this.parts.forEach((p) => p.setPosition(this.x, this.y));
     if (this.entering) return [];
 

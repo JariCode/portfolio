@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import * as Phaser from 'phaser';
 import SpaceScene, { GAME_W, GAME_H, MAX_BOMBS, MAX_HP, MAX_WEAPON, NEW_RUN } from './SpaceScene.js';
+import { WEAPON_NAMES } from './player.js';
 import { SECTORS } from './sectors.js';
 import { Frame } from './Hud.jsx';
 import { clearSaves, readRecord, saveRecord } from './score.js';
@@ -139,14 +140,22 @@ export default function Game({ onExit }) {
               <span key={i} className={`sd-hull-cell${i < hud.hp ? ' is-full' : ''}${hud.hp <= 2 ? ' is-low' : ''}`} />
             ))}
           </div>
+          {/* Pommit ja ase omilla riveillään rungon alla */}
           <div className="sd-hud-gear">
+            <span className="sd-hud-label">Pommit</span>
             <span className="sd-hud-bombs" aria-label={`Pommit ${hud.bombs}/${MAX_BOMBS}`}>
               {Array.from({ length: MAX_BOMBS }, (_, i) => (
                 <span key={i} className={`sd-bomb-dot${i < hud.bombs ? ' is-full' : ''}`} />
               ))}
             </span>
-            <span className="sd-hud-weapon" aria-label={`Aseen taso ${hud.weapon}/${MAX_WEAPON}`}>
-              Ase {hud.weapon}
+            <span className="sd-hud-label">Ase</span>
+            <span className="sd-hud-weapon" aria-label={`Ase ${WEAPON_NAMES[hud.weapon]}, taso ${hud.weapon}/${MAX_WEAPON}`}>
+              {WEAPON_NAMES[hud.weapon]}
+              <span className="sd-weapon-pips" aria-hidden="true">
+                {Array.from({ length: MAX_WEAPON }, (_, i) => (
+                  <span key={i} className={i < hud.weapon ? 'is-full' : ''} />
+                ))}
+              </span>
             </span>
           </div>
         </div>

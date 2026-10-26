@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { SECTORS } from './sectors.js';
 import { createStarfield } from './parallax.js';
 import { createHitTest } from './obstacles.js';
-import { PlayerShip, HITBOX, createPlayerAnims, preloadPlayer } from './player.js';
+import { PlayerShip, HITBOX, WEAPON_NAMES, createPlayerAnims, preloadPlayer } from './player.js';
 import { Enemy, createFleetAnims, preloadFleet } from './enemies.js';
 import { Boss } from './boss.js';
 import { PICKUP_TYPES, Pickup, createPickupAnims, preloadPickups } from './pickups.js';
@@ -33,7 +33,13 @@ const MARGIN_X = 36;
 const MARGIN_TOP = 120; // HUD on yläreunassa
 const MARGIN_BOTTOM = 60;
 
-const BULLET_SPEED = 950;
+// Pelaajan ammukset aseen tason mukaan. tip = osumakohta suhteessa ammuksen keskipisteeseen
+// (luodin ja säteen kärki edessä, plasmapallo keskeltä), r = osuma-alueen säde, damage = vahinko.
+const SHOTS = {
+  tykki: { key: 'pelaaja-ammus-tykki', anim: 'sd-ammus-tykki', speed: 950, tip: -12, r: 6, damage: 1 },
+  salama: { key: 'pelaaja-ammus-salama', anim: 'sd-ammus-salama', speed: 1250, tip: -28, r: 5, damage: 1 },
+  plasma: { key: 'pelaaja-ammus-iso', anim: 'sd-ammus-iso', speed: 700, tip: 0, r: 18, damage: 3 },
+};
 const INVULNERABLE_MS = 1600; // osuman jälkeen hetki suojassa, ettei sama osuma toistu heti
 const KNOCKBACK = 340; // kiveen osuminen työntää alusta poispäin (px/s, vaimenee)
 const SHIELD_MS = 8000;
@@ -158,19 +164,25 @@ export default class SpaceScene extends Phaser.Scene {
   }
 
   // ── Ampuminen ──
-  // Aseen taso: 1 = vuorotellen piipuista, 2 = molemmista piipuista joka laukauksella,
-  // 3 = lisäksi kaksi vinoa ammusta keulasta
+  // Aseen taso (player.js WEAPON_NAMES): 1 Tykki = luoti vuorotellen piipuista,
+  // 2 Salama = säde molemmista piipuista joka laukauksella, 3 Plasma = säteet + plasmapallo
+  // keulasta joka toisella laukauksella (3 vahinkoa, iso osuma-alue)
   fire(barrel, x, y) {
     if (this.finished) return;
-    const shots = [[x, y, 0]];
-    if (this.weapon >= 2) shots.push([this.ship.x - (x - this.ship.x), y, 0]);
-    if (this.weapon >= 3 && barrel === 1) shots.push([this.ship.x, y - 10, -0.2], [this.ship.x, y - 10, 0.2]);
-    for (const [bx, by, angle] of shots) {
-      const b = this.add.sprite(bx, by, 'pelaaja-ammus-tykki').setScale(2).setDepth(3).setRotation(angle).play('sd-ammus-tykki');
-      b.vx = Math.sin(angle) * BULLET_SPEED;
-      this.bullets.push(b);
+    if (this.weapon === 1) {
+      this.shot(SHOTS.tykki, x, y);
+    } else {
+      this.shot(SHOTS.salama, x, y);
+      this.shot(SHOTS.salama, this.ship.x - (x - this.ship.x), y);
     }
+    if (this.weapon >= 3 && barrel === 1) this.shot(SHOTS.plasma, this.ship.x, y - 20);
     play('shot', { volume: 0.25, gap: 0.1 });
+  }
+
+  shot(def, x, y) {
+    const b = this.add.sprite(x, y, def.key).setScale(2).setDepth(3).play(def.anim);
+    b.def = def;
+    this.bullets.push(b);
   }
 
   // Pieni kipinä ammuksen osuessa
@@ -326,17 +338,17 @@ export default class SpaceScene extends Phaser.Scene {
   // Pelaajan ammukset: osuma viholliseen, pomoon tai kiveen
   updateBullets(dt, cam) {
     this.bullets = this.bullets.filter((b) => {
-      b.x += b.vx * dt;
-      b.y -= BULLET_SPEED * dt;
-      const tipY = b.y - 12;
-      const boss = this.boss && !this.boss.dead && this.boss.contains(b.x, tipY, 6) ? this.boss : null;
-      const target = this.enemies.find((e) => !e.dead && e.contains(b.x, tipY, 6)) ?? boss;
+      const { speed, tip, r, damage } = b.def;
+      b.y -= speed * dt;
+      const tipY = b.y + tip;
+      const boss = this.boss && !this.boss.dead && this.boss.contains(b.x, tipY, r) ? this.boss : null;
+      const target = this.enemies.find((e) => !e.dead && e.contains(b.x, tipY, r)) ?? boss;
       if (target) {
         this.spark(b.x, tipY, 0xffffff);
-        this.damageEnemy(target, 1);
+        this.damageEnemy(target, damage);
       } else if (this.isSolid(b.x, tipY)) {
         this.spark(b.x, tipY);
-      } else if (b.y > cam.scrollY - 40 && b.x > -20 && b.x < GAME_W + 20) {
+      } else if (b.y > cam.scrollY - 60) {
         return true;
       }
       b.destroy();
@@ -401,7 +413,8 @@ export default class SpaceScene extends Phaser.Scene {
       this.ship.setShield(true);
     }
     this.ship.setHp(this.hp);
-    this.popup(p.x, p.y - 30, PICKUP_TYPES[p.type].label.toUpperCase());
+    const label = p.type === 'ase' ? `Ase: ${WEAPON_NAMES[this.weapon]}` : PICKUP_TYPES[p.type].label;
+    this.popup(p.x, p.y - 30, label.toUpperCase());
   }
 
   // Kilpi välkkyy viimeiset kaksi sekuntia ennen kuin se loppuu

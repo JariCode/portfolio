@@ -29,6 +29,7 @@ export const BULLETS = {
 
 // Liikkeet
 const WAVE_AMPLITUDE = 110; // aalto: sivuttaisliikkeen laajuus (px)
+const SLIDE_SPEED = 160; // kiveen törmäävä vihollinen liukuu sivulle tätä nopeutta (px/s)
 const DIVE_STOP = 230; // sukellus: pysähtyy tälle korkeudelle ruudulla ennen syöksyä
 const DIVE_WAIT = 0.6; // s
 const DIVE_SPEED = 540;
@@ -101,12 +102,30 @@ export class Enemy {
     // Ensimmäinen laukaus pienen satunnaisen viiveen jälkeen, etteivät kaikki ammu yhtä aikaa
     this.nextShot = this.def.fire ? 0.5 + Math.random() * 0.9 : Infinity;
 
+    // Kivet ovat kiinteitä myös vihollisille: jos syntypaikka osuu kiveen, siirrytään
+    // lähimpään vapaaseen kohtaan samalla korkeudella
+    if (this.blocked(this.x, this.y)) {
+      const free = Array.from({ length: 24 }, (_, i) => (i >> 1) * 32 * (i % 2 ? 1 : -1) + this.x).find((fx) => fx > 40 && fx < 728 && !this.blocked(fx, this.y));
+      if (free !== undefined) this.x = this.x0 = free;
+    }
+
     const base = `${fleet}-${type}`;
-    const add = (key) => scene.add.sprite(x, y, key).setScale(ENEMY_SCALE).setRotation(Math.PI).setDepth(3);
+    const add = (key) => scene.add.sprite(this.x, y, key).setScale(ENEMY_SCALE).setRotation(Math.PI).setDepth(3);
     this.engine = add(`${base}-moottori`).play(`${base}-moottori`);
     this.weapons = has(`${base}-aseet`) ? add(`${base}-aseet`) : null;
     this.body = add(base);
     this.parts = [this.engine, this.weapons, this.body].filter(Boolean);
+  }
+
+  // Osuuko vihollinen kiveen kohdassa (x, y): osuma-alueen soikion kehä ja keskipiste
+  blocked(x, y) {
+    const { rx, ry } = this.def;
+    if (this.scene.isSolid(x, y)) return true;
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      if (this.scene.isSolid(x + Math.cos(a) * rx * 0.85, y + Math.sin(a) * ry * 0.85)) return true;
+    }
+    return false;
   }
 
   // Liike ruudun suhteen; palauttaa false, kun vihollinen on poistunut ruudulta
@@ -115,17 +134,20 @@ export class Enemy {
     if (this.dead) return this.body.active;
     this.t += dt;
     const d = this.def;
+    // Haluttu uusi paikka liikkeen mukaan; kivet tarkistetaan alla (moveTo)
+    let nx = this.x;
+    let ny = this.y;
     switch (this.move) {
       case 'aalto':
-        this.y += d.speed * dt - scrolled;
-        this.x = Phaser.Math.Clamp(this.x0 + Math.sin(this.t * 2.2) * WAVE_AMPLITUDE, 40, 728);
+        ny += d.speed * dt - scrolled;
+        nx = Phaser.Math.Clamp(this.x0 + Math.sin(this.t * 2.2) * WAVE_AMPLITUDE, 40, 728);
         break;
       case 'sukellus': {
         const screenY = this.y - cam.scrollY;
         if (!this.diving && screenY < DIVE_STOP) {
-          this.y += 170 * dt - scrolled;
+          ny += 170 * dt - scrolled;
         } else if (!this.diving) {
-          this.y -= scrolled;
+          ny -= scrolled;
           this.wait = (this.wait ?? 0) + dt;
           // Syöksy kohti aluksen sen hetkistä paikkaa
           if (this.wait > DIVE_WAIT) {
@@ -133,8 +155,8 @@ export class Enemy {
             this.diving = { vx: Math.sin(a) * DIVE_SPEED, vy: Math.max(200, Math.cos(a) * DIVE_SPEED) };
           }
         } else {
-          this.x += this.diving.vx * dt;
-          this.y += this.diving.vy * dt - scrolled;
+          nx += this.diving.vx * dt;
+          ny += this.diving.vy * dt - scrolled;
         }
         break;
       }
@@ -142,11 +164,42 @@ export class Enemy {
         // Pysyy kartalla paikallaan, joten liikkuu ruudulla kartan mukana
         break;
       default:
-        this.y += d.speed * dt - scrolled;
+        ny += d.speed * dt - scrolled;
     }
+    this.moveTo(nx, ny, dt);
     this.parts.forEach((p) => p.setPosition(this.x, this.y));
     const screenY = this.y - cam.scrollY;
     return screenY < cam.height + 140 && this.x > -120 && this.x < 888;
+  }
+
+  // Siirtyy kohti uutta paikkaa, mutta ei kiven sisään. Kivet ovat kartalla paikallaan, joten
+  // pysähtynyt vihollinen ei voi joutua kiven sisään: se vain rullaa ruudulla kartan mukana.
+  moveTo(nx, ny, dt) {
+    if (!this.blocked(nx, ny)) {
+      this.x = nx;
+      this.y = ny;
+      return;
+    }
+    // Syöksy loppuu kiveen; jatketaan suoraan alas
+    if (this.diving) {
+      this.diving = null;
+      this.move = 'suora';
+    }
+    if (!this.blocked(this.x, ny)) {
+      // Pystysuunta vapaa: sivuttaisliike pysähtyy kiveen, aalto jatkuu tästä kohdasta
+      this.x0 += this.x - nx;
+      this.y = ny;
+      return;
+    }
+    // Kivi edessä: liu'u sille sivulle, jolla on enemmän tilaa
+    const left = this.blocked(this.x - 48, ny);
+    const right = this.blocked(this.x + 48, ny);
+    const dir = left && !right ? 1 : right && !left ? -1 : this.x < 384 ? 1 : -1;
+    const sx = this.x + dir * SLIDE_SPEED * dt;
+    if (!this.blocked(sx, this.y)) {
+      this.x = sx;
+      this.x0 += dir * SLIDE_SPEED * dt;
+    }
   }
 
   // Ampuu, kun on kunnolla ruudulla. Palauttaa uudet ammukset.

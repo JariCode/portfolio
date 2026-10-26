@@ -17,6 +17,11 @@ export const MUZZLES = { 1: { x: -22, y: -30 }, 2: { x: 22, y: -30 } };
 // eivät osu, jotta kapeista väleistä pääsee läpi ilman, että osuma tuntuu epäreilulta
 export const HITBOX = { rx: 20, ry: 30 };
 
+// Aseen tasot nimineen (HUD ja tehostimen teksti). Taso näkyy myös ammusten väristä:
+// 1 Tykki = oranssit luodit vuorotellen, 2 Salama = syaanit säteet molemmista piipuista,
+// 3 Plasma = säteiden lisäksi iso vihreä plasmapallo keulasta.
+export const WEAPON_NAMES = { 1: 'Tykki', 2: 'Salama', 3: 'Plasma' };
+
 const KEYS = [
   'pelaaja-ehja',
   'pelaaja-vaurio1',
@@ -27,6 +32,8 @@ const KEYS = [
   'pelaaja-liekki-teho',
   'pelaaja-ase-tykki',
   'pelaaja-ammus-tykki',
+  'pelaaja-ammus-salama',
+  'pelaaja-ammus-iso',
   'pelaaja-kilpi',
 ];
 
@@ -48,6 +55,8 @@ export function createPlayerAnims(scene) {
   // 7 ruutua, kaksi laukausta kierroksella: 28 ruutua/s = 8 laukausta sekunnissa
   make('sd-tykki', 'pelaaja-ase-tykki', 28);
   make('sd-ammus-tykki', 'pelaaja-ammus-tykki', 12);
+  make('sd-ammus-salama', 'pelaaja-ammus-salama', 16);
+  make('sd-ammus-iso', 'pelaaja-ammus-iso', 14);
   make('sd-kilpi', 'pelaaja-kilpi', 14);
 }
 
