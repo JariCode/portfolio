@@ -190,6 +190,34 @@
   color: var(--cyan);
 }
 
+/* Tyhjennä tallennukset: tarkoituksella huomaamaton linkki, ettei sitä paina vahingossa.
+   Vahvistuksen kysymys erottuu vaaleampana. */
+.zr-title-clear {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3cqw 1cqw;
+  color: var(--text);
+  font-size: max(9px, 1.1cqw);
+}
+
+.zr-title-clear button {
+  padding: 0.3cqw 0.6cqw;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.zr-title-clear button:hover,
+.zr-title-clear button:focus-visible {
+  color: var(--text);
+}
+
 /* ── Ohjeet-paneeli ── */
 .zr-help {
   position: absolute;
