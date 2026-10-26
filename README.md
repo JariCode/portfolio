@@ -156,7 +156,7 @@ Musiikin ja äänten lähde on [Pixabay](https://pixabay.com/) ja lisenssi [Pixa
 
 ### Z-Runner
 
-Peli, tarina ja juoni sekä kartat ovat Jari Karrin. Tilesetit, taustat ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Tekijät: `src/games/zrunner/credits.js`, josta pelin lopputekstit luetaan.
+Peli, tarina ja juoni sekä kartat ovat Jari Karrin. Taustat ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Tekijät: `src/games/zrunner/credits.js`, josta pelin lopputekstit luetaan.
 
 **Hahmot (sprite-arkit).** Lisenssi: [CraftPix File License](https://craftpix.net/file-licenses/). Kaupallinen käyttö ja muokkaus sallittu, tekijän mainintaa ei vaadita. Ruudut on kohdistettu, skaalattu ja koottu sprite-arkeiksi.
 
@@ -183,7 +183,7 @@ Peli, tarina ja juoni sekä kartat ovat Jari Karrin. Tilesetit, taustat ja anima
 
 ### Space Driver 2026
 
-Peli ja sektorien kartat ovat Jari Karrin. Asteroidikentän tileset, HUD ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Tekijät: `src/games/spacedriver/credits.js`.
+Peli ja sektorien kartat ovat Jari Karrin. HUD ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Tekijät: `src/games/spacedriver/credits.js`.
 
 **Alukset ja tehostimet (sprite-arkit).** Lisenssi: [CC0](https://creativecommons.org/publicdomain/zero/1.0/), eli vapaa käyttö ilman ehtoja. Valitut tiedostot on nimetty uudelleen, muuten ne ovat sellaisenaan.
 
@@ -194,7 +194,6 @@ Peli ja sektorien kartat ovat Jari Karrin. Asteroidikentän tileset, HUD ja anim
 | Vihollislaivasto 2 | Void – Fleet Pack 2 | Baldur (piirtäjä), Foozle (julkaisija) | [itch.io](https://foozlecc.itch.io/void-fleet-pack-2) |
 | Vihollislaivasto 3 | Void – Fleet Pack 3 | Baldur (piirtäjä), Foozle (julkaisija) | [itch.io](https://foozlecc.itch.io/void-fleet-pack-3) |
 | Tehostimet | Void – Pickups Pack | Baldur (piirtäjä), Foozle (julkaisija) | [itch.io](https://foozlecc.itch.io/void-pickups-pack) |
-| Asteroidikenttä (tileset) | `asteroidit.png` | Claude (Anthropic), piirretty koodilla | Tehty tätä peliä varten |
 
 **Musiikki ja äänet** (Pixabay, `public/audio/spacedriver/`). Taistelumusiikki ja intro on rekisteröity Content ID:hen.
 
@@ -210,6 +209,10 @@ Peli ja sektorien kartat ovat Jari Karrin. Asteroidikentän tileset, HUD ja anim
 | Pommi | `pommi.mp3` | Medium Explosion | JuveriSetila (Freesound), julkaisija freesound_community |
 | Tehostimen keräys | `tehostin.mp3` | Win | Musheran |
 | Hyperhyppy | `hyperhyppy.mp3` | Hyper-Drive Spaceship Flyby | SoundShelfStudio |
+
+### Tilesetit
+
+Kaikkien pelien tilesetit on piirretty koodilla Clauden (Anthropic) kanssa tätä sivustoa varten: Z-Runnerin `kaupunki.png`, `metro.png` ja `puisto.png` sekä Space Driverin `asteroidit.png`.
 
 ## Paikallinen käyttö
 
