@@ -46,7 +46,7 @@ export default function PrivacyPolicy() {
             sektorin, johon pääsit) ja kaupunginrakennuspelin keskeneräisen kaupungin selaimesi omaan
             muistiin (localStorage), jotta voit jatkaa myöhemmin. Tallennus tapahtuu vain, kun pelaat.
             Tiedot pysyvät laitteellasi, eivätkä ne siirry minulle tai muualle. Voit poistaa ne pelin
-            lopussa olevalla Tyhjennä tallennukset -napilla, jolloin peli alkaa alusta, tai
+            aloitus- tai loppuruudun Tyhjennä tallennukset -napilla, jolloin peli alkaa alusta, tai
             tyhjentämällä tämän sivuston tiedot selaimen asetuksista.
           </p>
         </section>
