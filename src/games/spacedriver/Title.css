@@ -130,31 +130,54 @@
   font-weight: 600;
   letter-spacing: 0.5em;
   opacity: 0;
-  animation: sd-blink-in 0.5s 1.3s steps(1, end) forwards;
+  animation: sd-blink-in 0.5s 1.3s steps(1, start) forwards;
 }
 
 .sd-logo-year span {
   color: color-mix(in srgb, var(--sd-amber) 45%, transparent);
 }
 
-/* ── Iskulause kirjoittuu esiin merkki kerrallaan ── */
+/* ── Iskulause: kolme sanaa kirjoittuvat esiin vuorotellen, välissä merkkivalot ── */
 .sd-tagline {
-  display: inline-block;
-  color: var(--text);
-  font-family: var(--sd-mono);
-  font-size: max(10px, 3.3cqw);
-  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 2.6cqw;
+  font-family: var(--sd-font);
+  font-size: max(10px, 3.8cqw);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   white-space: nowrap;
-  clip-path: inset(0 100% 0 0);
-  animation: sd-type 1.4s 1.6s steps(var(--sd-chars), end) forwards;
 }
 
-/* Vilkkuva kursori rivin lopussa */
-.sd-tagline::after {
-  content: '_';
-  color: var(--cyan);
-  animation: sd-cursor 0.9s steps(1, end) infinite;
+.sd-tag-word {
+  color: var(--text);
+  text-shadow: 0 0 0.5em color-mix(in srgb, var(--cyan) 45%, transparent);
+  clip-path: inset(0 100% 0 0);
+  animation: sd-type 0.4s steps(8, jump-none) forwards;
 }
+
+.sd-tag-word:nth-child(1) { animation-delay: 1.6s; }
+.sd-tag-word:nth-child(3) { animation-delay: 2s; color: var(--cyan); }
+.sd-tag-word:nth-child(5) {
+  animation-delay: 2.4s;
+  color: var(--sd-amber);
+  text-shadow: 0 0 0.5em color-mix(in srgb, var(--sd-amber) 50%, transparent);
+}
+
+/* Pieni vinoneliö sanojen välissä, syttyy edellisen sanan jälkeen */
+.sd-tag-sep {
+  flex: none;
+  width: 1.1cqw;
+  height: 1.1cqw;
+  background: var(--sd-amber);
+  box-shadow: 0 0 1cqw var(--sd-amber);
+  rotate: 45deg;
+  opacity: 0;
+  animation: sd-blink-in 0.3s 1.9s steps(1, start) forwards;
+}
+
+.sd-tag-sep:nth-child(4) { animation-delay: 2.3s; }
 
 .sd-actions {
   display: flex;
@@ -163,7 +186,7 @@
   gap: 3cqw;
   margin-top: 1cqw;
   opacity: 0;
-  animation: sd-blink-in 0.4s 2.2s steps(1, end) forwards;
+  animation: sd-blink-in 0.4s 2.8s steps(1, start) forwards;
 }
 
 /* ── Ennätys mittarinäyttönä ── */
@@ -175,7 +198,7 @@
   border-left: 2px solid var(--cyan);
   background: linear-gradient(90deg, color-mix(in srgb, var(--cyan) 12%, transparent), transparent);
   opacity: 0;
-  animation: sd-blink-in 0.4s 2.4s steps(1, end) forwards;
+  animation: sd-blink-in 0.4s 3s steps(1, start) forwards;
 }
 
 .sd-record-label {
@@ -371,18 +394,14 @@
   to { transform: scaleX(1); }
 }
 
-/* Näkyviin yhdellä askeleella kuin näytön osa syttyisi */
+/* Näkyviin yhdellä askeleella kuin näytön osa syttyisi. steps(1, start) eikä end:
+   end voi jäädä pyöristyksen takia alkuarvoon, jolloin elementti ei syty lainkaan. */
 @keyframes sd-blink-in {
   to { opacity: 1; }
 }
 
 @keyframes sd-type {
   to { clip-path: inset(0 0 0 0); }
-}
-
-@keyframes sd-cursor {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
 }
 
 @keyframes sd-open {
@@ -413,8 +432,7 @@
   }
 
   .sd-title-hero,
-  .sd-title-reticle,
-  .sd-tagline::after {
+  .sd-title-reticle {
     animation: none;
   }
 }

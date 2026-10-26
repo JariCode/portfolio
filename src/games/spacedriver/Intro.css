@@ -1,5 +1,5 @@
 /* ═══ Space Driverin alkuanimaatio ═══ */
-/* Aikajana (s): 0,3–1,3 päätteen käynnistysrivi · 1,4–3,4 "Vuosi 2026" · 2,8–6,4 laivasto
+/* Aikajana (s): 0,3–1,3 käynnistysilmoitus · 1,4–3,4 "Vuosi 2026" · 2,8–6,4 laivasto
    saapuu · 3,8 tähtäimet lukittuvat ja varoitus · 5,6 alus nousee · 6,0 lähtölupa ·
    7,0 hyperhyppy (Intro.jsx WARP_AT) · 7,6 alus kiitää ylös · 7,8 valoviiva · 8,1 logo ·
    8,8 sektori · 10,0 loppu (DURATION) */
@@ -14,7 +14,7 @@
 .sd-intro-frame,
 .sd-intro-status {
   opacity: 0;
-  animation: sd-on 0.6s 0.1s steps(3, end) forwards;
+  animation: sd-on 0.6s 0.1s linear forwards;
 }
 
 /* ── Vihollislaivasto ── */
@@ -55,7 +55,7 @@
     linear-gradient(var(--c), var(--c)) bottom right / 2px var(--l);
   background-repeat: no-repeat;
   opacity: 0;
-  animation: sd-lock 0.9s steps(6, end) forwards;
+  animation: sd-lock 0.9s linear forwards;
   animation-delay: calc(3.8s + var(--sd-delay) * 2);
 }
 
@@ -82,38 +82,78 @@
   pointer-events: none;
 }
 
-/* Päätteen rivit: tasalevyinen fontti, kirjoittuvat merkki kerrallaan */
+/* Ohjaamon ilmoitus: meripihkainen tunniste ja sen alla iso teksti, joka kirjoittuu esiin.
+   Alla kasvaa ohut viiva. Koko ilmoitus sammuu kerralla. --sd-at on ilmoituksen alkuhetki. */
 .sd-intro-term {
   position: absolute;
-  left: 50%;
-  max-width: none;
-  color: var(--cyan);
-  font-family: var(--sd-mono);
-  font-size: max(10px, 3.4cqw);
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  translate: -50% 0;
-  clip-path: inset(0 100% 0 0);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2cqw;
 }
 
 .sd-intro-term::after {
-  content: '_';
-  animation: sd-cursor 0.9s steps(1, end) infinite;
+  content: '';
+  width: 56%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  transform: scaleX(0);
+  animation: sd-grow 0.6s ease-out forwards;
+}
+
+/* Tunniste: tumma teksti meripihkaisella pohjalla, viistetyt kulmat */
+.sd-intro-term-tag {
+  padding: 0.5cqw 2.4cqw;
+  background: var(--sd-amber);
+  color: #120a00;
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.4cqw);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  clip-path: polygon(1.2cqw 0, 100% 0, calc(100% - 1.2cqw) 100%, 0 100%);
+  opacity: 0;
+  animation: sd-on 0.4s linear forwards;
+}
+
+.sd-intro-term-text {
+  max-width: none;
+  color: var(--text);
+  font-family: var(--sd-font);
+  font-size: 4.6cqw;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 0 0.5em color-mix(in srgb, var(--cyan) 50%, transparent);
+  clip-path: inset(0 100% 0 0);
+  animation: sd-type 0.6s steps(var(--sd-chars), jump-none) forwards;
+  animation-delay: calc(var(--sd-at) + 0.15s);
 }
 
 .sd-intro-term--boot {
-  top: 46%;
-  animation:
-    sd-type 0.9s 0.3s steps(var(--sd-chars), end) forwards,
-    sd-off 0.2s 1.3s steps(1, end) forwards;
+  --sd-at: 0.3s;
+  top: 42%;
+  animation: sd-off 0.25s 1.35s steps(1, start) forwards;
 }
 
 .sd-intro-term--launch {
-  top: 52%;
-  color: color-mix(in srgb, var(--sd-amber) 35%, #fff);
-  animation:
-    sd-type 0.8s 6s steps(var(--sd-chars), end) forwards,
-    sd-off 0.2s 7.2s steps(1, end) forwards;
+  --sd-at: 6s;
+  top: 46%;
+  animation: sd-off 0.25s 7.2s steps(1, start) forwards;
+}
+
+.sd-intro-term--boot .sd-intro-term-tag,
+.sd-intro-term--launch .sd-intro-term-tag,
+.sd-intro-term--boot::after,
+.sd-intro-term--launch::after {
+  animation-delay: var(--sd-at);
+}
+
+.sd-intro-term--launch .sd-intro-term-text {
+  text-shadow: 0 0 0.5em color-mix(in srgb, var(--sd-amber) 55%, transparent);
 }
 
 /* Vuosiluku: pyyhkäistään näkyviin vasemmalta ja pois oikealle */
@@ -125,14 +165,19 @@
   max-width: none;
   color: var(--text);
   font-family: var(--sd-font);
-  font-size: 9cqw;
-  font-weight: 800;
+  font-size: 10cqw;
+  font-weight: 900;
   letter-spacing: 0.14em;
   text-align: center;
   text-transform: uppercase;
+  /* Viivat kummallakin puolella tekstiä */
+  background:
+    linear-gradient(var(--cyan), var(--cyan)) left 4% center / 9% 2px no-repeat,
+    linear-gradient(var(--cyan), var(--cyan)) right 4% center / 9% 2px no-repeat;
   text-shadow:
     -0.04em 0 color-mix(in srgb, var(--cyan) 55%, transparent),
-    0.03em 0 color-mix(in srgb, var(--sd-amber) 45%, transparent);
+    0.03em 0 color-mix(in srgb, var(--sd-amber) 45%, transparent),
+    0 0 0.4em color-mix(in srgb, var(--cyan) 40%, transparent);
   clip-path: inset(0 100% 0 0);
   animation: sd-wipe-in 0.6s 1.4s cubic-bezier(0.7, 0, 0.3, 1) forwards, sd-wipe-out 0.5s 3.1s ease-in forwards;
 }
@@ -156,7 +201,7 @@
   text-align: center;
   text-transform: uppercase;
   opacity: 0;
-  animation: sd-alert 1.2s 3.8s steps(1, end) forwards, sd-off 0.2s 5.6s steps(1, end) forwards;
+  animation: sd-alert 1.2s 3.8s linear forwards, sd-off 0.2s 5.6s steps(1, start) forwards;
 }
 
 .sd-intro-warning span {
@@ -241,7 +286,7 @@
   background: linear-gradient(90deg, color-mix(in srgb, var(--sd-amber) 14%, transparent), transparent);
   white-space: nowrap;
   opacity: 0;
-  animation: sd-on 0.4s 8.8s steps(2, end) forwards;
+  animation: sd-on 0.4s 8.8s linear forwards;
 }
 
 .sd-intro-sector-name {
@@ -286,11 +331,13 @@
 }
 
 /* ═══ Keyframet ═══ */
+/* Syttyy välähtäen. Kovat portaat tehdään vierekkäisillä prosenteilla eikä steps()-ajoituksella:
+   steps() voi jäädä pyöristyksen takia viimeistä edelliseen arvoon (osa jäisi himmeäksi). */
 @keyframes sd-on {
-  0% { opacity: 0; }
-  50% { opacity: 1; }
-  75% { opacity: 0.3; }
-  100% { opacity: 1; }
+  0%, 24% { opacity: 0; }
+  25%, 49% { opacity: 1; }
+  50%, 69% { opacity: 0.3; }
+  70%, 100% { opacity: 1; }
 }
 
 @keyframes sd-off {
@@ -301,9 +348,8 @@
   to { clip-path: inset(0 0 0 0); }
 }
 
-@keyframes sd-cursor {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+@keyframes sd-grow {
+  to { transform: scaleX(1); }
 }
 
 @keyframes sd-wipe-in {
@@ -316,19 +362,19 @@
 }
 
 @keyframes sd-alert {
-  0% { opacity: 1; }
-  15% { opacity: 0; }
-  30% { opacity: 1; }
-  45% { opacity: 0; }
+  0%, 14% { opacity: 1; }
+  15%, 29% { opacity: 0; }
+  30%, 44% { opacity: 1; }
+  45%, 59% { opacity: 0; }
   60%, 100% { opacity: 1; }
 }
 
 @keyframes sd-lock {
-  0% { opacity: 1; transform: scale(1.35); }
-  33% { opacity: 0.2; }
-  50% { opacity: 1; transform: scale(1.15); }
-  66% { opacity: 0.4; }
-  100% { opacity: 1; transform: scale(1); }
+  0%, 19% { opacity: 1; transform: scale(1.35); }
+  20%, 34% { opacity: 0.2; transform: scale(1.35); }
+  35%, 49% { opacity: 1; transform: scale(1.15); }
+  50%, 64% { opacity: 0.4; transform: scale(1.15); }
+  65%, 100% { opacity: 1; transform: scale(1); }
 }
 
 /* Laivasto liukuu yläreunan takaa näkyviin ja jää uhkaavasti ylös */

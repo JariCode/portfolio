@@ -19,9 +19,21 @@ const FLEET = [
   ['laivasto1', 'scout', 86, 0.15, 'sm'],
 ];
 
-// Päätteeseen kirjoittuvat rivit: merkkien määrä ohjaa askelia (Intro.css, --sd-chars)
-const BOOT = '> järjestelmät käynnistyvät';
-const LAUNCH = '> lähtölupa myönnetty';
+// Ohjaamon ilmoitukset: tunniste ja teksti, joka kirjoittuu esiin merkki kerrallaan
+// (merkkien määrä ohjaa askelia, Intro.css --sd-chars)
+const BOOT = { tag: 'SD-2026', text: 'Järjestelmät päällä' };
+const LAUNCH = { tag: 'Laukaisu', text: 'Lähtölupa myönnetty' };
+
+function Notice({ tag, text, className }) {
+  return (
+    <div className={`sd-intro-term ${className}`}>
+      <span className="sd-intro-term-tag">{tag}</span>
+      <span className="sd-intro-term-text" style={{ '--sd-chars': text.length }}>
+        {text}
+      </span>
+    </div>
+  );
+}
 
 export default function Intro({ onDone }) {
   const skipRef = useRef(null);
@@ -68,16 +80,12 @@ export default function Intro({ onDone }) {
 
       {/* Tarinateksti: ruudunlukija lukee rivit tavallisena tekstinä */}
       <div className="sd-intro-story">
-        <p className="sd-intro-term sd-intro-term--boot" style={{ '--sd-chars': BOOT.length + 1 }}>
-          {BOOT}
-        </p>
+        <Notice {...BOOT} className="sd-intro-term--boot" />
         <p className="sd-intro-year">Vuosi 2026</p>
         <p className="sd-intro-warning">
           <span>Varoitus</span> Kolme laivastoa ylittää rajan
         </p>
-        <p className="sd-intro-term sd-intro-term--launch" style={{ '--sd-chars': LAUNCH.length + 1 }}>
-          {LAUNCH}
-        </p>
+        <Notice {...LAUNCH} className="sd-intro-term--launch" />
       </div>
 
       {/* Hyperhypyn valoviiva avautuu ja paljastaa logon */}

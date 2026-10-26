@@ -63,9 +63,13 @@ export default function Title({ onStart }) {
           </span>
         </h3>
 
-        {/* Kirjoittuu esiin kuin päätteeseen: merkkien määrä ohjaa askelia (Title.css) */}
-        <p className="sd-tagline" style={{ '--sd-chars': 26 }}>
-          &gt; lennä · ammu · selviydy
+        {/* Sanat syttyvät yksi kerrallaan, välissä meripihkaiset merkkivalot (Title.css) */}
+        <p className="sd-tagline">
+          <span className="sd-tag-word">Lennä</span>
+          <span className="sd-tag-sep" aria-hidden="true" />
+          <span className="sd-tag-word">Ammu</span>
+          <span className="sd-tag-sep" aria-hidden="true" />
+          <span className="sd-tag-word">Selviydy</span>
         </p>
 
         <div className="sd-actions">
