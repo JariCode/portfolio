@@ -273,7 +273,7 @@ export default function Game({ onExit }) {
 
       {hint && !result && (
         <p className="sd-hint" aria-hidden="true">
-          <span className="sd-hint-keys">Nuolet liikkuvat · välilyönti ampuu · B pommi</span>
+          <span className="sd-hint-keys">Nuolet liikuttavat · välilyönti ampuu · B pommi</span>
           <span className="sd-hint-touch">Vedä alusta sormella · ammu napista</span>
         </p>
       )}
