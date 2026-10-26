@@ -184,10 +184,9 @@ export default class SpaceScene extends Phaser.Scene {
     this.input.on('pointerup', release);
     this.input.on('pointerupoutside', release);
 
-    // Pitkä hyperhypyn ääni hiljennetään, jos peli suljetaan tai sektori vaihtuu kesken
-    const stopSounds = () => this.stopJump?.(0.3);
-    this.events.once('shutdown', stopSounds);
-    this.events.once('destroy', stopSounds);
+    // Pitkä hyperhypyn ääni hiljennetään, jos peli suljetaan kesken. Sektorin vaihtuessa se
+    // saa soida loppuun, koska välianimaatio jatkaa samaa hyppyä.
+    this.events.once('destroy', () => this.stopJump?.(0.3));
 
     this.hudKey = '';
     this.emitHud();
@@ -231,6 +230,8 @@ export default class SpaceScene extends Phaser.Scene {
   }
 
   update(time, delta) {
+    // Hyperhypyn aikana sektori on valmiina välianimaation takana, mutta ei vielä käynnissä
+    if (this.controls.hold) return;
     const dt = Math.min(delta, 50) / 1000;
     const cam = this.cameras.main;
     this.elapsed += dt;
@@ -583,7 +584,7 @@ export default class SpaceScene extends Phaser.Scene {
   // Pommi: valkoinen välähdys ja paineaalto, kaikki ruudulla olevat viholliset saavat
   // vahinkoa ja vihollisten ammukset katoavat
   useBomb() {
-    if (this.finished || this.bombs <= 0) return;
+    if (this.finished || this.bombs <= 0 || this.controls.hold) return;
     this.bombs -= 1;
     play('bomb', { volume: 0.9 });
     const cam = this.cameras.main;

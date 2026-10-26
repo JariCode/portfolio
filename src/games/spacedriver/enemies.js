@@ -27,6 +27,17 @@ export const BULLETS = {
   aalto: { sheet: 'ammus-aalto', r: 26, speed: 220, scale: 1.5 },
 };
 
+// Laivastojen omat ammuskuvat: sama ammustyyppi näyttää eri laivastoissa erilaiselta.
+// Laivasto 1 käyttää BULLETSin kuvia sellaisenaan; muilla korvataan vain se, mikä eroaa.
+// Laivasto 2:lla ei ole aaltoa, joten tukialuksen aalto on iso hidas salamapallo.
+const FLEET_BULLETS = {
+  laivasto2: {
+    luoti: { sheet: 'ammus-salama' },
+    iso: { sheet: 'ammus-raketti' },
+    aalto: { sheet: 'ammus-salama', r: 14, scale: 4 },
+  },
+};
+
 // Liikkeet
 const WAVE_AMPLITUDE = 110; // aalto: sivuttaisliikkeen laajuus (px)
 const STEER_SPEED = 240; // kuinka nopeasti vihollinen kaartaa kivien välistä aukkoa kohti (px/s)
@@ -61,7 +72,7 @@ const has = (key) => SPRITES.some((s) => s.key === key);
 // Vihollisen ammus. vx/vy ovat nopeus ruudun suhteen (px/s).
 export class EnemyBullet {
   constructor(scene, fleet, kind, x, y, angle) {
-    const b = BULLETS[kind];
+    const b = { ...BULLETS[kind], ...FLEET_BULLETS[fleet]?.[kind] };
     const key = `${fleet}-${b.sheet}`;
     this.r = b.r;
     this.x = x;

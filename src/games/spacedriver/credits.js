@@ -79,6 +79,12 @@ export const CREDITS = [
     license: 'Tehty tätä peliä varten',
   },
   {
+    type: 'tileset',
+    name: 'Aseman raunio (asema.png)',
+    author: 'Claude (Anthropic) · Piirretty koodilla',
+    license: 'Tehty tätä peliä varten',
+  },
+  {
     type: 'musiikki',
     name: 'Feel This Energy (Voyager)',
     author: 'AlexGrohl',

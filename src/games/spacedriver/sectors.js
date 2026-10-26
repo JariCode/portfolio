@@ -1,4 +1,5 @@
 import sektori1 from './maps/sektori1.json';
+import sektori2 from './maps/sektori2.json';
 
 // Sektorit pelijärjestyksessä. Kartta (Tiled) sisältää vain laatat: Tausta, Esteet ja Edusta.
 // Viholliset ja tehostimet ovat tässä listoina kuten Z-Runnerin zombit (worlds.js), joten
@@ -62,5 +63,60 @@ export const SECTORS = [
       [9, 4, 'energia'],
     ],
     boss: { type: 'battlecruiser', name: 'Raskas risteilijä', hp: 160, points: 5000 },
+  },
+  {
+    key: 'sektori2',
+    name: 'Aseman raunio',
+    map: sektori2,
+    tileset: { name: 'asema', file: '/games/spacedriver/asema.png' },
+    fleet: 'laivasto2',
+    // Kartta: avaruus (rivit 40–49), telakan suu (30–39), käytävän mutka (20–29),
+    // reaktorisali (10–19) ja pomoareena (0–9). Kapeissa kohdissa viholliset tulevat aukon
+    // kohdalta, ja ne väistävät seiniä kuten sektorissa 1.
+    enemies: [
+      [48, 4, 'scout', 'suora'],
+      [48, 8, 'scout', 'suora'],
+      [46, 6, 'fighter', 'suora'],
+      [44, 2, 'scout', 'aalto'],
+      [44, 9, 'scout', 'aalto'],
+      [42, 5, 'bomber', 'suora'],
+      [40, 3, 'fighter', 'aalto'],
+      [40, 8, 'fighter', 'aalto'],
+      [38, 6, 'torpedo', 'paikallaan'],
+      [36, 4, 'scout', 'sukellus'],
+      [36, 7, 'scout', 'sukellus'],
+      [34, 5, 'fighter', 'suora'],
+      [34, 6, 'fighter', 'suora'],
+      [31, 6, 'support', 'paikallaan'],
+      [29, 4, 'scout', 'suora'],
+      [29, 7, 'scout', 'suora'],
+      [27, 5, 'bomber', 'aalto'],
+      [25, 4, 'fighter', 'suora'],
+      [25, 7, 'fighter', 'suora'],
+      [22, 6, 'frigate', 'suora'],
+      [20, 3, 'scout', 'sukellus'],
+      [20, 8, 'scout', 'sukellus'],
+      [17, 5, 'torpedo', 'paikallaan'],
+      [15, 3, 'fighter', 'aalto'],
+      [15, 8, 'fighter', 'aalto'],
+      [12, 6, 'bomber', 'suora'],
+      [10, 2, 'scout', 'sukellus'],
+      [10, 6, 'scout', 'sukellus'],
+      [10, 9, 'scout', 'sukellus'],
+      [7, 4, 'frigate', 'suora'],
+      [4, 3, 'fighter', 'suora'],
+      [4, 8, 'fighter', 'suora'],
+    ],
+    // Ase käytävän mutkassa, kilpi reaktorisalissa ennen pomoa
+    pickups: [
+      [44, 6, 'energia'],
+      [34, 5, 'pommi'],
+      [27, 7, 'ase'],
+      [22, 3, 'energia'],
+      [16, 8, 'kilpi'],
+      [13, 6, 'pommi'],
+      [9, 5, 'energia'],
+    ],
+    boss: { type: 'battlecruiser', name: 'Rynnäkköristeilijä', hp: 200, points: 6000 },
   },
 ];

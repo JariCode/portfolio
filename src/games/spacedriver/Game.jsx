@@ -4,6 +4,7 @@ import SpaceScene, { GAME_W, GAME_H, MAX_BOMBS, MAX_HP, MAX_WEAPON, NEW_RUN } fr
 import { WEAPON_NAMES } from './player.js';
 import { SECTORS } from './sectors.js';
 import { Frame } from './Hud.jsx';
+import HyperJump from './HyperJump.jsx';
 import { clearSaves, readRecord, saveRecord } from './score.js';
 import { isMuted, onMuteChange, playMusic, setMuted } from './sound.js';
 import './Game.css';
@@ -23,11 +24,16 @@ export default function Game({ onExit }) {
   const gameRef = useRef(null);
   const actionRef = useRef(null);
   // Kosketusnapit kirjoittavat tähän olioon, jota scene lukee joka ruudulla.
-  // fire: ampumanappi pohjassa, bomb: pommin painallusten laskuri (scene käyttää uudet).
-  const controlsRef = useRef({ fire: false, bomb: 0 });
+  // fire: ampumanappi pohjassa, bomb: pommin painallusten laskuri (scene käyttää uudet),
+  // hold: seuraava sektori odottaa hyperhypyn takana.
+  const controlsRef = useRef({ fire: false, bomb: 0, hold: false });
   const [hud, setHud] = useState(EMPTY_HUD);
   // result: { kind: 'clear' | 'dead', sector, score, kills, newRecord, best }
   const [result, setResult] = useState(null);
+  // Hyperhyppy sektorien välissä: { from, to: { index, name } }
+  const [jump, setJump] = useState(null);
+  // Nykyisen sektorin alku: kaatuessa yritetään uudelleen tästä, ei koko pelin alusta
+  const sectorStartRef = useRef(FIRST_SECTOR);
   const [hint, setHint] = useState(true);
   // Mykistys on sound.js:ssä, jotta M-näppäin (SpaceDriver.jsx) ja nappi pysyvät samassa tilassa
   const muted = useSyncExternalStore(onMuteChange, isMuted);
@@ -60,7 +66,26 @@ export default function Game({ onExit }) {
     });
 
     game.events.on('sd-hud', setHud);
-    game.events.on('sd-clear', finish('clear'));
+    // Sektori läpi: seuraavaan sektoriin hyperhypyllä, viimeisen jälkeen loppuruutu.
+    // Runko, pisteet, pommit, ase ja tuhotut siirtyvät mukana.
+    game.events.on('sd-clear', (stats) => {
+      const next = stats.sector + 1;
+      if (!SECTORS[next]) {
+        finish('clear')(stats);
+        return;
+      }
+      const { hp, score, bombs, weapon, kills } = stats;
+      const start = { sector: next, carry: { hp, score, bombs, weapon, kills } };
+      sectorStartRef.current = start;
+      setJump({ from: stats.sector, to: { index: next, name: SECTORS[next].name } });
+      playMusic('intro', { loop: false, fadeIn: 0.3 });
+      // Seuraava sektori latautuu jo välianimaation aikana (uuden laivaston kuvat), jottei
+      // sen jälkeen tule mustaa hetkeä. Sektori odottaa paikallaan, kunnes hyppy päättyy.
+      controlsRef.current.hold = true;
+      controlsRef.current.fire = false;
+      setHud({ ...EMPTY_HUD, ...start.carry, sector: next, name: SECTORS[next].name });
+      game.scene.getScene('space').scene.restart(start);
+    });
     game.events.on('sd-dead', finish('dead'));
     gameRef.current = game;
     playMusic('music');
@@ -91,18 +116,33 @@ export default function Game({ onExit }) {
   }, []);
 
   // Loppuruudulla fokus pääpainikkeessa, jotta Enter jatkaa heti. Pelin aikana fokus on
-  // pelinäkymässä, ettei se jää sivulle.
+  // pelinäkymässä, ettei se jää sivulle (myös hyperhypyn Ohita-napin poistuttua).
+  // Hyperhypyn aikana fokus on sen Ohita-napissa.
   useEffect(() => {
+    if (jump) return;
     (result ? actionRef : rootRef).current?.focus({ preventScroll: true });
-  }, [result]);
+  }, [result, jump]);
 
-  // Uusi peli alusta. Pysyvä funktio, jotta se ei vaihdu joka renderöinnillä.
-  const restart = useCallback(() => {
-    setResult(null);
-    setHud(EMPTY_HUD);
-    controlsRef.current.fire = false;
-    gameRef.current?.scene.getScene('space').scene.restart(FIRST_SECTOR);
+  // Hyppy päättyi (tai ohitettiin): valmiiksi ladattu sektori lähtee liikkeelle ja
+  // taistelumusiikki alkaa. Pysyvä funktio, jotta hyperhypyn ajastin ei nollaudu.
+  const endJump = useCallback(() => {
+    controlsRef.current.hold = false;
+    setJump(null);
+    playMusic('music');
   }, []);
+
+  // Kaatuessa sama sektori uudelleen niillä tiedoilla, joilla siihen tultiin, mutta ehjällä
+  // rungolla (muuten vähällä rungolla sektoriin tullut ei pääsisi eteenpäin). Viimeisen
+  // sektorin läpäisyn jälkeen uusi peli alusta. Sama scene käynnistyy uusilla tiedoilla.
+  const restart = () => {
+    if (result?.kind === 'clear') sectorStartRef.current = FIRST_SECTOR;
+    const start = { ...sectorStartRef.current, carry: { ...sectorStartRef.current.carry, hp: MAX_HP } };
+    setResult(null);
+    setHud({ ...EMPTY_HUD, ...start.carry, sector: start.sector, name: SECTORS[start.sector].name });
+    controlsRef.current.fire = false;
+    playMusic('music');
+    gameRef.current?.scene.getScene('space').scene.restart(start);
+  };
 
   // Poistaa vain Space Driverin tallennukset ja palaa alkuvalikkoon
   const clear = () => {
@@ -229,6 +269,8 @@ export default function Game({ onExit }) {
         </button>
       </div>
 
+      {jump && <HyperJump from={jump.from} to={jump.to} onDone={endJump} />}
+
       {hint && !result && (
         <p className="sd-hint" aria-hidden="true">
           <span className="sd-hint-keys">Nuolet liikkuvat · välilyönti ampuu · B pommi</span>
@@ -261,8 +303,8 @@ export default function Game({ onExit }) {
             )}
             <p className="sd-result-text sd-result-note">
               {result.kind === 'clear'
-                ? 'Raskas risteilijä kaatui ja kivivyö on selvitetty. Seuraavat sektorit ovat vielä rakenteilla.'
-                : 'Runko ei kestänyt. Väistä kiviä ja ammuksia, ja kerää energiaa matkalta.'}
+                ? `${SECTORS[result.sector].boss.name} kaatui ja sektori on selvitetty. Seuraavat sektorit ovat vielä rakenteilla.`
+                : 'Runko ei kestänyt. Väistä esteitä ja ammuksia, ja kerää energiaa matkalta.'}
             </p>
 
             <div className="sd-result-actions">

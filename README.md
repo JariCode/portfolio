@@ -212,7 +212,7 @@ Peli ja sektorien kartat ovat Jari Karrin. HUD ja animaatiot on piirretty koodil
 
 ### Tilesetit
 
-Kaikkien pelien tilesetit on piirretty koodilla Clauden (Anthropic) kanssa tätä sivustoa varten: Z-Runnerin `kaupunki.png`, `metro.png` ja `puisto.png` sekä Space Driverin `asteroidit.png`.
+Kaikkien pelien tilesetit on piirretty koodilla Clauden (Anthropic) kanssa tätä sivustoa varten: Z-Runnerin `kaupunki.png`, `metro.png` ja `puisto.png` sekä Space Driverin `asteroidit.png` ja `asema.png`.
 
 ## Paikallinen käyttö
 

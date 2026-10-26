@@ -1,0 +1,223 @@
+/* ═══ Hyperhyppy sektorista seuraavaan (HyperJump.jsx) ═══ */
+/* Aikajana (s): 0,1 kehys ja tilarivi · 0,2 ilmoitus "Sektori N selvitetty" · 0,3 alus
+   nousee · 1,6 valoviiva · 1,9 seuraavan sektorin numero · 2,3 nimi kirjoittuu · 3,0
+   koordinaatit · 4,1 alus kiitää ylös · 4,4 näyttö sulkeutuu · 5,0 loppu (DURATION) */
+.sd-jump {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  background: #000;
+}
+
+.sd-jump-frame,
+.sd-jump-status {
+  opacity: 0;
+  animation: sd-jump-on 0.5s 0.1s linear forwards;
+}
+
+/* ── Ilmoitus ylhäällä. Tekstit puristuvat lopussa vaakaviivaksi kuin näyttö sammuisi. ── */
+.sd-jump-notice {
+  position: absolute;
+  top: 16%;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2cqw;
+  animation: sd-jump-close 0.5s 4.4s ease-in forwards;
+}
+
+.sd-jump-tag {
+  padding: 0.5cqw 2.4cqw;
+  background: var(--cyan);
+  color: #00121a;
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.4cqw);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  clip-path: polygon(1.2cqw 0, 100% 0, calc(100% - 1.2cqw) 100%, 0 100%);
+  opacity: 0;
+  animation: sd-jump-on 0.4s 0.2s linear forwards;
+}
+
+.sd-jump-done {
+  max-width: none;
+  color: var(--text);
+  font-family: var(--sd-font);
+  font-size: 4.4cqw;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0);
+  animation: sd-jump-type 0.7s 0.4s steps(var(--sd-chars), jump-none) forwards;
+}
+
+/* ── Alus: nousee alhaalta, tärisee hypyn voimasta ja kiitää lopuksi ylös ── */
+.sd-jump-hero {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  translate: -50% 0;
+  animation:
+    sd-jump-hero-in 1.2s 0.3s cubic-bezier(0.2, 0.8, 0.3, 1) both,
+    sd-jump-hero-out 0.6s 4.1s cubic-bezier(0.6, 0, 0.9, 0.4) forwards;
+}
+
+.sd-jump-ship {
+  width: 22cqw;
+  filter: drop-shadow(0 1.5cqw 2.5cqw color-mix(in srgb, var(--cyan) 45%, transparent));
+  animation: sd-jump-shake 0.12s linear infinite;
+}
+
+/* ── Valoviiva ja seuraava sektori ── */
+.sd-jump-beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 46%;
+  height: max(2px, 0.6cqw);
+  background: linear-gradient(90deg, transparent, #fff 20%, #fff 80%, transparent);
+  box-shadow: 0 0 3cqw var(--sd-amber), 0 0 8cqw color-mix(in srgb, var(--sd-amber) 60%, transparent);
+  opacity: 0;
+  transform: scaleX(0);
+  animation: sd-jump-beam 0.9s 1.6s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+.sd-jump-target {
+  position: absolute;
+  top: 34%;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.4cqw;
+  pointer-events: none;
+  animation: sd-jump-close 0.5s 4.4s ease-in forwards;
+}
+
+.sd-jump-number {
+  max-width: none;
+  color: var(--cyan);
+  font-family: var(--sd-font);
+  font-size: 11cqw;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow:
+    -0.04em 0 color-mix(in srgb, var(--sd-amber) 55%, transparent),
+    0.03em 0 color-mix(in srgb, var(--violet) 45%, transparent);
+  clip-path: inset(0 100% 0 0);
+  animation: sd-jump-wipe 0.6s 1.9s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+.sd-jump-name {
+  max-width: none;
+  color: var(--sd-amber);
+  font-family: var(--sd-font);
+  font-size: 5.6cqw;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0);
+  animation: sd-jump-type 0.7s 2.3s steps(var(--sd-chars), jump-none) forwards;
+}
+
+.sd-jump-info {
+  max-width: none;
+  padding-left: 2cqw;
+  border-left: 2px solid var(--sd-amber);
+  color: var(--muted);
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.4cqw);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: sd-jump-on 0.4s 3s linear forwards;
+}
+
+/* ── Edistymispalkki ja Ohita-nappi ── */
+.sd-jump-progress {
+  position: absolute;
+  left: 6cqw;
+  right: 6cqw;
+  bottom: 3.4cqw;
+  height: max(3px, 0.9cqw);
+  background: repeating-linear-gradient(90deg, var(--sd-amber) 0 3cqw, transparent 3cqw 3.8cqw);
+  transform-origin: left;
+  animation: sd-jump-progress 5s linear both;
+}
+
+/* Kaksi luokkaa: yhteinen .sd-btn (SpaceDriver.css) tulee buildissa tämän tiedoston jälkeen */
+.sd-btn.sd-jump-skip {
+  position: absolute;
+  right: 6cqw;
+  bottom: 7cqw;
+  z-index: 2;
+  min-height: 28px;
+  padding: max(4px, 1.2cqw) max(12px, 4cqw);
+  font-size: max(9px, 2.5cqw);
+}
+
+/* ═══ Keyframet ═══ */
+/* Syttyy välähtäen: kovat portaat vierekkäisillä prosenteilla (ei steps(), joka voi jäädä
+   pyöristyksen takia viimeistä edelliseen arvoon) */
+@keyframes sd-jump-on {
+  0%, 24% { opacity: 0; }
+  25%, 49% { opacity: 1; }
+  50%, 69% { opacity: 0.3; }
+  70%, 100% { opacity: 1; }
+}
+
+@keyframes sd-jump-type {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes sd-jump-wipe {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes sd-jump-beam {
+  0% { opacity: 1; transform: scaleX(0); }
+  40% { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1) scaleY(0.2); }
+}
+
+@keyframes sd-jump-close {
+  to { opacity: 0; transform: scaleY(0.05); }
+}
+
+@keyframes sd-jump-hero-in {
+  from { transform: translateY(40cqw); }
+  to { transform: translateY(-16cqh); }
+}
+
+@keyframes sd-jump-hero-out {
+  from { translate: -50% 0; }
+  to { translate: -50% -100cqh; }
+}
+
+/* Pieni tärinä: vain transform, ettei kuva värise (ks. Z-Runnerin opit) */
+@keyframes sd-jump-shake {
+  0%, 49% { transform: translate(0, 0); }
+  50%, 100% { transform: translate(0.25cqw, -0.2cqw); }
+}
+
+@keyframes sd-jump-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sd-jump-ship {
+    animation: none;
+  }
+}
