@@ -5,7 +5,7 @@ import MetroCutscene from './MetroCutscene.jsx';
 import ParkCutscene from './ParkCutscene.jsx';
 import Outro from './Outro.jsx';
 import { WORLDS } from './worlds.js';
-import { calcScore, clearSaves, formatTime, readRecord, saveRecord } from './score.js';
+import { calcScore, clearResume, clearSaves, formatTime, readRecord, saveRecord, saveResume } from './score.js';
 import { playMusic } from './sound.js';
 import MuteButton from './MuteButton.jsx';
 import './Game.css';
@@ -24,7 +24,10 @@ const FIRST_WORLD = { world: 0, carry: NEW_RUN };
 // Välianimaatiot maailmojen välillä: worlds.js kertoo, mikä näytetään ennen maailmaa
 const CUTSCENES = { metro: MetroCutscene, park: ParkCutscene };
 
-export default function Game({ onExit }) {
+// resume: jatkokohta { world, carry } (Jatka-nappi) tai null, jolloin peli alkaa alusta
+export default function Game({ onExit, resume }) {
+  // Tallennettu maailma tarkistetaan: jos sitä ei ole (esim. vanha tallennus), aloitetaan alusta
+  const first = resume && WORLDS[resume.world] ? resume : FIRST_WORLD;
   const rootRef = useRef(null);
   const touchRef = useRef(null);
   const hostRef = useRef(null);
@@ -32,8 +35,8 @@ export default function Game({ onExit }) {
   const controlsRef = useRef({ left: false, right: false, jump: false, attack: false });
   const replayRef = useRef(null);
   // Nykyisen maailman alku: kaatuessa yritetään uudelleen tästä, ei koko pelin alusta
-  const worldStartRef = useRef(FIRST_WORLD);
-  const [hud, setHud] = useState(EMPTY_HUD);
+  const worldStartRef = useRef(first);
+  const [hud, setHud] = useState({ ...EMPTY_HUD, ...first.carry, world: first.world, worldName: WORLDS[first.world].name });
   // result: { kind: 'finish' | 'dead', ...pelin tiedot, score, newRecord }
   const [result, setResult] = useState(null);
   const [cutscene, setCutscene] = useState(null);
@@ -60,11 +63,13 @@ export default function Game({ onExit }) {
       loader: { imageLoadType: 'HTMLImageElement' },
       // Phaserin oma ääni pois: äänet soitetaan sound.js:llä, jota myös animaatiot käyttävät
       audio: { noAudio: true },
-      scene: [LevelScene],
       callbacks: {
         preBoot: (g) => g.registry.set('controls', controlsRef.current),
       },
     });
+
+    // Scene lisätään erikseen, jotta se alkaa oikeasta maailmasta (alusta tai jatkokohdasta)
+    game.scene.add('level', LevelScene, true, worldStartRef.current);
 
     game.events.on('zr-hud', setHud);
     game.events.on('zr-train', setTrain);
@@ -75,11 +80,15 @@ export default function Game({ onExit }) {
         const next = stats.world + 1;
         const { hp, time, orbs, totalOrbs, kills, totalZombies } = stats;
         worldStartRef.current = { world: next, carry: { hp, time, orbs, totalOrbs, kills, totalZombies } };
+        // Jatkokohta talteen: peliä voi jatkaa tästä myöhemmin (myös sivun päivityksen jälkeen)
+        saveResume(worldStartRef.current);
         setCutscene({ number: next + 1, name: WORLDS[next].name, kind: WORLDS[next].cutscene });
         playMusic('intro', { loop: false, fadeIn: 0.3 });
         return;
       }
-      // Koko pelin maali: pisteet ja ennätys (tallennetaan vain, jos parempi kuin aiempi)
+      // Koko pelin maali: pisteet ja ennätys (tallennetaan vain, jos parempi kuin aiempi).
+      // Peli on pelattu loppuun, joten jatkokohtaa ei enää tarvita.
+      clearResume();
       const score = calcScore({ ...stats, worlds: WORLDS.length });
       const newRecord = saveRecord({
         score: score.total,

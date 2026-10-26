@@ -1,8 +1,10 @@
-// Z-Runnerin pisteet ja ennätyksen tallennus. Yhteinen aloitusnäkymälle ja maaliruudulle.
+// Z-Runnerin pisteet sekä ennätyksen ja jatkokohdan tallennus. Yhteinen aloitusnäkymälle ja
+// pelikentälle.
 // localStorage-kutsut ovat try/catchissa: selain voi estää tallennuksen (esim. yksityinen selaus).
 
 const SAVE_PREFIX = 'jaricode:zrunner:';
 const RECORD_KEY = `${SAVE_PREFIX}ennatys`;
+const RESUME_KEY = `${SAVE_PREFIX}jatko`;
 
 // Pisteytys: valopallo 10, zombi 50 ja aikabonus 5 pistettä jokaisesta sekunnista,
 // joka jää alle aikarajan (kolme minuuttia jokaista pelattua maailmaa kohti).
@@ -43,6 +45,37 @@ export function saveRecord(result) {
     return true;
   } catch {
     return false;
+  }
+}
+
+// Jatkokohta: { world, carry } eli maailman alku, josta keskeneräistä peliä voi jatkaa
+// myöhemmin (sama kohta, josta kaatuessa yritetään uudelleen). Tallennetaan, kun ensimmäinen
+// maailma on läpäisty, ja poistetaan, kun peli on pelattu loppuun tai aloitetaan alusta.
+// Väärän muotoinen tallennus ohitetaan: Game.jsx tarkistaa vielä, että maailma on olemassa.
+export function readResume() {
+  try {
+    const resume = JSON.parse(localStorage.getItem(RESUME_KEY));
+    const { world, carry } = resume ?? {};
+    const valid = Number.isInteger(world) && world > 0 && carry && Object.values(carry).every(Number.isFinite);
+    return valid ? resume : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveResume(start) {
+  try {
+    localStorage.setItem(RESUME_KEY, JSON.stringify(start));
+  } catch {
+    // Tallennus estetty: jatkaminen ei vain ole mahdollista
+  }
+}
+
+export function clearResume() {
+  try {
+    localStorage.removeItem(RESUME_KEY);
+  } catch {
+    // Tallennus estetty: ei mitään poistettavaa
   }
 }
 

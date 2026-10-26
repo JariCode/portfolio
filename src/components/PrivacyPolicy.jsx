@@ -1,7 +1,7 @@
 import { profile } from '../data/profile.js';
 import './PrivacyPolicy.css';
 
-const UPDATED = '21.10.2026'; // päivitä, kun sisältö muuttuu
+const UPDATED = '26.10.2026'; // päivitä, kun sisältö muuttuu
 
 // Lyhyt tietosuojaseloste: sivu kerää tietoja vain yhteydenottolomakkeella
 export default function PrivacyPolicy() {
@@ -42,11 +42,12 @@ export default function PrivacyPolicy() {
         <section>
           <h3>Pelien tallennukset</h3>
           <p>
-            Pelialueen pelit tallentavat ennätyksesi ja kaupunginrakennuspelin keskeneräisen kaupungin
-            selaimesi omaan muistiin (localStorage), jotta ne säilyvät seuraavaan kertaan. Tallennus
-            tapahtuu vain, kun pelaat. Tiedot pysyvät laitteellasi, eivätkä ne siirry minulle tai
-            muualle. Voit poistaa ne pelin lopussa olevalla Tyhjennä tallennukset -napilla, jolloin peli
-            alkaa alusta, tai tyhjentämällä tämän sivuston tiedot selaimen asetuksista.
+            Pelialueen pelit tallentavat ennätyksesi, keskeneräisen pelin jatkokohdan (maailman tai
+            sektorin, johon pääsit) ja kaupunginrakennuspelin keskeneräisen kaupungin selaimesi omaan
+            muistiin (localStorage), jotta voit jatkaa myöhemmin. Tallennus tapahtuu vain, kun pelaat.
+            Tiedot pysyvät laitteellasi, eivätkä ne siirry minulle tai muualle. Voit poistaa ne pelin
+            lopussa olevalla Tyhjennä tallennukset -napilla, jolloin peli alkaa alusta, tai
+            tyhjentämällä tämän sivuston tiedot selaimen asetuksista.
           </p>
         </section>
 
