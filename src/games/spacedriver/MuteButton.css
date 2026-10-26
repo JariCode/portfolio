@@ -62,3 +62,9 @@
   z-index: 5;
   width: max(30px, 7cqw);
 }
+
+/* Ohjeiden ollessa auki kelluva nappi piiloon: puhelimessa se osui paneelin Selvä-nappiin.
+   M-näppäin mykistää silti. */
+.sd:has(.sd-help) .sd-mute--float {
+  display: none;
+}
