@@ -19,6 +19,13 @@ const CC0 = 'CC0';
 const CC0_URL = 'https://creativecommons.org/publicdomain/zero/1.0/';
 const VOID_CHANGES = 'Valitut tiedostot nimetty uudelleen, ei muita muutoksia';
 
+// Musiikki ja äänet: Pixabay. Lisenssi ei vaadi mainintaa, mutta tekijät kerrotaan silti.
+// Freesoundista Pixabayhin siirretyissä äänissä tekijä on alkuperäinen tekijä ja
+// julkaisija freesound_community (kuten Z-Runnerissa).
+const PIXABAY = 'Pixabay Content License';
+const PIXABAY_URL = 'https://pixabay.com/service/license-summary/';
+const FREESOUND = '(Freesound), julkaisija freesound_community';
+
 export const CREDITS = [
   {
     type: 'alus',
@@ -70,5 +77,85 @@ export const CREDITS = [
     name: 'Asteroidikenttä (asteroidit.png)',
     author: 'Claude (Anthropic) · Piirretty koodilla',
     license: 'Tehty tätä peliä varten',
+  },
+  {
+    type: 'musiikki',
+    name: 'Feel This Energy (Voyager)',
+    author: 'AlexGrohl',
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'musiikki.mp3',
+  },
+  {
+    type: 'musiikki',
+    name: 'Free Boss Fight Loop',
+    author: 'C0mp0s3r69',
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'pomo.mp3',
+  },
+  {
+    type: 'musiikki',
+    name: 'Space Ambient Music',
+    author: 'Onetent',
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'intro.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'laser shot ingame',
+    author: 'RibhavAgrawal',
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'ammus.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Laser zap',
+    author: `Hoscalegeek ${FREESOUND}`,
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'vihollisen-ammus.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Metal Hit 12',
+    author: 'floraphonic',
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'osuma.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Explosion',
+    author: `morganpurkis ${FREESOUND}`,
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'rajahdys.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Medium Explosion',
+    author: `JuveriSetila ${FREESOUND}`,
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'pommi.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Win',
+    author: 'Musheran',
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'tehostin.mp3',
+  },
+  {
+    type: 'ääni',
+    name: 'Hyper-Drive Spaceship Flyby',
+    author: 'SoundShelfStudio',
+    license: PIXABAY,
+    licenseUrl: PIXABAY_URL,
+    file: 'hyperhyppy.mp3',
   },
 ];

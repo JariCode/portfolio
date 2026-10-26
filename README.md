@@ -150,13 +150,15 @@ Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakati
 
 ## Tekijät ja lisenssit
 
-Z-Runnerin peli, tarina ja juoni sekä kartat ovat Jari Karrin. Tilesetit, taustat ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Samat tiedot ovat tiedostossa `src/games/zrunner/credits.js`, josta pelin lopputekstit luetaan.
+Kuva- ja äänitiedostot eivät ole versionhallinnassa, eikä niitä jaeta erikseen. Ne ovat käytössä vain pelien osana. Jokaisen pelin tekijät ovat myös pelin omassa `credits.js`-tiedostossa.
 
-Kuva- ja äänitiedostot eivät ole versionhallinnassa, eikä niitä jaeta erikseen. Ne ovat käytössä vain pelin osana.
+Musiikin ja äänten lähde on [Pixabay](https://pixabay.com/) ja lisenssi [Pixabay Content License](https://pixabay.com/service/license-summary/): käyttö ja muokkaus sallittu, tekijän mainintaa ei vaadita. Osa Pixabayn musiikista on rekisteröity YouTuben Content ID -järjestelmään. Sivustolla se ei haittaa, mutta jos kappaletta käytetään YouTube-videolla, YouTube voi tehdä tekijänoikeusilmoituksen, jonka voi kiistää lisenssin perusteella.
 
-### Hahmot (sprite-arkit)
+### Z-Runner
 
-Lisenssi: [CraftPix File License](https://craftpix.net/file-licenses/). Kaupallinen käyttö ja muokkaus sallittu, tekijän mainintaa ei vaadita. Ruudut on kohdistettu, skaalattu ja koottu sprite-arkeiksi.
+Peli, tarina ja juoni sekä kartat ovat Jari Karrin. Tilesetit, taustat ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Tekijät: `src/games/zrunner/credits.js`, josta pelin lopputekstit luetaan.
+
+**Hahmot (sprite-arkit).** Lisenssi: [CraftPix File License](https://craftpix.net/file-licenses/). Kaupallinen käyttö ja muokkaus sallittu, tekijän mainintaa ei vaadita. Ruudut on kohdistettu, skaalattu ja koottu sprite-arkeiksi.
 
 | Käyttö | Paketti | Tekijä | Lähde |
 |---|---|---|---|
@@ -164,9 +166,7 @@ Lisenssi: [CraftPix File License](https://craftpix.net/file-licenses/). Kaupalli
 | Aikuiset zombit | 2D Zombie Free Sprite | CraftPix.net | [craftpix.net](https://craftpix.net/freebies/2d-game-zombie-character-free-sprite-pack-1/) |
 | Lapsizombit | 2D Zombie Kids Free Sprite | CraftPix.net | [craftpix.net](https://craftpix.net/freebies/2d-game-zombie-kids-character-free-sprite-8/) |
 
-### Musiikki ja äänet
-
-Lähde: [Pixabay](https://pixabay.com/). Lisenssi: [Pixabay Content License](https://pixabay.com/service/license-summary/). Käyttö ja muokkaus sallittu, tekijän mainintaa ei vaadita.
+**Musiikki ja äänet** (Pixabay, `public/audio/zrunner/`). Taustamusiikki ja intro on rekisteröity Content ID:hen.
 
 | Käyttö | Tiedosto | Nimi Pixabayssa | Tekijä |
 |---|---|---|---|
@@ -181,7 +181,34 @@ Lähde: [Pixabay](https://pixabay.com/). Lisenssi: [Pixabay Content License](htt
 | Osuma zombiin | `zombi-osuma.mp3` | Impact Thud | Universfield |
 | Pakoauto ja lopputekstit | `auto.mp3` | Inside Car (Driving) | Fabrizio84 (Freesound), julkaisija freesound_community |
 
-Taustamusiikki ja intro on rekisteröity YouTuben Content ID -järjestelmään. Sivustolla se ei haittaa, mutta jos niitä käytetään YouTube-videolla, YouTube voi tehdä tekijänoikeusilmoituksen, jonka voi kiistää lisenssin perusteella.
+### Space Driver 2026
+
+Peli ja sektorien kartat ovat Jari Karrin. Asteroidikentän tileset, HUD ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Tekijät: `src/games/spacedriver/credits.js`.
+
+**Alukset ja tehostimet (sprite-arkit).** Void-sarja, piirtäjä Baldur, julkaisija Foozle. Lisenssi: [CC0](https://creativecommons.org/publicdomain/zero/1.0/), eli vapaa käyttö ilman ehtoja. Valitut tiedostot on nimetty uudelleen, muuten ne ovat sellaisenaan.
+
+| Käyttö | Paketti | Lähde |
+|---|---|---|
+| Pelaajan alus | Void – Main Ship | [itch.io](https://foozlecc.itch.io/void-main-ship) |
+| Vihollislaivasto 1 | Void – Fleet Pack 1 | [itch.io](https://foozlecc.itch.io/void-fleet-pack-1) |
+| Vihollislaivasto 2 | Void – Fleet Pack 2 | [itch.io](https://foozlecc.itch.io/void-fleet-pack-2) |
+| Vihollislaivasto 3 | Void – Fleet Pack 3 | [itch.io](https://foozlecc.itch.io/void-fleet-pack-3) |
+| Tehostimet | Void – Pickups Pack | [itch.io](https://foozlecc.itch.io/void-pickups-pack) |
+
+**Musiikki ja äänet** (Pixabay, `public/audio/spacedriver/`). Taistelumusiikki ja intro on rekisteröity Content ID:hen.
+
+| Käyttö | Tiedosto | Nimi Pixabayssa | Tekijä |
+|---|---|---|---|
+| Taistelumusiikki (silmukka) | `musiikki.mp3` | Feel This Energy (Voyager) | AlexGrohl |
+| Pomotaistelu (silmukka) | `pomo.mp3` | Free Boss Fight Loop | C0mp0s3r69 |
+| Alkuanimaatio | `intro.mp3` | Space Ambient Music | Onetent |
+| Pelaajan ammus | `ammus.mp3` | laser shot ingame | RibhavAgrawal |
+| Vihollisen ja pomon ammus | `vihollisen-ammus.mp3` | Laser zap | Hoscalegeek (Freesound), julkaisija freesound_community |
+| Osuma alukseen ja viholliseen | `osuma.mp3` | Metal Hit 12 | floraphonic |
+| Vihollisen räjähdys | `rajahdys.mp3` | Explosion | morganpurkis (Freesound), julkaisija freesound_community |
+| Pommi | `pommi.mp3` | Medium Explosion | JuveriSetila (Freesound), julkaisija freesound_community |
+| Tehostimen keräys | `tehostin.mp3` | Win | Musheran |
+| Hyperhyppy | `hyperhyppy.mp3` | Hyper-Drive Spaceship Flyby | SoundShelfStudio |
 
 ## Paikallinen käyttö
 
