@@ -8,6 +8,7 @@ const CONTROLS = [
   { keys: ['←', '→'], alt: 'A / D', label: 'Liiku' },
   { keys: ['Välilyönti'], alt: '↑ / W', label: 'Hyppää' },
   { keys: ['X'], alt: 'K', label: 'Lyö' },
+  { keys: ['M'], alt: '', label: 'Äänet päälle/pois' },
   { keys: ['Esc'], alt: '', label: 'Sulje peli' },
 ];
 
