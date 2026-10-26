@@ -27,11 +27,10 @@ export const GAMES = [
     genre: 'Avaruusammuskelu',
     color: 'cyan',
     ratio: 3 / 4,
-    description:
-      'Ohjaa alusta vihollisaaltojen läpi. Vauhti kiihtyy aalto aallolta, ja lopussa odottaa pomo.',
-    planned: ['Vihollisaallot', 'Pomotaistelu', 'Neonräjähdykset', 'Ennätystila'],
+    load: () => import('../games/spacedriver/SpaceDriver.jsx'),
+    description: 'Lennä kolmen vihollislaivaston läpi, kerää tehostimia ja kaada pomo.',
     controls: {
-      desktop: 'Hiiri tai nuolinäppäimet',
+      desktop: 'Nuolet tai WASD, välilyönti (pommi)',
       mobile: 'Vedä alusta sormella',
     },
   },

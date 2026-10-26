@@ -1,0 +1,45 @@
+/* ═══ Alus kerroksina (Ship.jsx) ═══ */
+/* Koko annetaan käyttäjän luokalla (leveys); ruutu on aina neliö kuten sprite-arkeissa */
+.sd-ship {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+}
+
+/* Viholliset on piirretty nokka ylöspäin, mutta ne lentävät alaspäin */
+.sd-ship--enemy {
+  rotate: 180deg;
+}
+
+.sd-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Pikseligrafiikka pysyy terävänä suurennettuna */
+.sd-layer img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  max-width: none;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+/* Animaatio: kuvaa siirretään ruutu kerrallaan (steps), vain transformilla */
+.sd-layer--anim img {
+  animation: sd-frames var(--sd-dur) steps(var(--sd-frames)) infinite;
+}
+
+@keyframes sd-frames {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sd-layer--anim img {
+    animation: none;
+  }
+}

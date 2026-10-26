@@ -1,0 +1,420 @@
+/* ═══ Space Driverin aloitusnäkymä ═══ */
+/* Mitat cqw-yksiköissä (prosentteja pelinäkymän leveydestä, ks. SpaceDriver.css) */
+.sd-title {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* ── Taustalla lipuvat viholliset ── */
+.sd-title-drifters {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sd-title-drifter {
+  position: absolute;
+  top: 0;
+  width: 13cqw;
+  opacity: 0;
+  animation: sd-drift 12s linear infinite;
+  animation-delay: var(--sd-delay);
+}
+
+/* ── Pelaajan alus ja tähtäysrengas näkymän alaosassa ── */
+.sd-title-hero {
+  position: absolute;
+  left: 50%;
+  bottom: 9%;
+  width: 22cqw;
+  translate: -50% 0;
+  animation: sd-hover 3.4s ease-in-out infinite;
+}
+
+.sd-title-ship {
+  width: 100%;
+  filter: drop-shadow(0 1.5cqw 2.5cqw color-mix(in srgb, var(--sd-amber) 35%, transparent));
+}
+
+/* Hitaasti pyörivä katkoviivarengas aluksen ympärillä */
+.sd-title-reticle {
+  position: absolute;
+  inset: -22%;
+  border: 1px dashed color-mix(in srgb, var(--cyan) 40%, transparent);
+  border-radius: 50%;
+  animation: sd-spin 18s linear infinite;
+}
+
+/* ── Sisältö ── */
+.sd-title-content {
+  position: absolute;
+  inset: 8% 0 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3cqw;
+  padding: 6cqw;
+  text-align: center;
+}
+
+/* ── Logo: pyyhkäistään näkyviin rivi kerrallaan, skannausviiva edellä ── */
+.sd-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--sd-font);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.sd-logo-line {
+  position: relative;
+  clip-path: inset(0 100% 0 0);
+  animation: sd-wipe 0.7s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+/* Skannausviiva kulkee pyyhkäisyn reunassa: koko rivin levyinen kerros, jonka oikeassa
+   reunassa on viiva, siirretään transformilla vasemmalta oikealle samaan tahtiin */
+.sd-logo-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to left, #fff 0 2px, color-mix(in srgb, var(--cyan) 35%, transparent) 2px, transparent 12%);
+  opacity: 0;
+  animation: sd-scan 0.7s cubic-bezier(0.7, 0, 0.3, 1) both;
+  animation-delay: inherit;
+}
+
+.sd-logo-space {
+  font-size: 16cqw;
+  letter-spacing: 0.06em;
+  color: var(--cyan);
+  /* Kaksi värisiirtymää ilman hehkua: kuin kuva ohjaamon näytöllä */
+  text-shadow:
+    -0.04em 0 color-mix(in srgb, var(--sd-amber) 55%, transparent),
+    0.03em 0 color-mix(in srgb, var(--violet) 45%, transparent);
+  animation-delay: 0.15s;
+}
+
+.sd-logo-driver {
+  margin-top: 0.12em;
+  font-size: 12.6cqw;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  text-shadow:
+    -0.04em 0 color-mix(in srgb, var(--cyan) 50%, transparent),
+    0.03em 0 color-mix(in srgb, var(--sd-amber) 45%, transparent);
+  animation-delay: 0.45s;
+}
+
+/* Meripihkainen viiva logon alla kasvaa keskeltä reunoille */
+.sd-logo-driver::before {
+  content: '';
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: -0.22em;
+  height: max(2px, 0.6cqw);
+  background: linear-gradient(90deg, transparent, var(--sd-amber), transparent);
+  transform: scaleX(0);
+  animation: sd-grow 0.6s 1.1s ease-out forwards;
+}
+
+.sd-logo-year {
+  margin-top: 4.5cqw;
+  color: var(--sd-amber);
+  font-family: var(--sd-mono);
+  font-size: max(10px, 3.4cqw);
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  opacity: 0;
+  animation: sd-blink-in 0.5s 1.3s steps(1, end) forwards;
+}
+
+.sd-logo-year span {
+  color: color-mix(in srgb, var(--sd-amber) 45%, transparent);
+}
+
+/* ── Iskulause kirjoittuu esiin merkki kerrallaan ── */
+.sd-tagline {
+  display: inline-block;
+  color: var(--text);
+  font-family: var(--sd-mono);
+  font-size: max(10px, 3.3cqw);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0);
+  animation: sd-type 1.4s 1.6s steps(var(--sd-chars), end) forwards;
+}
+
+/* Vilkkuva kursori rivin lopussa */
+.sd-tagline::after {
+  content: '_';
+  color: var(--cyan);
+  animation: sd-cursor 0.9s steps(1, end) infinite;
+}
+
+.sd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3cqw;
+  margin-top: 1cqw;
+  opacity: 0;
+  animation: sd-blink-in 0.4s 2.2s steps(1, end) forwards;
+}
+
+/* ── Ennätys mittarinäyttönä ── */
+.sd-record {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  padding: 1cqw 2.4cqw;
+  border-left: 2px solid var(--cyan);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--cyan) 12%, transparent), transparent);
+  opacity: 0;
+  animation: sd-blink-in 0.4s 2.4s steps(1, end) forwards;
+}
+
+.sd-record-label {
+  color: var(--muted);
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.3cqw);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.sd-record-value {
+  color: var(--cyan);
+  font-family: var(--sd-font);
+  font-size: max(11px, 3.6cqw);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Ohjeet-paneeli ohjaamon näyttönä ── */
+.sd-help {
+  position: absolute;
+  inset: 12% 6%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 3cqw;
+  padding: 0 6cqw 5cqw;
+  overflow-y: auto;
+  border: 1px solid color-mix(in srgb, var(--cyan) 55%, transparent);
+  background:
+    repeating-linear-gradient(to bottom, rgb(41 224 255 / 0.04) 0 1px, transparent 1px 4px),
+    rgb(5 4 14 / 0.96);
+  font-size: max(10px, 3.1cqw);
+  clip-path: polygon(var(--sd-cut) 0, 100% 0, 100% calc(100% - var(--sd-cut)), calc(100% - var(--sd-cut)) 100%, 0 100%, 0 var(--sd-cut));
+  animation: sd-open 0.25s ease-out both;
+}
+
+/* Otsikkopalkki: nimi vasemmalla, tunnus oikealla */
+.sd-help-head {
+  display: flex;
+  justify-content: space-between;
+  margin-inline: -6cqw;
+  padding: 2.2cqw 6cqw;
+  max-width: none;
+  background: color-mix(in srgb, var(--cyan) 16%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  color: var(--cyan);
+  font-family: var(--sd-font);
+  font-size: max(11px, 3.6cqw);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.sd-help-head span + span {
+  color: color-mix(in srgb, var(--cyan) 55%, transparent);
+  font-family: var(--sd-mono);
+  font-size: 0.7em;
+  font-weight: 400;
+}
+
+.sd-help dl {
+  display: grid;
+  gap: 2.2cqw;
+}
+
+.sd-help dl div {
+  display: flex;
+  align-items: center;
+  gap: 3cqw;
+}
+
+.sd-help dt {
+  min-width: 8.5em;
+  color: var(--muted);
+  font-family: var(--sd-mono);
+  font-size: 0.9em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sd-help dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.2cqw;
+  margin: 0;
+}
+
+/* Näppäimet kantikkaina kuin ohjaamon kytkimet */
+.sd-help kbd {
+  min-width: 1.8em;
+  padding: 0.15em 0.5em;
+  border: 1px solid color-mix(in srgb, var(--sd-amber) 60%, transparent);
+  background: color-mix(in srgb, var(--sd-amber) 10%, transparent);
+  color: color-mix(in srgb, var(--sd-amber) 35%, #fff);
+  font-family: var(--sd-mono);
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.sd-help-alt {
+  color: var(--muted);
+  font-family: var(--sd-mono);
+  font-size: 0.85em;
+}
+
+.sd-help-text {
+  max-width: none;
+  color: var(--muted);
+}
+
+.sd-help-close {
+  align-self: flex-start;
+}
+
+/* Pieni näkymä (puhelin vaakatasossa): ohjeet koko alueelle ja tiiviimmin */
+@container (max-width: 360px) {
+  .sd-help {
+    inset: 3%;
+    gap: 6px;
+    padding: 0 12px 10px;
+    font-size: 10px;
+  }
+
+  .sd-help-head {
+    margin-inline: -12px;
+    padding: 6px 12px;
+  }
+
+  .sd-help dl {
+    gap: 4px;
+  }
+
+  .sd-help dt {
+    min-width: 7.5em;
+  }
+
+  .sd-help .sd-btn {
+    min-height: 26px;
+    padding-block: 3px;
+  }
+}
+
+/* Matala näkymä (puhelin vaakatasossa: pystypeli jää pieneksi): tiiviimpi asettelu,
+   jotta logo, napit ja ennätys mahtuvat aluksen yläpuolelle */
+@container (max-height: 360px) {
+  .sd-title-content {
+    inset: 6% 0 17%;
+    gap: 1.8cqw;
+    padding: 3cqw;
+  }
+
+  .sd-logo-year {
+    display: none;
+  }
+
+  .sd-actions {
+    margin-top: 0;
+    gap: 2cqw;
+  }
+
+  .sd-actions .sd-btn {
+    min-height: 26px;
+    padding: 3px 10px;
+    font-size: 9px;
+  }
+
+  .sd-title-hero {
+    bottom: 3%;
+    width: 14cqw;
+  }
+
+  .sd-status {
+    display: none;
+  }
+}
+
+/* ═══ Keyframet ═══ */
+@keyframes sd-wipe {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* Skannausviiva näkyy vain pyyhkäisyn aikana */
+@keyframes sd-scan {
+  0% { opacity: 1; transform: translateX(-100%); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+@keyframes sd-grow {
+  to { transform: scaleX(1); }
+}
+
+/* Näkyviin yhdellä askeleella kuin näytön osa syttyisi */
+@keyframes sd-blink-in {
+  to { opacity: 1; }
+}
+
+@keyframes sd-type {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes sd-cursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes sd-open {
+  from { opacity: 0; transform: scaleY(0.6); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes sd-spin {
+  to { rotate: 360deg; }
+}
+
+@keyframes sd-hover {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2cqw); }
+}
+
+/* Vihollinen ilmestyy yläreunasta, lipuu alas ja häipyy (cqh = pelinäkymän korkeus) */
+@keyframes sd-drift {
+  0% { opacity: 0; transform: translateY(-15cqw); }
+  10% { opacity: 0.5; }
+  60% { opacity: 0.5; }
+  75%, 100% { opacity: 0; transform: translateY(80cqh); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sd-title-drifter {
+    display: none;
+  }
+
+  .sd-title-hero,
+  .sd-title-reticle,
+  .sd-tagline::after {
+    animation: none;
+  }
+}

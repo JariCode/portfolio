@@ -1,0 +1,59 @@
+/* ═══ Ohjaamon kehys ja tilarivi (Hud.jsx) ═══ */
+/* ── Ohjaamon kulmakiinnikkeet: neljä L-muotoista kulmaa näkymän reunoilla ── */
+.sd-frame {
+  position: absolute;
+  inset: 3cqw;
+  pointer-events: none;
+}
+
+.sd-frame-corner {
+  position: absolute;
+  width: 7cqw;
+  height: 7cqw;
+  border: 0 solid color-mix(in srgb, var(--cyan) 70%, transparent);
+}
+
+.sd-frame-corner:nth-child(1) { top: 0; left: 0; border-width: 2px 0 0 2px; }
+.sd-frame-corner:nth-child(2) { top: 0; right: 0; border-width: 2px 2px 0 0; }
+.sd-frame-corner:nth-child(3) { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+.sd-frame-corner:nth-child(4) { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+/* Tilarivi ylhäällä: tasalevyinen pieni teksti kuin mittaristossa */
+.sd-status {
+  position: absolute;
+  top: 4.4cqw;
+  left: 6cqw;
+  right: 6cqw;
+  display: flex;
+  justify-content: space-between;
+  color: color-mix(in srgb, var(--cyan) 75%, transparent);
+  font-family: var(--sd-mono);
+  font-size: max(8px, 2.3cqw);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Vilkkuva merkkivalo tilatekstin perässä */
+.sd-status-led::before {
+  content: '';
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 0.6em;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 0.6em var(--cyan);
+  animation: sd-led 1.6s steps(1, end) infinite;
+}
+
+@keyframes sd-led {
+  0%, 70% { opacity: 1; }
+  71%, 100% { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sd-status-led::before {
+    animation: none;
+  }
+}
