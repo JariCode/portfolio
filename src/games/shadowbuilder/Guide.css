@@ -1,0 +1,116 @@
+/* ═══ Vartijan puhe (Guide.jsx) ═══ */
+/* Rintakuva nousee vasemmasta alakulmasta valikon yläpuolelta, kupla avautuu sen viereen
+   ja teksti pyyhkäistään näkyviin samalla maskilla kuin alkuanimaatiossa. */
+.sb-guide {
+  position: absolute;
+  left: 2cqw;
+  bottom: 19cqw;
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.4cqw;
+  pointer-events: none;
+}
+
+.sb-guide-bust {
+  flex: none;
+  width: 15cqw;
+  /* Alareuna häipyy sumuun, ettei rajattu rintakuva katkea suoraan viivaan */
+  mask-image: linear-gradient(180deg, #000 70%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent);
+  animation: sb-guide-rise 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.sb-guide-bust .sb-guardian {
+  width: 100%;
+  height: auto;
+  /* Rintakuva rajataan näkymäänsä: muuten hahmon vartalo jatkuisi valikon päälle */
+  overflow: hidden;
+}
+
+/* Kupla: tumma lasi, ohut neonreuna ja pieni vinoneliö osoittamassa vartijaa */
+.sb-guide-bubble {
+  position: relative;
+  max-width: 58cqw;
+  margin-bottom: 3cqw;
+  padding: 1.6cqw 4cqw 1.6cqw 2.4cqw;
+  border: 1px solid var(--sb-neon);
+  background: rgb(12 8 34 / 0.93);
+  box-shadow:
+    inset 0 0 0 3px rgb(12 8 34),
+    inset 0 0 0 4px color-mix(in srgb, var(--sb-neon) 30%, transparent),
+    0 0 1.6cqw color-mix(in srgb, var(--sb-neon) 40%, transparent);
+  color: var(--sb-neon-hot);
+  font: inherit;
+  font-size: max(11px, 2.2cqw);
+  font-style: italic;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: sb-guide-open 0.35s 0.3s ease-out both;
+}
+
+.sb-guide-bubble::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  bottom: 2cqw;
+  width: 8px;
+  height: 8px;
+  border-left: 1px solid var(--sb-neon);
+  border-bottom: 1px solid var(--sb-neon);
+  background: rgb(12 8 34);
+  rotate: 45deg;
+}
+
+.sb-guide-text {
+  display: block;
+  mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  mask-size: 260% 100%;
+  -webkit-mask-size: 260% 100%;
+  mask-position: 100% 0;
+  -webkit-mask-position: 100% 0;
+  animation: sb-guide-sweep 1.1s 0.5s ease-out forwards;
+}
+
+/* Sulkemismerkki: pieni risti oikeassa yläkulmassa */
+.sb-guide-close {
+  position: absolute;
+  top: 1cqw;
+  right: 1.2cqw;
+  width: 1.6cqw;
+  height: 1.6cqw;
+  min-width: 8px;
+  min-height: 8px;
+  background:
+    linear-gradient(45deg, transparent 45%, var(--sb-neon) 45% 55%, transparent 55%),
+    linear-gradient(-45deg, transparent 45%, var(--sb-neon) 45% 55%, transparent 55%);
+  opacity: 0.7;
+}
+
+@keyframes sb-guide-rise {
+  from { opacity: 0; transform: translateY(5cqw); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sb-guide-open {
+  from { opacity: 0; transform: translateX(-1.5cqw) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes sb-guide-sweep {
+  from { mask-position: 100% 0; -webkit-mask-position: 100% 0; }
+  to { mask-position: 0 0; -webkit-mask-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-guide-bust,
+  .sb-guide-bubble,
+  .sb-guide-text {
+    animation: none;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+}

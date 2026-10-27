@@ -107,8 +107,8 @@ export default function City({ className = '' }) {
       </g>
 
       {/* Kuu: hillitty hopea, ylhäällä logon ja vartijan valopallon välissä */}
-      <circle cx="735" cy="100" r="150" fill="url(#sb-city-moon)" />
-      <circle cx="735" cy="100" r="34" fill="#ece8ff" />
+      <circle className="sb-city-moon" cx="735" cy="100" r="150" fill="url(#sb-city-moon)" />
+      <circle className="sb-city-moon" cx="735" cy="100" r="34" fill="#ece8ff" />
 
       {/* Kaukaiset kukkulat ja metsän reuna horisontissa */}
       <path

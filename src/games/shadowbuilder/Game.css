@@ -1,52 +1,183 @@
 /* ═══ Shadow Builderin pelikenttä (Game.jsx) ═══ */
-/* Vaihe 0: väliaikainen näkymä. Ruudukko ja rakentaminen tulevat vaiheessa 1. */
+/* Kerrokset alhaalta ylös: maisema, päivän sävy, taivaan valo, ruudukko, HUD, vartija, valikko.
+   Valon paikka ja päivän voimakkuus tulevat CSS-muuttujina (--lx, --ly, --day). */
 .sb-game {
   position: absolute;
   inset: 0;
   overflow: hidden;
 }
 
-.sb-game-city {
-  opacity: 0.55;
+/* Maisemasta jää pelissä pois aloitusnäkymän ruudukko, kyltti ja paikallaan pysyvä kuu:
+   pelissä ruudukko on oikea ja valo kulkee taivaalla */
+.sb-game-city .sb-city-grid,
+.sb-game-city .sb-city-grid-glow,
+.sb-game-city .sb-city-neon,
+.sb-game-city .sb-city-reflection,
+.sb-game-city .sb-city-moon {
+  display: none;
 }
 
-/* Vartijan rintakuva ja puhekupla vasemmassa alakulmassa */
-.sb-game-guide {
+/* Päivällä taivas vaalenee hämärän violetiksi; yöllä sävy häviää */
+.sb-game-day {
   position: absolute;
-  left: 4cqw;
-  bottom: 14cqw;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(120 80 190 / 0.5), rgb(255 150 170 / 0.18) 55%, transparent 70%);
+  opacity: var(--day);
+  pointer-events: none;
+}
+
+/* Taivaan valo: matala aurinko tai kuu. Paikka transformilla (ei top/left), jotta liike on tasaista. */
+.sb-game-light {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6cqw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  translate: calc(var(--lx) - 3cqw) calc(var(--ly) - 3cqw);
+  pointer-events: none;
+}
+
+.sb-game-light.is-sun {
+  background: radial-gradient(circle, #fff3e0 30%, #ffc49a 55%, transparent 72%);
+  box-shadow: 0 0 6cqw 2cqw rgb(255 170 150 / 0.35);
+}
+
+.sb-game-light.is-moon {
+  width: 4.6cqw;
+  background: radial-gradient(circle, #f2eeff 45%, #cfc4ff 62%, transparent 72%);
+  box-shadow: 0 0 5cqw 1.4cqw rgb(185 168 255 / 0.3);
+}
+
+/* Ruudukko HUDin ja valikon välissä */
+.sb-game-board {
+  position: absolute;
+  top: 10cqw;
+  left: 1cqw;
+  right: 1cqw;
+  bottom: 18cqw;
+}
+
+/* ── HUD: luku vasemmalla, tauko, mykistys ja valikko oikealla ── */
+.sb-hud {
+  position: absolute;
+  top: 2.4cqw;
+  left: 3cqw;
+  right: 3cqw;
+  z-index: 3;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: space-between;
   gap: 2cqw;
 }
 
-.sb-game-guide .sb-guardian {
-  width: 16cqw;
-  height: auto;
+.sb-hud-chapter {
+  display: flex;
+  align-items: center;
+  gap: 1.4cqw;
+  max-width: none;
+  padding: 0.8cqw 0;
+  border-block: 1px solid color-mix(in srgb, var(--sb-neon) 50%, transparent);
+  color: var(--sb-neon);
+  font-family: var(--sb-font);
+  font-size: max(10px, 2.2cqw);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.sb-game-bubble {
-  position: relative;
-  max-width: 50cqw;
-  margin-bottom: 4cqw;
-  padding: 1.8cqw 2.6cqw;
-  border: 1px solid var(--sb-neon);
-  background: rgb(12 8 34 / 0.9);
-  box-shadow: 0 0 1.6cqw color-mix(in srgb, var(--sb-neon) 45%, transparent);
+.sb-hud-sep {
+  width: 0.8cqw;
+  height: 0.8cqw;
+  min-width: 4px;
+  min-height: 4px;
+  background: var(--sb-neon-hot);
+  rotate: 45deg;
+}
+
+.sb-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+}
+
+/* Kuvakenappi: sama ilme kuin mykistysnapissa */
+.sb-icon-btn {
+  display: grid;
+  place-items: center;
+  width: max(30px, 5.6cqw);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--sb-neon) 65%, transparent);
+  background: var(--sb-glass);
+  box-shadow:
+    inset 0 0 0 2px #0b0820,
+    inset 0 0 0 3px color-mix(in srgb, var(--sb-neon) 30%, transparent);
   color: var(--sb-neon-hot);
-  font-size: max(11px, 2.2cqw);
-  font-style: italic;
-  line-height: 1.45;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s;
 }
 
-.sb-game-hud {
-  position: absolute;
-  top: 3cqw;
-  right: 3cqw;
+.sb-icon-btn svg {
+  width: 52%;
+  height: 52%;
+  fill: currentColor;
 }
 
-.sb-btn.sb-game-back {
+.sb-icon-btn:hover,
+.sb-icon-btn.is-active {
+  border-color: var(--sb-neon-hot);
+  box-shadow:
+    inset 0 0 0 2px #0b0820,
+    inset 0 0 0 3px var(--sb-neon),
+    0 0 1.6cqw color-mix(in srgb, var(--sb-neon) 50%, transparent);
+}
+
+/* Kaksi luokkaa: yhteinen .sb-btn (ShadowBuilder.css) tulee buildissa tämän tiedoston jälkeen */
+.sb-btn.sb-hud-exit {
+  min-height: max(30px, 5.6cqw);
+  padding: 0 max(12px, 2.6cqw);
+  font-size: max(10px, 1.8cqw);
+}
+
+/* ── Tauko: valo pysähtyy, ruudukko himmenee hieman ja keskelle tulee merkintä ── */
+.sb-game.is-paused .sb-game-board {
+  filter: saturate(0.6) brightness(0.8);
+}
+
+.sb-paused {
   position: absolute;
-  right: 4cqw;
-  bottom: 4cqw;
+  top: 12cqw;
+  left: 50%;
+  z-index: 3;
+  max-width: none;
+  padding: 0.8cqw 3cqw;
+  border-block: 1px solid var(--sb-neon);
+  color: var(--sb-neon-hot);
+  font-family: var(--sb-font);
+  font-size: max(11px, 2.6cqw);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  translate: -50% 0;
+  pointer-events: none;
+  animation: sb-paused 1.6s ease-in-out infinite;
+}
+
+/* Hyvin pieni näkymä (puhelin vaakatasossa): luvun nimi pois, jotta napit mahtuvat */
+@container (max-width: 300px) {
+  .sb-hud-chapter {
+    visibility: hidden;
+  }
+}
+
+@keyframes sb-paused {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-paused {
+    animation: none;
+  }
 }

@@ -1,0 +1,295 @@
+/* ═══ Ruudukko ja rakennukset (Board.jsx, Building.jsx) ═══ */
+/* Hehku kerroksina ja läpinäkyvyydellä, ei SVG-suodattimilla (puhelimen suorituskyky).
+   touch-action: none, jotta sormella napauttelu ei rullaa eikä zoomaa sivua. */
+.sb-board {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  touch-action: none;
+  cursor: pointer;
+}
+
+/* ── Maa: tumma leijuva laatta, jonka reunassa ohut neonviiva ── */
+.sb-board-ground {
+  fill: #1a1340;
+  stroke: var(--sb-neon);
+  stroke-width: 1.6;
+  stroke-opacity: 0.55;
+}
+
+.sb-board-side--left {
+  fill: #0a0620;
+}
+
+.sb-board-side--right {
+  fill: #07041a;
+}
+
+.sb-board-side {
+  stroke: color-mix(in srgb, var(--sb-neon) 35%, transparent);
+  stroke-width: 1;
+}
+
+.sb-board-tile {
+  fill: transparent;
+  stroke: var(--sb-neon);
+  stroke-width: 0.8;
+  stroke-opacity: 0.16;
+}
+
+/* Varjot: yksi ryhmä, jonka läpinäkyvyys tulee valosta (päällekkäiset varjot eivät tummu) */
+.sb-board-shadows {
+  fill: #020109;
+  pointer-events: none;
+}
+
+.sb-board-shadow--ghost {
+  stroke: var(--sb-neon);
+  stroke-width: 1.4;
+  stroke-dasharray: 4 4;
+}
+
+/* Kursori: valittu ruutu. Punertava, jos ruutuun ei voi rakentaa. */
+.sb-board-cursor {
+  fill: color-mix(in srgb, var(--sb-neon) 14%, transparent);
+  stroke: var(--sb-neon-hot);
+  stroke-width: 1.6;
+  pointer-events: none;
+  animation: sb-cursor 1.4s ease-in-out infinite;
+}
+
+.sb-board-cursor.is-invalid {
+  fill: rgb(255 92 140 / 0.12);
+  stroke: #ff7aa6;
+}
+
+/* Purkutilassa kohde näkyy punertavana */
+.sb-board--demolish .sb-board-cursor:not(.is-invalid) {
+  fill: rgb(255 92 140 / 0.22);
+  stroke: #ff7aa6;
+}
+
+/* ── Rakennukset ── */
+.sb-b {
+  pointer-events: none;
+  transform-box: view-box;
+  animation: sb-b-rise 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+.sb-b.is-ghost {
+  opacity: 0.55;
+  animation: none;
+}
+
+.sb-b-left {
+  fill: #2a1d5c;
+}
+
+.sb-b-right {
+  fill: #1b1342;
+}
+
+.sb-b-top {
+  fill: #3a2a78;
+}
+
+.sb-b-left,
+.sb-b-right,
+.sb-b-top,
+.sb-b-roof,
+.sb-b-roof-back {
+  stroke: color-mix(in srgb, var(--sb-neon) 55%, transparent);
+  stroke-width: 0.9;
+  stroke-linejoin: round;
+}
+
+.sb-b-roof {
+  fill: #4a3594;
+}
+
+.sb-b-roof-back {
+  fill: #2f2266;
+}
+
+.sb-b-parapet.sb-b-top {
+  fill: #2a1d5c;
+}
+
+/* Ikkunat: pimeinä ilman tieyhteyttä, lämpimät valot kun yhteys on */
+.sb-b-win {
+  fill: #0d0826;
+  transition: fill 0.6s;
+}
+
+.sb-b-win.is-on {
+  fill: var(--sb-window);
+}
+
+.sb-b-door {
+  fill: #0d0826;
+}
+
+.sb-b-sign {
+  fill: #2a1d5c;
+  stroke: color-mix(in srgb, var(--sb-neon) 40%, transparent);
+  stroke-width: 1;
+}
+
+.sb-b-sign.is-on {
+  fill: var(--sb-neon-hot);
+  stroke: var(--sb-neon);
+  stroke-width: 4;
+  stroke-opacity: 0.45;
+  paint-order: stroke;
+  animation: sb-sign 4.2s linear infinite;
+}
+
+/* Valokenno: tumma varjossa ja yöllä, kirkas valossa */
+.sb-b-panel {
+  fill: #1a1540;
+  stroke: color-mix(in srgb, var(--sb-neon) 50%, transparent);
+  stroke-width: 0.9;
+  transition: fill 0.5s;
+}
+
+.sb-b-panel.is-lit {
+  fill: #8fd8ff;
+}
+
+.sb-b-panel-grid {
+  fill: none;
+  stroke: #0b0820;
+  stroke-width: 0.8;
+  stroke-opacity: 0.6;
+}
+
+.sb-b-lawn {
+  fill: #142b3a;
+  stroke: color-mix(in srgb, var(--sb-neon) 40%, transparent);
+  stroke-width: 0.8;
+}
+
+.sb-b-trunk {
+  stroke: #0a0620;
+  stroke-width: 2.4;
+}
+
+.sb-b-crown {
+  fill: #2e5a6e;
+  stroke: #7fd1c8;
+  stroke-width: 0.8;
+  stroke-opacity: 0.5;
+}
+
+.sb-b-lamp {
+  fill: #2a1d5c;
+}
+
+.sb-b-lamp.is-on {
+  fill: var(--sb-window);
+  stroke: var(--sb-window);
+  stroke-width: 5;
+  stroke-opacity: 0.3;
+  paint-order: stroke;
+}
+
+.sb-b-lawn--dark {
+  fill: #160f30;
+}
+
+.sb-b-stem {
+  stroke: #d9cdf5;
+  stroke-width: 2.2;
+}
+
+.sb-b-cap {
+  fill: #c86bff;
+  stroke: #c86bff;
+  stroke-width: 4;
+  stroke-opacity: 0.25;
+  paint-order: stroke;
+}
+
+.sb-b-chimney {
+  stroke: #1b1342;
+  stroke-width: 7;
+}
+
+.sb-b-bolt {
+  fill: none;
+  stroke: var(--sb-window);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.sb-b-spire {
+  stroke: #3a2a78;
+  stroke-width: 2;
+}
+
+.sb-b-orb {
+  fill: #fff;
+}
+
+.sb-b-orb-glow {
+  fill: var(--sb-neon);
+  opacity: 0.35;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sb-orb 3.2s ease-in-out infinite;
+}
+
+/* Tie: tumma laatta ja himmeä neonkeskiviiva */
+.sb-b-road {
+  fill: #2b2160;
+  stroke: #3d2f80;
+  stroke-width: 0.8;
+}
+
+.sb-b-road-line {
+  fill: var(--sb-neon);
+  stroke: var(--sb-neon);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 4;
+  stroke-opacity: 0.85;
+}
+
+.sb-b--road {
+  animation-name: sb-b-fade;
+}
+
+/* ═══ Keyframet ═══ */
+/* Rakennus nousee maasta: venyy pohjastaan ylös ja syttyy */
+@keyframes sb-b-rise {
+  from { opacity: 0; transform: scale(0.9, 0.1); }
+  to { opacity: 1; transform: scale(1, 1); }
+}
+
+@keyframes sb-b-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sb-cursor {
+  0%, 100% { stroke-opacity: 1; }
+  50% { stroke-opacity: 0.45; }
+}
+
+/* Kyltin neonputki värähtää välillä: kovat portaat vierekkäisillä prosenteilla */
+@keyframes sb-sign {
+  0%, 91% { opacity: 1; }
+  92%, 93% { opacity: 0.35; }
+  94%, 96% { opacity: 1; }
+  97%, 98% { opacity: 0.5; }
+  99%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-b,
+  .sb-b-sign.is-on,
+  .sb-b-orb-glow,
+  .sb-board-cursor {
+    animation: none;
+  }
+}

@@ -1,0 +1,155 @@
+/* ═══ Rakennusvalikko (Toolbar.jsx) ═══ */
+/* Tumma lasi alareunassa. Napit ovat neliöitä kaksoisviivakehyksellä kuten muut napit. */
+.sb-toolbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1cqw;
+  padding: 1.2cqw 2cqw 2cqw;
+  border-top: 1px solid color-mix(in srgb, var(--sb-neon) 45%, transparent);
+  background: linear-gradient(180deg, rgb(10 7 30 / 0.7), rgb(7 5 26 / 0.94));
+}
+
+.sb-toolbar-info {
+  max-width: none;
+  min-height: 1.4em;
+  color: var(--muted);
+  font-size: max(10px, 1.9cqw);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-toolbar-info strong {
+  margin-right: 0.5em;
+  color: var(--sb-neon-hot);
+  font-family: var(--sb-font);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sb-toolbar-row {
+  display: flex;
+  gap: 1.2cqw;
+}
+
+.sb-tool {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: max(38px, 10.4cqw);
+  aspect-ratio: 1;
+  padding: 0 0 0.5cqw;
+  border: 1px solid color-mix(in srgb, var(--sb-neon) 45%, transparent);
+  background: var(--sb-glass);
+  box-shadow:
+    inset 0 0 0 2px #0b0820,
+    inset 0 0 0 3px color-mix(in srgb, var(--sb-neon) 22%, transparent);
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+}
+
+.sb-tool:hover:not(:disabled) {
+  border-color: var(--sb-neon-hot);
+  color: var(--sb-neon-hot);
+}
+
+/* Valittu: neon syttyy ja kehys hehkuu */
+.sb-tool.is-active {
+  border-color: var(--sb-neon-hot);
+  color: #fff;
+  box-shadow:
+    inset 0 0 0 2px #0b0820,
+    inset 0 0 0 3px var(--sb-neon),
+    0 0 1.6cqw color-mix(in srgb, var(--sb-neon) 55%, transparent);
+}
+
+.sb-tool-icon {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Kuvakkeet ovat esikatselupiirroksia; valikossa ne näytetään täysin peittävinä */
+.sb-tool-icon .sb-b.is-ghost {
+  opacity: 1;
+}
+
+.sb-tool-x {
+  fill: none;
+  stroke: #ff7aa6;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.sb-tool-name {
+  font-size: max(8px, 1.45cqw);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+.sb-tool-key {
+  position: absolute;
+  top: 0.5cqw;
+  left: 0.8cqw;
+  color: var(--sb-neon);
+  font-size: max(8px, 1.3cqw);
+  font-weight: 600;
+}
+
+/* Lukittu rakennus: himmeä kuvake ja lukko keskellä */
+.sb-tool.is-locked {
+  cursor: not-allowed;
+}
+
+.sb-tool.is-locked .sb-tool-icon,
+.sb-tool.is-locked .sb-tool-name {
+  opacity: 0.25;
+}
+
+.sb-tool-lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3cqw;
+  color: var(--sb-neon);
+  font-size: max(7px, 1.25cqw);
+  letter-spacing: 0.06em;
+}
+
+.sb-tool-lock svg {
+  width: 30%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+/* Pieni näkymä (puhelin): nimet pois napeista, valitun nimi näkyy yläpuolella */
+@container (max-width: 420px) {
+  .sb-tool-name {
+    display: none;
+  }
+
+  .sb-toolbar-row {
+    gap: 3px;
+  }
+
+  /* Kahdeksan nappia mahtuu riviin: leveys jaetaan reunusten ja välien jälkeen */
+  .sb-tool {
+    width: calc((100cqw - 4cqw - 21px) / 8);
+  }
+}
