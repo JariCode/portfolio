@@ -204,7 +204,7 @@
   text-align: center;
 }
 
-.sb-help p {
+.sb-help-text {
   max-width: none;
   color: var(--muted);
   line-height: 1.5;
@@ -214,15 +214,35 @@
   align-self: flex-start;
 }
 
-/* Pieni näkymä (puhelin): tiiviimpi ohjepaneeli ilman selitystekstiä */
+/* Pieni näkymä (puhelin): tiiviimpi ohjepaneeli */
 @container (max-width: 380px) {
   .sb-help {
     margin: auto 4%;
-    padding: 12px 14px;
-    gap: 8px;
+    padding: 10px 14px;
+    gap: 7px;
+    font-size: 10px;
   }
 
-  .sb-help p {
+  .sb-help h4 {
+    font-size: 1.3em;
+  }
+
+  .sb-help dl {
+    gap: 3px 10px;
+  }
+
+  .sb-help kbd {
+    padding: 0 0.45em;
+  }
+
+  .sb-help-text {
+    line-height: 1.35;
+  }
+}
+
+/* Hyvin pieni näkymä (puhelin vaakatasossa): vain näppäimet, kuten Space Driverissä */
+@container (max-width: 300px) {
+  .sb-help-text {
     display: none;
   }
 }

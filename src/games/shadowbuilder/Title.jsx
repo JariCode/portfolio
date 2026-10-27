@@ -127,7 +127,7 @@ export default function Title({ onStart, onResume }) {
 
       {help && (
         <div id="sb-help" className="sb-help" role="region" aria-label="Ohjeet">
-          <h4>Ohjeet</h4>
+          <h4>Ohjaimet</h4>
           <dl>
             {CONTROLS.map((c) => (
               <div key={c.label}>
@@ -140,11 +140,9 @@ export default function Title({ onStart, onResume }) {
               </div>
             ))}
           </dl>
-          <p>
-            Kasvata kaupunki tuhanteen asukkaaseen mahdollisimman nopeasti: mitä vähemmän päiviä, sitä parempi
-            ennätys. Talot tarvitsevat tien ja sähköä; joka keskiyö kerätään verot ja taloihin muuttaa väkeä.
-            Rakennukset heittävät varjoja: valokenno tarvitsee valoa, sienitarha varjoa. Puhelimella valitse
-            rakennus valikosta ja napauta ruutua kahdesti.
+          <p className="sb-help-text">
+            Puhelimella valitse rakennus alhaalta ja napauta ruutua kahdesti. Tavoite: 1000 asukasta mahdollisimman
+            nopeasti.
           </p>
           <button type="button" className="sb-btn sb-help-close" onClick={() => setHelp(false)}>
             Selvä
