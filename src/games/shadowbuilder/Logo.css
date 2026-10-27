@@ -1,0 +1,70 @@
+/* ═══ Logo (Logo.jsx) ═══ */
+.sb-logo {
+  position: relative;
+  display: inline-grid;
+  justify-items: start;
+}
+
+.sb-logo-text,
+.sb-logo-cast {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: none;
+  margin: 0;
+  font-family: var(--sb-font);
+  font-weight: 800;
+  line-height: 0.92;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sb-logo-line {
+  display: block;
+}
+
+/* Ylempi sana isompana, alempi harvennettuna saman levyiseksi */
+.sb-logo-shadow-word {
+  font-size: 9.6cqw;
+  letter-spacing: 0.06em;
+}
+
+.sb-logo-builder {
+  font-size: 7.4cqw;
+  letter-spacing: 0.235em;
+}
+
+/* Kirjaimet: vaalea sisus, ohut violetti hehku. Hehku kerroksina (ei suodattimia). */
+.sb-logo-text {
+  position: relative;
+  z-index: 1;
+  color: #f4eeff;
+  text-shadow:
+    0 0 0.04em #fff,
+    0 0 0.12em var(--sb-neon),
+    0 0 0.4em color-mix(in srgb, var(--sb-neon) 55%, transparent);
+}
+
+/* Varjo: sama teksti peilattuna kirjainten alareunasta alaspäin ja kallistettuna.
+   Kallistus kääntyy hitaasti puolelta toiselle, ja varjo haalistuu kauempana. */
+.sb-logo-cast {
+  color: #04020e;
+  opacity: 0.6;
+  transform-origin: 0 100%;
+  transform: scaleY(-0.42) skewX(var(--sb-cast, 30deg));
+  mask-image: linear-gradient(to top, #000 10%, transparent 95%);
+  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 95%);
+  animation: sb-cast 11s ease-in-out infinite alternate;
+}
+
+@keyframes sb-cast {
+  from { transform: scaleY(-0.42) skewX(38deg); }
+  to { transform: scaleY(-0.42) skewX(-38deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-logo-cast {
+    animation: none;
+  }
+}

@@ -1,0 +1,77 @@
+/* ═══ Varjojen vartija (Guardian.jsx) ═══ */
+/* Liike vain transformilla ja opacitylla: viitta heiluu, valopallo sykkii, silmät räpsähtävät,
+   sumu ajelehtii. Muunnosten keskipisteet SVG:n omissa koordinaateissa (transform-box). */
+.sb-guardian {
+  display: block;
+  overflow: visible;
+}
+
+.sb-guardian-coat {
+  transform-box: view-box;
+  animation: sb-coat 5.2s ease-in-out infinite;
+}
+
+.sb-guardian-coat--left {
+  transform-origin: 170px 250px;
+}
+
+.sb-guardian-coat--right {
+  transform-origin: 230px 250px;
+  animation-delay: -2.6s;
+}
+
+.sb-guardian-orb-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sb-orb 3.2s ease-in-out infinite;
+}
+
+.sb-guardian-orb-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sb-orb-ring 14s linear infinite;
+}
+
+/* Räpäys: silmät painuvat hetkeksi viivaksi muutaman sekunnin välein */
+.sb-guardian-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sb-blink 5.6s linear infinite;
+}
+
+.sb-guardian-mist {
+  animation: sb-mist 7s ease-in-out infinite;
+}
+
+@keyframes sb-coat {
+  0%, 100% { transform: rotate(0deg) skewX(0deg); }
+  50% { transform: rotate(0.6deg) skewX(-1.2deg); }
+}
+
+@keyframes sb-orb {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+@keyframes sb-orb-ring {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sb-blink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  95%, 97% { transform: scaleY(0.12); }
+}
+
+@keyframes sb-mist {
+  0%, 100% { transform: translateX(0); opacity: 0.8; }
+  50% { transform: translateX(12px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-guardian-coat,
+  .sb-guardian-orb-glow,
+  .sb-guardian-orb-ring,
+  .sb-guardian-mist {
+    animation: none;
+  }
+}

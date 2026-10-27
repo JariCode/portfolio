@@ -1,0 +1,111 @@
+/* ═══ Shadow Builderin juuri ═══ */
+/* container-type: size tekee pelinäkymästä mittayksikön: cqw = 1 % sen leveydestä (1:1).
+   Oma ilme: mystinen yökaupunki. Lähes yksivärinen violetti neon, sumu ja tumma lasi,
+   ohuet kaksoisviivakehykset. Otsikot Cinzelillä, pienet tekstit sivun leipätekstifontilla.
+   Ei Z-Runnerin pyöreitä hehkunappeja eikä Space Driverin viistettyjä HUD-nappeja. */
+.sb {
+  /* Pelin omat värit: neon, kuunvalo, ikkunat ja sumu */
+  --sb-neon: var(--violet);
+  --sb-neon-hot: #e6d9ff;
+  --sb-moon: #ece8ff;
+  --sb-window: #ffd27a;
+  --sb-fog: #9a84e6;
+  --sb-glass: rgb(12 8 34 / 0.78);
+  --sb-font: 'Cinzel Variable', Georgia, serif;
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  container-type: size;
+  background: #07051a;
+  color: var(--text);
+  font-family: var(--font-body);
+  user-select: none;
+}
+
+/* ── Napit: tumma lasi, ohut kaksoisviiva ja pienet vinoneliöt reunoilla ── */
+.sb-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: max(7px, 1.6cqw) max(18px, 4.4cqw);
+  border: 1px solid color-mix(in srgb, var(--sb-neon) 70%, transparent);
+  background: var(--sb-glass);
+  /* Sisempi ohut viiva: kaksoiskehys ilman ylimääräisiä elementtejä */
+  box-shadow:
+    inset 0 0 0 3px #0b0820,
+    inset 0 0 0 4px color-mix(in srgb, var(--sb-neon) 35%, transparent);
+  color: var(--sb-neon-hot);
+  font-family: var(--sb-font);
+  font-size: max(11px, 2.3cqw);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s, text-shadow 0.25s, color 0.25s;
+}
+
+.sb-btn::before,
+.sb-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--sb-neon);
+  rotate: 45deg;
+  translate: 0 -50%;
+}
+
+.sb-btn::before {
+  left: -4px;
+}
+
+.sb-btn::after {
+  right: -4px;
+}
+
+/* Neon syttyy hoverilla ja fokuksella */
+.sb-btn:hover,
+.sb-btn:focus-visible {
+  outline: none;
+  border-color: var(--sb-neon-hot);
+  color: #fff;
+  text-shadow: 0 0 0.6em var(--sb-neon);
+  box-shadow:
+    inset 0 0 0 3px #0b0820,
+    inset 0 0 0 4px var(--sb-neon),
+    0 0 2cqw color-mix(in srgb, var(--sb-neon) 55%, transparent);
+}
+
+/* Pääpainike: violetti lasi, joka hengittää hitaasti */
+.sb-btn--start {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sb-neon) 30%, #0b0820), #120a33);
+  animation: sb-breathe 3.4s ease-in-out infinite;
+}
+
+@keyframes sb-breathe {
+  0%, 100% { box-shadow: inset 0 0 0 3px #0b0820, inset 0 0 0 4px color-mix(in srgb, var(--sb-neon) 35%, transparent), 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 0 3px #0b0820, inset 0 0 0 4px color-mix(in srgb, var(--sb-neon) 70%, transparent), 0 0 2.4cqw color-mix(in srgb, var(--sb-neon) 40%, transparent); }
+}
+
+/* ── Latausteksti, jos pelikenttä latautuu vielä alkuanimaation jälkeen ── */
+.sb-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--sb-neon);
+  font-family: var(--sb-font);
+  font-size: max(11px, 2.4cqw);
+  letter-spacing: 0.2em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-btn--start {
+    animation: none;
+  }
+}

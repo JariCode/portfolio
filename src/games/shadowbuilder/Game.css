@@ -1,0 +1,52 @@
+/* ═══ Shadow Builderin pelikenttä (Game.jsx) ═══ */
+/* Vaihe 0: väliaikainen näkymä. Ruudukko ja rakentaminen tulevat vaiheessa 1. */
+.sb-game {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.sb-game-city {
+  opacity: 0.55;
+}
+
+/* Vartijan rintakuva ja puhekupla vasemmassa alakulmassa */
+.sb-game-guide {
+  position: absolute;
+  left: 4cqw;
+  bottom: 14cqw;
+  display: flex;
+  align-items: flex-end;
+  gap: 2cqw;
+}
+
+.sb-game-guide .sb-guardian {
+  width: 16cqw;
+  height: auto;
+}
+
+.sb-game-bubble {
+  position: relative;
+  max-width: 50cqw;
+  margin-bottom: 4cqw;
+  padding: 1.8cqw 2.6cqw;
+  border: 1px solid var(--sb-neon);
+  background: rgb(12 8 34 / 0.9);
+  box-shadow: 0 0 1.6cqw color-mix(in srgb, var(--sb-neon) 45%, transparent);
+  color: var(--sb-neon-hot);
+  font-size: max(11px, 2.2cqw);
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.sb-game-hud {
+  position: absolute;
+  top: 3cqw;
+  right: 3cqw;
+}
+
+.sb-btn.sb-game-back {
+  position: absolute;
+  right: 4cqw;
+  bottom: 4cqw;
+}

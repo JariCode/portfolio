@@ -1,0 +1,301 @@
+/* ═══ Shadow Builderin alkuanimaatio (Intro.jsx) ═══ */
+/* Aikajana (s): 0 kaupunki valaistuna · 0,8 ensimmäinen rivi · 1,8 neonkyltti välkkyy ja
+   sammuu · 2,2 ikkunat sammuvat, pimeys laskeutuu · 3,4 vartija nousee kyltin varjosta ·
+   5,0 silmät syttyvät · 5,2 toinen rivi · 7,6 valopallo leimahtaa, sumu väistyy, valot
+   palaavat · 7,9 kolmas rivi · 9,4 logo syttyy · 10,6 luku · 12,4 loppu (DURATION) */
+.sb-intro {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #07051a;
+}
+
+.sb-intro-city {
+  animation: sb-in-fade 0.8s ease-out both;
+}
+
+/* ── Valot sammuvat ja palaavat ── */
+/* Pääkyltti: sammuu välkkyen ja syttyy uudelleen logon kanssa */
+.sb-intro .sb-city-neon--main {
+  animation:
+    sb-in-neon-off 1s 1.8s linear forwards,
+    sb-in-neon-on 1s 9.4s linear forwards;
+}
+
+/* Ikkunat sammuvat yhdessä, palaavat porrastetusti (--d jokaisella ikkunalla, City.jsx) */
+.sb-intro .sb-city-window {
+  animation:
+    sb-in-dim 0.8s 2.2s ease-in forwards,
+    sb-in-light 0.4s calc(7.8s + var(--d)) ease-out forwards;
+}
+
+.sb-intro-dark {
+  position: absolute;
+  inset: 0;
+  background: #02010a;
+  opacity: 0;
+  pointer-events: none;
+  animation:
+    sb-in-darken 1s 2.2s ease-in forwards,
+    sb-in-brighten 1.2s 7.6s ease-out forwards;
+}
+
+/* ── Vartija nousee kyltin varjosta ── */
+.sb-intro-guardian {
+  position: absolute;
+  left: 44cqw;
+  bottom: 9cqw;
+  height: 66cqw;
+  aspect-ratio: 300 / 650;
+  opacity: 0;
+  animation: sb-in-rise 1.8s 3.4s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.sb-intro-guardian .sb-guardian {
+  width: 100%;
+  height: 100%;
+}
+
+/* Silmät syttyvät vasta, kun vartija on noussut. Räpäys jatkuu sen jälkeen. */
+.sb-intro .sb-guardian-eyes {
+  opacity: 0;
+  animation:
+    sb-in-eyes 0.5s 5s linear forwards,
+    sb-blink 5.6s 6s linear infinite;
+}
+
+/* Valopallo leimahtaa, kun vartija herättää kaupungin */
+.sb-intro .sb-guardian-orb-glow {
+  animation:
+    sb-orb 3.2s ease-in-out infinite,
+    sb-in-flare 1.4s 7.6s ease-out;
+}
+
+/* Paksu katusumu ajelehtii pois, kun valo leimahtaa */
+.sb-intro-fog {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: 0;
+  height: 46%;
+  background: linear-gradient(to bottom, transparent, rgb(154 132 230 / 0.32) 45%, rgb(154 132 230 / 0.5));
+  pointer-events: none;
+  animation: sb-in-fog-clear 2s 7.6s ease-in forwards;
+}
+
+/* ── Tarinarivit: valo pyyhkäisee tekstin näkyviin vasemmalta (maski) ja häivyttää sen ── */
+.sb-intro-story {
+  position: absolute;
+  top: 32cqw;
+  left: 7cqw;
+  width: 36cqw;
+}
+
+.sb-intro-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  color: var(--sb-neon-hot);
+  font-family: var(--sb-font);
+  font-size: max(13px, 3.8cqw);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 0.6em color-mix(in srgb, var(--sb-neon) 60%, transparent);
+  opacity: 0;
+  mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  mask-size: 260% 100%;
+  -webkit-mask-size: 260% 100%;
+  mask-position: 100% 0;
+  -webkit-mask-position: 100% 0;
+}
+
+.sb-intro-line--1 {
+  animation:
+    sb-in-sweep 1.2s 0.8s ease-out forwards,
+    sb-in-out 0.5s 3s ease-in forwards;
+}
+
+.sb-intro-line--2 {
+  animation:
+    sb-in-sweep 1.2s 5.2s ease-out forwards,
+    sb-in-out 0.5s 7.3s ease-in forwards;
+}
+
+.sb-intro-line--3 {
+  font-size: max(16px, 5cqw);
+  animation:
+    sb-in-sweep 1s 7.9s ease-out forwards,
+    sb-in-out 0.5s 9.2s ease-in forwards;
+}
+
+/* ── Logo ja luku ── */
+.sb-intro-title {
+  position: absolute;
+  top: 9cqw;
+  left: 7cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5.4cqw;
+}
+
+.sb-intro-logo {
+  opacity: 0;
+  animation: sb-in-neon-on 1.1s 9.4s linear forwards;
+}
+
+.sb-intro-chapter {
+  display: flex;
+  align-items: center;
+  gap: 1.8cqw;
+  max-width: none;
+  padding: 1cqw 0;
+  border-block: 1px solid color-mix(in srgb, var(--sb-neon) 55%, transparent);
+  color: var(--sb-neon);
+  font-family: var(--sb-font);
+  font-size: max(11px, 2.8cqw);
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  opacity: 0;
+  mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  mask-size: 260% 100%;
+  -webkit-mask-size: 260% 100%;
+  mask-position: 100% 0;
+  -webkit-mask-position: 100% 0;
+  animation: sb-in-sweep 1s 10.6s ease-out forwards;
+}
+
+.sb-intro-chapter-sep {
+  width: 0.9cqw;
+  height: 0.9cqw;
+  background: var(--sb-neon-hot);
+  rotate: 45deg;
+}
+
+/* ── Edistyminen: ohut neonviiva täyttyy kohti vinoneliötä ── */
+.sb-intro-progress {
+  position: absolute;
+  left: 14cqw;
+  right: 22cqw;
+  bottom: 6.4cqw;
+  height: 1px;
+  background: color-mix(in srgb, var(--sb-neon) 25%, transparent);
+}
+
+.sb-intro-progress::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--sb-neon-hot);
+  box-shadow: 0 0 6px var(--sb-neon);
+  transform-origin: left;
+  animation: sb-in-progress 12.4s linear both;
+}
+
+.sb-intro-progress::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--sb-neon-hot);
+  rotate: 45deg;
+  translate: 0 -50%;
+}
+
+/* Kaksi luokkaa: yhteinen .sb-btn (ShadowBuilder.css) tulee buildissa tämän tiedoston jälkeen */
+.sb-btn.sb-intro-skip {
+  position: absolute;
+  right: 4cqw;
+  bottom: 4cqw;
+  z-index: 4;
+  min-height: 30px;
+  padding: max(5px, 1cqw) max(14px, 3.4cqw);
+  font-size: max(10px, 1.9cqw);
+}
+
+/* ═══ Keyframet ═══ */
+@keyframes sb-in-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Neon sammuu ja syttyy välähdellen: kovat portaat vierekkäisillä prosenteilla */
+@keyframes sb-in-neon-off {
+  0%, 14% { opacity: 1; }
+  15%, 29% { opacity: 0.2; }
+  30%, 44% { opacity: 1; }
+  45%, 59% { opacity: 0.1; }
+  60%, 69% { opacity: 0.7; }
+  70%, 100% { opacity: 0.06; }
+}
+
+@keyframes sb-in-neon-on {
+  0%, 9% { opacity: 0.06; }
+  10%, 24% { opacity: 1; }
+  25%, 39% { opacity: 0.2; }
+  40%, 54% { opacity: 1; }
+  55%, 64% { opacity: 0.5; }
+  65%, 100% { opacity: 1; }
+}
+
+@keyframes sb-in-dim {
+  to { opacity: 0.04; }
+}
+
+@keyframes sb-in-light {
+  from { opacity: 0.04; }
+  to { opacity: 0.85; }
+}
+
+@keyframes sb-in-darken {
+  to { opacity: 0.5; }
+}
+
+@keyframes sb-in-brighten {
+  from { opacity: 0.5; }
+  to { opacity: 0; }
+}
+
+@keyframes sb-in-rise {
+  from { opacity: 0; transform: translateY(18cqw) scaleY(0.85); }
+  to { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+@keyframes sb-in-eyes {
+  0%, 19% { opacity: 0; }
+  20%, 39% { opacity: 1; }
+  40%, 59% { opacity: 0.2; }
+  60%, 100% { opacity: 1; }
+}
+
+@keyframes sb-in-flare {
+  0% { transform: scale(1); opacity: 1; }
+  35% { transform: scale(2.6); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.85; }
+}
+
+@keyframes sb-in-fog-clear {
+  to { opacity: 0; transform: translateX(30%); }
+}
+
+@keyframes sb-in-sweep {
+  from { opacity: 1; mask-position: 100% 0; -webkit-mask-position: 100% 0; }
+  to { opacity: 1; mask-position: 0 0; -webkit-mask-position: 0 0; }
+}
+
+@keyframes sb-in-out {
+  from { opacity: 1; mask-position: 0 0; -webkit-mask-position: 0 0; }
+  to { opacity: 0; mask-position: 0 0; -webkit-mask-position: 0 0; }
+}
+
+@keyframes sb-in-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}

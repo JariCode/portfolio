@@ -40,12 +40,12 @@ export const GAMES = [
     genre: 'Kaupunginrakennus',
     color: 'violet',
     ratio: 1,
+    load: () => import('../games/shadowbuilder/ShadowBuilder.jsx'),
     description:
       'Rakenna yökaupunki tyhjästä. Pidä sähköt päällä, kassa plussalla ja kasvata väkiluku tuhanteen.',
-    planned: ['6 rakennustyyppiä', 'Raha ja sähkö', 'Tavoite 1000 asukasta', 'Tallennus'],
     controls: {
-      desktop: 'Hiiri',
-      mobile: 'Napauta ruutua',
+      desktop: 'Hiiri, numerot 1–7 ja välilyönti (tauko)',
+      mobile: 'Valitse valikosta, napauta ruutua',
     },
   },
 ];
