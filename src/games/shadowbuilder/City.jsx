@@ -1,9 +1,9 @@
 import './City.css';
 
 // Maisema aloitusnäkymään ja animaatioihin. Kaupunkia ei enää ole: se katosi varjoihin.
-// Jäljellä on tyhjä aukea, raunioiden kivijalat, yksinäinen neonkyltti ja maahan hehkuva
-// ruudukko, johon pelaaja rakentaa kaupungin uudelleen. Vanha kaupunki näkyy vain muistona
-// (haamukaupunki), jonka intro näyttää ja häivyttää; oletuksena se on piilossa.
+// Jäljellä on tyhjä aukea, yksinäinen neonkyltti ja maahan hehkuva ruudukko, johon pelaaja
+// rakentaa kaupungin uudelleen. Vanha kaupunki näkyy vain muistona (haamukaupunki), jonka
+// intro näyttää ja häivyttää; oletuksena se on piilossa.
 // Maisema on aina sama (ei satunnaisuutta renderöinnissä).
 
 // Pieni toistettava satunnaislukugeneraattori: sama siemen antaa saman maiseman
@@ -109,7 +109,6 @@ export default function City({ className = '' }) {
       {/* Kuu: hillitty hopea, ylhäällä logon ja vartijan valopallon välissä */}
       <circle cx="735" cy="100" r="150" fill="url(#sb-city-moon)" />
       <circle cx="735" cy="100" r="34" fill="#ece8ff" />
-      <circle cx="747" cy="91" r="34" fill="#cfc4ff" opacity=".35" />
 
       {/* Kaukaiset kukkulat ja metsän reuna horisontissa */}
       <path
@@ -139,15 +138,6 @@ export default function City({ className = '' }) {
       {/* Tyhjä aukea */}
       <rect y={HORIZON} width="1000" height={1000 - HORIZON} fill="url(#sb-city-ground)" />
       <rect y={HORIZON} width="1000" height="2" fill="#b28cff" opacity=".18" />
-
-      {/* Raunioiden kivijalat: täällä oli ennen taloja */}
-      <g className="sb-city-ruins" fill="#0f0a2a" stroke="#3a2f7a" strokeWidth="1">
-        <path d={`M70 ${HORIZON + 26} h70 v-14 h-14 v-10 h-22 v8 h-34z`} />
-        <path d={`M210 ${HORIZON + 12} h44 v-22 h-10 v8 h-12 v-14 h-22z`} />
-        <path d={`M690 ${HORIZON + 18} h60 v-10 h-18 v-16 h-14 v12 h-28z`} />
-        <path d={`M880 ${HORIZON + 34} h80 v-12 h-26 v-8 h-30 v6 h-24z`} />
-        <path d={`M560 ${HORIZON + 8} h30 v-12 h-8 v-6 h-22z`} />
-      </g>
 
       {/* Rakennusruudukko: hehkuu maassa, johon kaupunki nousee */}
       <ellipse cx={GRID.cx} cy={GRID.top + GRID.n * GRID.hh} rx="360" ry="150" fill="url(#sb-city-gridglow)" className="sb-city-grid-glow" />
