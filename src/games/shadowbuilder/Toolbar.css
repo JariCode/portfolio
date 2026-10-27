@@ -199,9 +199,15 @@
     display: none;
   }
 
-  /* Pelkkä kuvake: tietoriville jää tilaa */
+  /* Pelkkä kuvake: tietoriville jää tilaa. Kuvaus saa jatkua kahdelle riville. */
   .sb-toolbar-info {
+    display: -webkit-box;
     padding-inline: 32px;
+    white-space: normal;
+    line-height: 1.3;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   .sb-toolbar-row {

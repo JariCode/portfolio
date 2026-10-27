@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import Building from './Building.jsx';
 import { iso, TH, TW } from './iso.js';
-import { autoRot, canPlace, connectedSet, roadLinks, SIZE } from './buildings.js';
+import { autoRot, canPlace, connectedSet, HEIGHT, isHome, RANGE, roadLinks, SIZE } from './buildings.js';
+import { growthOf } from './economy.js';
 import { shadowOf } from './shadows.js';
 import './Board.css';
 
@@ -69,6 +70,30 @@ export default function Board({ grid, rots, previewRot, tool, hover, light, shad
   }
   items.sort((a, b) => a.x + a.y - (b.x + b.y) || (a.ghost ? 1 : 0) - (b.ghost ? 1 : 0));
 
+  // Vaikutusalue: nurmea, puistoa, kauppaa tai voimalaa esikatsellessa hehkuvat ruudut, joihin
+  // vaikutus ulottuu, ja talojen päällä näkyy, paljonko niiden kasvu muuttuisi (+1/yö)
+  const range = hover && valid ? RANGE[tool] : null;
+  const area = [];
+  const badges = [];
+  if (range) {
+    const next = [...grid];
+    next[hover.y * SIZE + hover.x] = tool;
+    for (let dy = -range.r; dy <= range.r; dy++) {
+      for (let dx = -range.r; dx <= range.r; dx++) {
+        const x = hover.x + dx;
+        const y = hover.y + dy;
+        if ((!dx && !dy) || x < 0 || y < 0 || x >= SIZE || y >= SIZE) continue;
+        if (range.adjacent && dx && dy) continue;
+        area.push([x, y]);
+        const i = y * SIZE + x;
+        if (isHome(grid[i])) {
+          const delta = growthOf(next, i) - growthOf(grid, i);
+          if (delta) badges.push({ i, x, y, delta, z: HEIGHT[grid[i]] });
+        }
+      }
+    }
+  }
+
   return (
     <svg
       ref={svgRef}
@@ -117,6 +142,15 @@ export default function Board({ grid, rots, previewRot, tool, hover, light, shad
         {ghostShadow && <polygon className="sb-board-shadow--ghost" points={toPoints(ghostShadow)} />}
       </g>
 
+      {/* Vaikutusalue maassa, rakennusten alla */}
+      {area.length > 0 && (
+        <g className={`sb-board-range${range.effect < 0 ? ' is-bad' : ''}`}>
+          {area.map(([x, y]) => (
+            <polygon key={`${x},${y}`} points={tilePoints(x, y)} />
+          ))}
+        </g>
+      )}
+
       {items.map((b) => (
         <Building
           key={b.ghost ? `ghost-${b.x}-${b.y}` : `${b.i}-${b.type}`}
@@ -129,6 +163,16 @@ export default function Board({ grid, rots, previewRot, tool, hover, light, shad
           lit={b.type === 'solar' && light.sun && light.alpha > 0.05 && !shaded.has(b.i)}
         />
       ))}
+
+      {/* Kasvun muutos talojen päällä */}
+      {badges.map((b) => {
+        const [bx2, by2] = iso(b.x + 0.5, b.y + 0.5, b.z + 0.45);
+        return (
+          <text key={b.i} className={`sb-board-badge${b.delta < 0 ? ' is-bad' : ''}`} x={bx2} y={by2}>
+            {b.delta > 0 ? `+${b.delta}` : `−${-b.delta}`}/yö
+          </text>
+        );
+      })}
 
       {hover && (
         <polygon

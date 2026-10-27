@@ -50,6 +50,37 @@
   stroke-dasharray: 4 4;
 }
 
+/* Vaikutusalue: hehkuvat ruudut esikatselun ympärillä (voimalan savu punertavana) */
+.sb-board-range {
+  fill: color-mix(in srgb, #5fbfa6 22%, transparent);
+  stroke: #5fbfa6;
+  stroke-width: 1;
+  stroke-opacity: 0.55;
+  pointer-events: none;
+}
+
+.sb-board-range.is-bad {
+  fill: rgb(255 92 140 / 0.16);
+  stroke: #ff7aa6;
+}
+
+/* Kasvun muutos talon päällä: tumma reunus erottaa tekstin taustasta */
+.sb-board-badge {
+  fill: #b8f5e3;
+  stroke: #07051a;
+  stroke-width: 4;
+  paint-order: stroke;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.sb-board-badge.is-bad {
+  fill: #ffc2d6;
+}
+
 /* Kursori: valittu ruutu. Punertava, jos ruutuun ei voi rakentaa. */
 .sb-board-cursor {
   fill: color-mix(in srgb, var(--sb-neon) 14%, transparent);

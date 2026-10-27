@@ -90,6 +90,13 @@
   opacity: 0.7;
 }
 
+/* Puhelimessa valikon tietorivi voi olla kaksirivinen: vartija nousee sen yläpuolelle */
+@container (max-width: 420px) {
+  .sb-guide {
+    bottom: calc(19cqw + 14px);
+  }
+}
+
 @keyframes sb-guide-rise {
   from { opacity: 0; transform: translateY(5cqw); }
   to { opacity: 1; transform: translateY(0); }

@@ -197,6 +197,14 @@ export default function Game({ onExit, saved }) {
     } else {
       const error = placeError(grid, hover.x, hover.y, tool, chapter, money);
       if (error) hint = { error };
+      else if (isHome(tool)) {
+        // Esikatselu kertoo, paljonko talo kasvaisi juuri tässä ruudussa
+        const next = [...grid];
+        next[i] = tool;
+        const def = toolById(tool);
+        const road = connectedSet(next).has(i) ? '' : ' · tarvitsee tien';
+        hint = { title: `${def.name} ${def.price} €`, text: `kasvaa tässä +${growthOf(next, i)} asukasta/yö${road}` };
+      }
     }
   }
 
@@ -225,6 +233,7 @@ export default function Game({ onExit, saved }) {
     dark,
     chapter,
     done: city.done,
+    tool,
   });
   const stats = useMemo(() => JSON.parse(statsKey), [statsKey]);
 

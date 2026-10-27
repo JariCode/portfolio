@@ -3,8 +3,8 @@
 // jotta ohjeet etenevät askel kerrallaan.
 //
 // s on pelin tilanne (Game.jsx, stats): rakennusten määrät, tieyhteydet, varjot, valo,
-// raha, sähkö, päivä ja luku. Tekstit eivät puhu klikkaamisesta tai napauttamisesta: sama
-// teksti käy hiirelle ja sormelle.
+// raha, sähkö, päivä, luku ja valittu työkalu. Tekstit eivät puhu klikkaamisesta tai
+// napauttamisesta: sama teksti käy hiirelle ja sormelle.
 
 export const LINES = [
   // ── Luku 1: ensimmäiset askeleet ──
@@ -41,6 +41,20 @@ export const LINES = [
     text: 'Ensimmäinen ikkuna syttyi. Asukkaat muuttavat taloon yön aikana.',
   },
   {
+    id: 'growth',
+    after: 'firstLight',
+    mood: 'rauhallinen',
+    when: (s) => s.house > 0,
+    text: 'Talo kasvaa kaksi asukasta yössä. Nurmi viereen, puisto kahden ruudun päähän ja kauppa kolmen ruudun päähän lisäävät kukin yhden.',
+  },
+  {
+    id: 'range',
+    after: 'growth',
+    mood: 'rauhallinen',
+    when: (s) => ['grass', 'park', 'shop'].includes(s.tool),
+    text: 'Hehkuvat ruudut näyttävät, mihin asti vaikutus ulottuu. Talojen päällä näet, paljonko niiden kasvu nopeutuu.',
+  },
+  {
     id: 'firstDay',
     after: 'firstLight',
     mood: 'rauhallinen',
@@ -59,7 +73,7 @@ export const LINES = [
     after: 'firstLight',
     mood: 'rauhallinen',
     when: (s) => s.solar === 0 && s.house >= 2,
-    text: 'Talot tarvitsevat sähköä. Valokenno kerää valoa, kunhan mikään ei varjosta sitä.',
+    text: 'Talot tarvitsevat sähköä, kukin kaksi. Valokenno tuottaa jopa kuusi, kunhan mikään ei varjosta sitä.',
   },
   {
     id: 'dark',
@@ -92,21 +106,21 @@ export const LINES = [
     after: 'firstDay',
     mood: 'rauhallinen',
     when: (s) => s.house >= 2 && s.grass === 0,
-    text: 'Nurmi talon vieressä saa asukkaat viihtymään, ja talo täyttyy nopeammin. Se on halpaa.',
+    text: 'Nurmi talon vieressä tuo yhden asukkaan lisää joka yö. Se maksaa vain viisi euroa.',
   },
   {
     id: 'shop',
     after: 'firstDay',
     mood: 'rauhallinen',
     when: (s) => s.house >= 3 && s.shop === 0,
-    text: 'Asukkaat kaipaavat kauppaa. Se tuo tuloja ja houkuttelee väkeä lähitaloihin.',
+    text: 'Kauppa tuo kymmenen euroa yössä ja osuuden lähiasukkaista. Talot kolmen ruudun päässä kasvavat nopeammin.',
   },
   {
     id: 'park',
     after: 'shop',
     mood: 'rauhallinen',
     when: (s) => s.shop > 0 && s.park === 0,
-    text: 'Puisto tuo viihtyvyyttä kahden ruudun säteelle. Myöhemmin se avaa tien kerrostaloille.',
+    text: 'Puisto nopeuttaa talojen kasvua kahden ruudun päässä, viereisiä kaksin verroin. Myöhemmin se avaa tien kerrostaloille.',
   },
   {
     id: 'poor',
@@ -134,14 +148,14 @@ export const LINES = [
     after: 'chapter2',
     mood: 'rauhallinen',
     when: (s) => s.tower > 0 && s.mushroom === 0,
-    text: 'Varjoista on hyötyäkin. Sienitarha tuottaa korkeiden talojen varjossa.',
+    text: 'Varjoista on hyötyäkin. Sienitarha tuottaa varjossa jopa 18 euroa yössä. Rakenna se korkean talon taakse.',
   },
   {
     id: 'plant',
     after: 'chapter2',
     mood: 'rauhallinen',
     when: (s) => s.tower >= 2 && s.plant === 0,
-    text: 'Kerrostalot janoavat sähköä. Voimala tuottaa sitä yölläkin, mutta sen savu karkottaa naapurit.',
+    text: 'Kerrostalot janoavat sähköä. Voimala tuottaa sitä yölläkin, mutta sen savu hidastaa talojen kasvua kahden ruudun päässä.',
   },
   // ── Luku 3 ja loppu ──
   {

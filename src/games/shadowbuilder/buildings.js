@@ -18,16 +18,16 @@ export const chapterOf = (pop) => CHAPTERS.find((c) => pop < c.to) ?? CHAPTERS[C
 // price: hinta. height: korkeus ruudun leveyksinä (varjon pituus). key: näppäin valikossa.
 // chapter: luku, jossa rakennus avautuu (valikossa lukittuna siihen asti).
 export const TOOLS = [
-  { id: 'road', key: '1', name: 'Tie', price: 5, info: 'Yhdistää rakennukset raatihuoneeseen', height: 0 },
-  { id: 'grass', key: '2', name: 'Nurmi', price: 5, info: 'Viihtyvyyttä viereisille taloille', height: 0 },
-  { id: 'house', key: '3', name: 'Talo', price: 50, info: '10 asukasta. Tarvitsee tien ja sähköä.', height: 0.95 },
-  { id: 'tower', key: '4', name: 'Kerrostalo', price: 150, info: 'Talon päälle, 60 asukasta. Vaatii puiston lähelle.', height: 2.2, chapter: 2 },
-  { id: 'shop', key: '5', name: 'Kauppa', price: 100, info: 'Tuloja lähiasukkaista. Lähellä talot kasvavat nopeammin.', height: 0.8 },
-  { id: 'solar', key: '6', name: 'Valokenno', price: 60, info: 'Sähköä vain valossa, ei varjossa', height: 0.22 },
-  { id: 'park', key: '7', name: 'Puisto', price: 40, info: 'Viihtyvyyttä kahden ruudun säteelle', height: 0.55 },
-  { id: 'mushroom', key: '8', name: 'Sienitarha', price: 80, info: 'Tuloja vain varjossa', height: 0.3, chapter: 2 },
-  { id: 'power', key: '9', name: 'Voimala', price: 250, info: 'Paljon sähköä säästä riippumatta. Savu karkottaa.', height: 1.3, chapter: 2 },
-  { id: 'demolish', key: 'Delete', name: 'Pura', price: 0, info: 'Poistaa rakennuksen, puolet hinnasta takaisin' },
+  { id: 'road', key: '1', name: 'Tie', price: 5, info: 'Rakennukset toimivat vain tien varrella', height: 0 },
+  { id: 'grass', key: '2', name: 'Nurmi', price: 5, info: 'Viereinen talo +1 asukas/yö. Päälle saa rakentaa.', height: 0 },
+  { id: 'house', key: '3', name: 'Talo', price: 50, info: '10 asukasta, kasvaa 2/yö. Kuluttaa 2 sähköä.', height: 0.95 },
+  { id: 'tower', key: '4', name: 'Kerrostalo', price: 150, info: 'Talon päälle: 60 asukasta, 6 sähköä. Puisto 2 ruudun päähän.', height: 2.2, chapter: 2 },
+  { id: 'shop', key: '5', name: 'Kauppa', price: 100, info: '10 €/yö + osuus lähiasukkaista. Talot 3 ruudun päässä +1/yö.', height: 0.8 },
+  { id: 'solar', key: '6', name: 'Valokenno', price: 60, info: 'Jopa 6 sähköä, riittää noin kahdelle talolle. Ei varjoon.', height: 0.22 },
+  { id: 'park', key: '7', name: 'Puisto', price: 40, info: 'Talot 2 ruudun päässä +1/yö, viereiset +2/yö', height: 0.55 },
+  { id: 'mushroom', key: '8', name: 'Sienitarha', price: 80, info: 'Jopa 18 €/yö varjossa. Paras korkean talon takana.', height: 0.3, chapter: 2 },
+  { id: 'power', key: '9', name: 'Voimala', price: 250, info: '30 sähköä, ylläpito 10 €/yö. Talot 2 ruudun päässä −1/yö.', height: 1.3, chapter: 2 },
+  { id: 'demolish', key: 'Delete', name: 'Pura', price: 0, info: 'Puolet hinnasta takaisin' },
 ];
 
 export const HEIGHT = Object.fromEntries(TOOLS.map((t) => [t.id, t.height ?? 0]));
@@ -122,6 +122,16 @@ export function autoRot(grid, x, y) {
 
 // Tiellä, nurmella ja raatihuoneella ei ole käännettävää julkisivua
 export const rotatable = (type) => Boolean(type) && !['road', 'grass', 'hall', 'demolish'].includes(type);
+
+// Vaikutusalueet taloihin (economy.js growthOf): säde ruutuina (myös vinottain) ja vaikutus
+// kasvuun. Nurmen ja puiston +1 koskee vain viereisiä ruutuja (ei vinottain). Näytetään
+// ruudukolla, kun rakennusta esikatsellaan.
+export const RANGE = {
+  grass: { r: 1, adjacent: true, effect: 1 },
+  park: { r: 2, effect: 1 },
+  shop: { r: 3, effect: 1 },
+  power: { r: 2, effect: -1 },
+};
 
 // Asukkaita mahtuu taloon ja kerrostaloon
 export const isHome = (type) => type === 'house' || type === 'tower';
