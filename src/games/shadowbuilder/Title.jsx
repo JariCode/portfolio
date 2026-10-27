@@ -141,9 +141,10 @@ export default function Title({ onStart, onResume }) {
             ))}
           </dl>
           <p>
-            Kasvata kaupunki tuhanteen asukkaaseen mahdollisimman harvassa päivässä. Talot tarvitsevat tien ja
-            sähköä; joka keskiyö kerätään verot ja taloihin muuttaa väkeä. Rakennukset heittävät varjoja: valokenno
-            tarvitsee valoa, sienitarha varjoa. Puhelimella valitse rakennus valikosta ja napauta ruutua kahdesti.
+            Kasvata kaupunki tuhanteen asukkaaseen mahdollisimman nopeasti: mitä vähemmän päiviä, sitä parempi
+            ennätys. Talot tarvitsevat tien ja sähköä; joka keskiyö kerätään verot ja taloihin muuttaa väkeä.
+            Rakennukset heittävät varjoja: valokenno tarvitsee valoa, sienitarha varjoa. Puhelimella valitse
+            rakennus valikosta ja napauta ruutua kahdesti.
           </p>
           <button type="button" className="sb-btn sb-help-close" onClick={() => setHelp(false)}>
             Selvä
