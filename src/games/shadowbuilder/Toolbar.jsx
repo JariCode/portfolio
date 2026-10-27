@@ -1,10 +1,11 @@
 import Building from './Building.jsx';
-import { TOOLS, toolById } from './buildings.js';
+import { rotatable, TOOLS, toolById } from './buildings.js';
 import './Toolbar.css';
 
 // Rakennusvalikko alareunassa. Kuvakkeet ovat samoja piirroksia kuin ruudukossa, pienennettyinä.
 // Valitun työkalun nimi ja lyhyt kuvaus näkyvät valikon yläpuolella, joten puhelimessakin
-// tietää, mitä on rakentamassa.
+// tietää, mitä on rakentamassa. Kääntönappi näkyy, kun valittuna on käännettävä rakennus;
+// se korostuu, kun pelaaja on kääntänyt itse (manual), muuten rakennus kääntyy kohti tietä.
 
 function Icon({ id }) {
   if (id === 'demolish') {
@@ -22,7 +23,7 @@ function Icon({ id }) {
   );
 }
 
-export default function Toolbar({ tool, onSelect }) {
+export default function Toolbar({ tool, onSelect, onRotate, manual }) {
   const current = toolById(tool);
   return (
     <div className="sb-toolbar">
@@ -35,6 +36,23 @@ export default function Toolbar({ tool, onSelect }) {
           'Valitse rakennus'
         )}
       </p>
+      {rotatable(tool) && (
+        <button
+          type="button"
+          className={`sb-tool-rotate${manual ? ' is-active' : ''}`}
+          title="Käännä rakennusta (R)"
+          tabIndex={-1}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={onRotate}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19 12a7 7 0 1 1-2.05-4.95" />
+            <path d="M17.5 3.5v4h-4" />
+          </svg>
+          <span>Käännä</span>
+          <kbd aria-hidden="true">R</kbd>
+        </button>
+      )}
       <div className="sb-toolbar-row" role="toolbar" aria-label="Rakennukset">
         {TOOLS.map((t) => (
           <button

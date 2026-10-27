@@ -42,7 +42,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 2.2cqw;
-  width: 60cqw;
+  width: 64cqw;
 }
 
 /* Logo syttyy kuin neonputki: välähdykset kovina portaina prosenteilla (ei steps()) */
@@ -90,6 +90,11 @@
   animation: sb-fade 0.8s 1.5s ease-out both;
 }
 
+/* Kolme nappia (Jatka, Uusi peli, Ohjeet) mahtuu samalle riville */
+.sb-actions .sb-btn {
+  padding-inline: max(14px, 3cqw);
+}
+
 .sb-record {
   color: var(--muted);
   font-size: max(10px, 1.9cqw);
@@ -100,6 +105,34 @@
 .sb-record strong {
   color: var(--sb-neon-hot);
   font-weight: 600;
+}
+
+/* Tallennusten tyhjennys: hillitty linkki ennätyksen alla, vahvistus kahdella painalluksella */
+.sb-title-clear {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6cqw 2cqw;
+  margin-top: -1cqw;
+  color: var(--sb-neon);
+  font-size: max(10px, 1.8cqw);
+  animation: sb-fade 0.8s 1.9s ease-out both;
+}
+
+.sb-title-clear button {
+  padding: 0.4cqw 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.sb-title-clear button:hover,
+.sb-title-clear button:focus-visible {
+  color: var(--text);
 }
 
 /* Ohjeiden ollessa auki sisältö ja vartija piiloon, etteivät ne pilkistä paneelin takaa */
@@ -249,7 +282,8 @@
   .sb-tagline,
   .sb-title-sub,
   .sb-actions,
-  .sb-record {
+  .sb-record,
+  .sb-title-clear {
     animation: none;
   }
 }

@@ -16,7 +16,8 @@
 }
 
 .sb-toolbar-info {
-  max-width: none;
+  max-width: 100%;
+  padding-inline: 15cqw;
   min-height: 1.4em;
   color: var(--muted);
   font-size: max(10px, 1.9cqw);
@@ -38,6 +39,48 @@
 .sb-toolbar-row {
   display: flex;
   gap: 1.2cqw;
+}
+
+/* Kääntönappi valikon oikeassa yläkulmassa, tietorivin tasalla */
+.sb-tool-rotate {
+  position: absolute;
+  top: 0.8cqw;
+  right: 2cqw;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8cqw;
+  min-height: max(24px, 3.6cqw);
+  padding: 0 max(8px, 1.4cqw);
+  border: 1px solid color-mix(in srgb, var(--sb-neon) 55%, transparent);
+  background: var(--sb-glass);
+  color: var(--sb-neon-hot);
+  font: inherit;
+  font-size: max(10px, 1.7cqw);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sb-tool-rotate svg {
+  width: max(12px, 2.2cqw);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sb-tool-rotate kbd {
+  padding: 0 0.4em;
+  border: 1px solid color-mix(in srgb, var(--sb-neon) 45%, transparent);
+  color: var(--sb-neon);
+  font-family: inherit;
+  font-size: 0.85em;
+}
+
+.sb-tool-rotate:hover,
+.sb-tool-rotate.is-active {
+  border-color: var(--sb-neon-hot);
+  box-shadow: 0 0 1.4cqw color-mix(in srgb, var(--sb-neon) 50%, transparent);
 }
 
 .sb-tool {
@@ -140,8 +183,15 @@
 
 /* Pieni näkymä (puhelin): nimet pois napeista, valitun nimi näkyy yläpuolella */
 @container (max-width: 420px) {
-  .sb-tool-name {
+  .sb-tool-name,
+  .sb-tool-rotate span,
+  .sb-tool-rotate kbd {
     display: none;
+  }
+
+  /* Pelkkä kuvake: tietoriville jää tilaa */
+  .sb-toolbar-info {
+    padding-inline: 32px;
   }
 
   .sb-toolbar-row {

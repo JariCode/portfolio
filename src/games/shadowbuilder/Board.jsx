@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Building from './Building.jsx';
 import { iso, TH, TW } from './iso.js';
-import { canPlace, connectedSet, roadLinks, SIZE } from './buildings.js';
+import { autoRot, canPlace, connectedSet, roadLinks, SIZE } from './buildings.js';
 import { shadowOf } from './shadows.js';
 import './Board.css';
 
@@ -23,7 +23,8 @@ const SIDE_RIGHT = `${bx},${by} ${rx},${ry} ${rx},${ry + DEPTH} ${bx},${by + DEP
 
 const VIEW = `${-SIZE * TW - 20} -70 ${SIZE * TW * 2 + 40} ${SIZE * TH * 2 + 70 + DEPTH + 20}`;
 
-export default function Board({ grid, tool, hover, light, shadows, shaded, onPoint }) {
+// rots: rakennusten käännöt (null = kääntyy tietä kohti). previewRot: esikatselun kääntö.
+export default function Board({ grid, rots, previewRot, tool, hover, light, shadows, shaded, onPoint }) {
   const svgRef = useRef(null);
   const linked = connectedSet(grid);
 
@@ -54,9 +55,14 @@ export default function Board({ grid, tool, hover, light, shadows, shaded, onPoi
   // Piirtojärjestys takaa eteen (x + y), jotta lähempi rakennus peittää kauempana olevan
   const items = [];
   grid.forEach((type, i) => {
-    if (type && type !== 'road') items.push({ i, type, x: i % SIZE, y: Math.floor(i / SIZE) });
+    if (!type || type === 'road') return;
+    const x = i % SIZE;
+    const y = Math.floor(i / SIZE);
+    items.push({ i, type, x, y, rot: rots[i] ?? autoRot(grid, x, y) });
   });
-  if (hover && valid && building && tool !== 'road') items.push({ i: 'ghost', type: tool, x: hover.x, y: hover.y, ghost: true });
+  if (hover && valid && building && tool !== 'road') {
+    items.push({ i: 'ghost', type: tool, x: hover.x, y: hover.y, rot: previewRot, ghost: true });
+  }
   items.sort((a, b) => a.x + a.y - (b.x + b.y) || (a.ghost ? 1 : 0) - (b.ghost ? 1 : 0));
 
   return (
@@ -113,6 +119,7 @@ export default function Board({ grid, tool, hover, light, shadows, shaded, onPoi
           type={b.type}
           x={b.x}
           y={b.y}
+          rot={b.rot}
           ghost={b.ghost}
           connected={!b.ghost && linked.has(b.i)}
           lit={b.type === 'solar' && light.sun && light.alpha > 0.05 && !shaded.has(b.i)}

@@ -39,6 +39,13 @@ export const LINES = [
     text: 'Ensimmäinen ikkuna syttyi. Kaupunki muistaa valonsa.',
   },
   {
+    id: 'rotate',
+    after: 'firstLight',
+    mood: 'rauhallinen',
+    when: (s) => s.house > 0,
+    text: 'Talot kääntävät ovensa kohti tietä. Jos haluat toisin, käännä rakennusta ennen kuin rakennat.',
+  },
+  {
     id: 'solar',
     after: 'firstLight',
     mood: 'rauhallinen',

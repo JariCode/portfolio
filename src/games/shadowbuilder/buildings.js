@@ -76,6 +76,27 @@ export function roadLinks(grid, x, y) {
   });
 }
 
+// Julkisivun suunnat käännöille 0–3 (sama järjestys kuin Building.jsx:n piirroksissa)
+const FACING = [
+  [0, 1],
+  [-1, 0],
+  [0, -1],
+  [1, 0],
+];
+
+// Rakennus kääntyy itsestään kohti viereistä tietä tai raatihuonetta. Näkyvät suunnat
+// (0 ja 3) ensin, jotta ovi näkyy, kun tie on edessä. Ilman tietä julkisivu kohti katsojaa.
+export function autoRot(grid, x, y) {
+  const r = [0, 3, 1, 2].find((i) => {
+    const n = at(grid, x + FACING[i][0], y + FACING[i][1]);
+    return n === 'road' || n === 'hall';
+  });
+  return r ?? 0;
+}
+
+// Tiellä ja raatihuoneella ei ole käännettävää julkisivua
+export const rotatable = (type) => Boolean(type) && type !== 'road' && type !== 'hall' && type !== 'demolish';
+
 // Voiko ruutuun rakentaa valitulla työkalulla
 export function canPlace(grid, x, y, tool) {
   const here = at(grid, x, y);

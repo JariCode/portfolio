@@ -4,10 +4,11 @@ import Board from './Board.jsx';
 import Toolbar from './Toolbar.jsx';
 import Guide from './Guide.jsx';
 import MuteButton from './MuteButton.jsx';
-import { canPlace, connectedSet, emptyGrid, SIZE, TOOLS } from './buildings.js';
+import { autoRot, canPlace, connectedSet, emptyGrid, rotatable, SIZE, TOOLS } from './buildings.js';
 import { castShadows, DAY, lightAt } from './shadows.js';
 import { nextLine } from './story.js';
 import { play } from './sound.js';
+import { clearCity, saveCity } from './score.js';
 import './Game.css';
 
 // Valon kulku päivitetään noin 20 kertaa sekunnissa: varjot liikkuvat hitaasti, joten
@@ -19,15 +20,20 @@ const START = 0.12;
 // Kuinka kauan vartijan puhekupla pysyy: perusaika ja lisäaika merkkiä kohden
 const bubbleTime = (text) => 3800 + text.length * 55;
 
-export default function Game({ onExit }) {
-  const [grid, setGrid] = useState(emptyGrid);
+// saved: tallennettu kaupunki (score.js), josta peli jatkuu, tai null uudessa pelissä
+export default function Game({ onExit, saved }) {
+  const [grid, setGrid] = useState(() => saved?.grid ?? emptyGrid());
+  // Käännöt ruuduittain: null = rakennus kääntyy itsestään kohti tietä, 0–3 = pelaajan valinta
+  const [rots, setRots] = useState(() => saved?.rots ?? Array(SIZE * SIZE).fill(null));
   const [tool, setTool] = useState('road');
+  // Seuraavan rakennuksen kääntö: null = automaattinen, 0–3 = käännetty R:llä tai napilla
+  const [rotMode, setRotMode] = useState(null);
   const [hover, setHover] = useState(null);
   const [paused, setPaused] = useState(false);
-  const [t, setT] = useState(START);
+  const [t, setT] = useState(saved?.t ?? START);
   const [line, setLine] = useState(null);
-  const [seen, setSeen] = useState(() => new Set());
-  const clock = useRef(START * DAY);
+  const [seen, setSeen] = useState(() => new Set(saved?.seen ?? []));
+  const clock = useRef((saved?.t ?? START) * DAY);
 
   // ── Aika: valo kulkee, paitsi tauolla ──
   useEffect(() => {
@@ -54,13 +60,36 @@ export default function Game({ onExit }) {
   const build = useCallback(
     (x, y) => {
       if (!canPlace(grid, x, y, tool)) return;
+      const i = y * SIZE + x;
       const next = [...grid];
-      next[y * SIZE + x] = tool === 'demolish' ? null : tool;
+      next[i] = tool === 'demolish' ? null : tool;
+      const nextRots = [...rots];
+      nextRots[i] = rotatable(tool) ? rotMode : null;
       setGrid(next);
+      setRots(nextRots);
       play(tool === 'demolish' ? 'demolish' : 'build', { rate: tool === 'road' ? 1.4 : 1 });
     },
-    [grid, tool],
+    [grid, rots, tool, rotMode],
   );
+
+  // Esikatselun kääntö: pelaajan valinta tai automaattisesti kohti tietä
+  const previewRot = hover && rotatable(tool) ? (rotMode ?? autoRot(grid, hover.x, hover.y)) : 0;
+
+  // R tai kääntönappi: käännetään esikatselua 90° siitä, mihin se nyt osoittaa
+  const rotate = useCallback(() => {
+    if (!rotatable(tool)) return;
+    setRotMode((r) => ((r ?? (hover ? autoRot(grid, hover.x, hover.y) : 0)) + 1) % 4);
+  }, [tool, hover, grid]);
+
+  // ── Tallennus: jokaisen rakennuksen ja purun jälkeen (sekä uuden repliikin jälkeen) ──
+  // Pelkkä raatihuone ei ole tallennettava kaupunki, joten tyhjä kaupunki poistetaan.
+  useEffect(() => {
+    if (grid.some((g) => g && g !== 'hall')) {
+      saveCity({ grid, rots, seen: [...seen], t: (clock.current / DAY) % 1 });
+    } else {
+      clearCity();
+    }
+  }, [grid, rots, seen]);
 
   // Hiiri: liike esikatselee, painallus rakentaa, tietä voi vetää painike pohjassa.
   // Kosketus: ensimmäinen napautus esikatselee, toinen samaan ruutuun rakentaa.
@@ -80,16 +109,20 @@ export default function Game({ onExit }) {
     }
   };
 
+  // Työkalun vaihto palauttaa käännön automaattiseksi
   const select = useCallback((id) => {
-    if (TOOLS.find((x) => x.id === id && !x.locked)) setTool(id);
+    if (!TOOLS.find((x) => x.id === id && !x.locked)) return;
+    setTool(id);
+    setRotMode(null);
   }, []);
 
-  // ── Näppäimet: numerot valitsevat, Delete purkaa, välilyönti tauko. Esc sulkee pelin. ──
+  // ── Näppäimet: numerot valitsevat, R kääntää, Delete purkaa, välilyönti tauko. Esc sulkee pelin. ──
   useEffect(() => {
     const onKey = (e) => {
       const byKey = TOOLS.find((x) => x.key === e.key);
       if (byKey) select(byKey.id);
       else if (e.key === 'Backspace') select('demolish');
+      else if (e.code === 'KeyR' && !e.repeat) rotate();
       else if (e.code === 'Space') {
         e.preventDefault();
         if (!e.repeat) setPaused((p) => !p);
@@ -97,7 +130,7 @@ export default function Game({ onExit }) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [select]);
+  }, [select, rotate]);
 
   // ── Tilanne vartijan repliikkejä varten ──
   // Tiivistetään merkkijonoksi, jotta valon tasainen liike ei käynnistä repliikkien
@@ -155,6 +188,8 @@ export default function Game({ onExit }) {
       <div className="sb-game-board">
         <Board
           grid={grid}
+          rots={rots}
+          previewRot={previewRot}
           tool={tool}
           hover={hover}
           light={light}
@@ -195,7 +230,7 @@ export default function Game({ onExit }) {
       {paused && <p className="sb-paused">Tauko</p>}
 
       <Guide key={line?.id} line={line} onClose={() => setLine(null)} />
-      <Toolbar tool={tool} onSelect={select} />
+      <Toolbar tool={tool} onSelect={select} onRotate={rotate} manual={rotMode !== null} />
     </div>
   );
 }
