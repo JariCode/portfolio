@@ -1,4 +1,4 @@
-/* ═══ Taustan yökaupunki (City.jsx) ═══ */
+/* ═══ Maisema (City.jsx) ═══ */
 .sb-city {
   position: absolute;
   inset: 0;
@@ -12,13 +12,49 @@
   animation-delay: var(--d);
 }
 
-.sb-city-window {
-  fill: var(--sb-window);
-  opacity: 0.85;
+/* Haamukaupunki: läpikuultavat violetit ääriviivat, oletuksena piilossa (intro näyttää sen).
+   Talot uppoavat horisonttiin, kun kaupunki katoaa: muunnoksen keskipiste horisontissa. */
+.sb-city-ghost {
+  opacity: 0;
+  transform-box: view-box;
+  transform-origin: 500px 620px;
 }
 
-.sb-city-window--violet {
-  fill: var(--sb-neon);
+.sb-city-ghost-house {
+  fill: color-mix(in srgb, var(--sb-neon) 8%, transparent);
+  stroke: color-mix(in srgb, var(--sb-neon) 55%, transparent);
+  stroke-width: 1.2;
+}
+
+.sb-city-ghost-windows {
+  fill: var(--sb-window);
+  opacity: 0.55;
+}
+
+/* Rakennusruudukko: ohuet viivat ja himmeä hehku maassa */
+.sb-city-grid-line {
+  fill: none;
+  stroke: var(--sb-neon);
+  stroke-width: 1;
+  stroke-opacity: 0.32;
+}
+
+.sb-city-grid-edge {
+  fill: color-mix(in srgb, var(--sb-neon) 5%, transparent);
+  stroke: var(--sb-neon);
+  stroke-width: 1.6;
+  stroke-opacity: 0.6;
+}
+
+.sb-city-grid-heart {
+  fill: color-mix(in srgb, var(--sb-neon) 28%, transparent);
+  stroke: var(--sb-neon-hot);
+  stroke-width: 1.4;
+  animation: sb-heart 3.6s ease-in-out infinite;
+}
+
+.sb-city-grid-glow {
+  animation: sb-grid-glow 5s ease-in-out infinite;
 }
 
 /* Neonputki: kirkas ohut viiva ja sen alla leveä himmeä hehku (ei suodattimia) */
@@ -43,6 +79,11 @@
   stroke-opacity: 0.22;
 }
 
+.sb-city-post {
+  stroke: #1c1446;
+  stroke-width: 6;
+}
+
 /* Sumu ajelehtii hitaasti sivulta toiselle */
 .sb-city-fog--near {
   animation: sb-fog 18s ease-in-out infinite alternate;
@@ -62,9 +103,21 @@
   to { transform: translateX(60px); }
 }
 
+@keyframes sb-heart {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes sb-grid-glow {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sb-city-stars circle,
-  .sb-city-fog {
+  .sb-city-fog,
+  .sb-city-grid-heart,
+  .sb-city-grid-glow {
     animation: none;
   }
 }

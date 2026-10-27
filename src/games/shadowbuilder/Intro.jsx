@@ -6,10 +6,11 @@ import './Intro.css';
 
 // Alkuanimaation kesto millisekunteina. Ajoitukset ovat Intro.css:ssä (animation-delay);
 // tämä luku vastaa viimeisen vaiheen loppua.
-const DURATION = 12400;
+const DURATION = 13800;
 
-// Tarina lyhyesti: valot sammuvat, kyltin varjosta nousee vartija, valot palaavat ja logo
-// syttyy. Rivit ovat tavallista tekstiä, joten ruudunlukija lukee ne.
+// Tarina lyhyesti: vanha kaupunki näkyy muistona ja vajoaa varjoihin, tyhjälle aukealle nousee
+// vartija, ja sen valo piirtää maahan ruudukon, johon kaupunki rakennetaan uudelleen.
+// Rivit ovat tavallista tekstiä, joten ruudunlukija lukee ne.
 export default function Intro({ onDone }) {
   const skipRef = useRef(null);
 
@@ -25,19 +26,20 @@ export default function Intro({ onDone }) {
   return (
     <div className="sb-intro">
       <City className="sb-intro-city" />
-      {/* Pimeys laskeutuu, kun valot sammuvat, ja väistyy, kun ne palaavat */}
+      {/* Pimeys laskeutuu, kun kaupunki katoaa, ja väistyy, kun vartijan valo leimahtaa */}
       <div className="sb-intro-dark" aria-hidden="true" />
 
       <div className="sb-intro-guardian">
         <Guardian />
       </div>
-      {/* Paksu sumu kadulla; vartija hajottaa sen valopallollaan */}
+      {/* Paksu sumu aukealla; vartija hajottaa sen valopallollaan */}
       <div className="sb-intro-fog" aria-hidden="true" />
 
       <div className="sb-intro-story">
-        <p className="sb-intro-line sb-intro-line--1">Yhtenä yönä kaupungin valot sammuivat.</p>
-        <p className="sb-intro-line sb-intro-line--2">Vain varjot muistavat, missä talot seisoivat.</p>
-        <p className="sb-intro-line sb-intro-line--3">Herätä kaupunki.</p>
+        <p className="sb-intro-line sb-intro-line--1">Täällä seisoi ennen kaupunki.</p>
+        <p className="sb-intro-line sb-intro-line--2">Yhtenä yönä se katosi varjoihin.</p>
+        <p className="sb-intro-line sb-intro-line--3">Vain varjot muistavat, missä talot seisoivat.</p>
+        <p className="sb-intro-line sb-intro-line--4">Rakenna se uudelleen.</p>
       </div>
 
       <div className="sb-intro-title">

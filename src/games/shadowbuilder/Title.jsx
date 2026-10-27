@@ -43,7 +43,7 @@ export default function Title({ onStart }) {
           <span className="sb-tagline-sep" aria-hidden="true" />
           <span>Herätä</span>
         </p>
-        <p className="sb-title-sub">Kaupunki nukkuu varjoissa. Vain sinä voit herättää sen.</p>
+        <p className="sb-title-sub">Kaupunki katosi varjoihin. Rakenna se uudelleen tyhjästä.</p>
 
         <div className="sb-actions">
           <button ref={startRef} type="button" className="sb-btn sb-btn--start" onClick={onStart}>

@@ -1,11 +1,12 @@
 import './City.css';
 
-// Taustan yökaupunki aloitusnäkymään ja animaatioihin: taivas, kuu, kaksi siluettikerrosta,
-// ikkunavalot, violetit neonkyltit ja ajelehtiva sumu. Kaupunki on aina sama (ei satunnaisuutta
-// renderöinnissä), joten talot pysyvät paikallaan vaiheesta toiseen.
-// Ikkunat ja kyltit saavat luokat, joita animaatiot ohjaavat (esim. intro sammuttaa valot).
+// Maisema aloitusnäkymään ja animaatioihin. Kaupunkia ei enää ole: se katosi varjoihin.
+// Jäljellä on tyhjä aukea, raunioiden kivijalat, yksinäinen neonkyltti ja maahan hehkuva
+// ruudukko, johon pelaaja rakentaa kaupungin uudelleen. Vanha kaupunki näkyy vain muistona
+// (haamukaupunki), jonka intro näyttää ja häivyttää; oletuksena se on piilossa.
+// Maisema on aina sama (ei satunnaisuutta renderöinnissä).
 
-// Pieni toistettava satunnaislukugeneraattori: sama siemen antaa saman kaupungin
+// Pieni toistettava satunnaislukugeneraattori: sama siemen antaa saman maiseman
 function random(seed) {
   let s = seed;
   return () => {
@@ -14,35 +15,31 @@ function random(seed) {
   };
 }
 
-// Rakennukset: [x, leveys, korkeus]. Ikkunat lasketaan rakennuksen koosta.
-function skyline(seed, count, minH, maxH) {
-  const r = random(seed);
+const HORIZON = 620;
+
+// Haamukaupungin talot horisontin päällä
+const GHOST = (() => {
+  const r = random(29);
   const out = [];
   let x = -20;
-  for (let i = 0; i < count && x < 1020; i++) {
+  while (x < 1020) {
     const w = 50 + Math.floor(r() * 70);
-    const h = minH + Math.floor(r() * (maxH - minH));
-    out.push({ x, w, h, spire: r() < 0.22, tank: r() < 0.18 });
+    const h = 140 + Math.floor(r() * 260);
+    out.push({ x, w, h, spire: r() < 0.25 });
     x += w + Math.floor(r() * 14);
   }
   return out;
-}
+})();
 
-const GROUND = 860;
-const FAR = skyline(11, 30, 220, 470);
-const NEAR = skyline(29, 30, 140, 360);
-
-// Ikkunat lähimpään kerrokseen: osa keltaisia, harva violetti, osa pimeänä.
-// --d porrastaa syttymisen, kun valot palaavat (intro).
-const WINDOWS = (() => {
+// Haamukaupungin ikkunat: himmeitä muistoja
+const GHOST_WINDOWS = (() => {
   const r = random(7);
   const out = [];
-  for (const b of NEAR) {
-    for (let y = GROUND - b.h + 18; y < GROUND - 24; y += 22) {
+  for (const b of GHOST) {
+    for (let y = HORIZON - b.h + 18; y < HORIZON - 24; y += 24) {
       for (let x = b.x + 10; x < b.x + b.w - 14; x += 16) {
-        const v = r();
-        if (v < 0.42) continue;
-        out.push({ x, y, warm: v < 0.9, d: Math.round(r() * 1200) / 1000 });
+        if (r() < 0.5) continue;
+        out.push({ x, y });
       }
     }
   }
@@ -51,19 +48,25 @@ const WINDOWS = (() => {
 
 const STARS = (() => {
   const r = random(3);
-  return Array.from({ length: 70 }, () => ({ x: r() * 1000, y: r() * 520, s: 0.6 + r() * 1.6, d: r() * 4 }));
+  return Array.from({ length: 80 }, () => ({ x: r() * 1000, y: r() * 560, s: 0.6 + r() * 1.6, d: r() * 4 }));
 })();
 
-// Neonkyltit: abstraktit merkit, ei tekstiä (kaupungin "riimut")
-function NeonSign({ x, y, h, glyphs, className = '' }) {
-  return (
-    <g className={`sb-city-neon ${className}`.trim()} transform={`translate(${x} ${y})`}>
-      <rect x="0" y="0" width="34" height={h} rx="4" className="sb-city-neon-glow" />
-      <rect x="0" y="0" width="34" height={h} rx="4" className="sb-city-neon-tube" />
-      <path d={glyphs} className="sb-city-neon-glyph" />
-    </g>
-  );
-}
+// Rakennusruudukko maassa: isometrinen 10 × 10, sama muoto kuin pelin ruudukko
+const GRID = { cx: 380, top: 660, hw: 28, hh: 14, n: 10 };
+const iso = (gx, gy) => [GRID.cx + (gx - gy) * GRID.hw, GRID.top + (gx + gy) * GRID.hh];
+const GRID_LINES = (() => {
+  const lines = [];
+  for (let i = 1; i < GRID.n; i++) {
+    const [ax, ay] = iso(i, 0);
+    const [bx, by] = iso(i, GRID.n);
+    const [cx, cy] = iso(0, i);
+    const [dx, dy] = iso(GRID.n, i);
+    lines.push(`M${ax} ${ay} L${bx} ${by}`, `M${cx} ${cy} L${dx} ${dy}`);
+  }
+  return lines;
+})();
+const GRID_EDGE = [iso(0, 0), iso(GRID.n, 0), iso(GRID.n, GRID.n), iso(0, GRID.n)].map((p) => p.join(' ')).join(' L');
+const GRID_HEART = [iso(4, 4), iso(5, 4), iso(5, 5), iso(4, 5)].map((p) => p.join(' ')).join(' L');
 
 export default function City({ className = '' }) {
   return (
@@ -71,19 +74,27 @@ export default function City({ className = '' }) {
       <defs>
         <linearGradient id="sb-city-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#07051a" />
-          <stop offset=".55" stopColor="#170f3c" />
-          <stop offset=".85" stopColor="#2e1c62" />
-          <stop offset="1" stopColor="#3a2475" />
+          <stop offset=".45" stopColor="#150e38" />
+          <stop offset=".62" stopColor="#2c1b5e" />
+        </linearGradient>
+        <linearGradient id="sb-city-ground" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#140d33" />
+          <stop offset=".35" stopColor="#0b0722" />
+          <stop offset="1" stopColor="#05030f" />
         </linearGradient>
         <radialGradient id="sb-city-moon" r=".5">
           <stop offset="0" stopColor="#e9e4ff" stopOpacity=".55" />
           <stop offset=".4" stopColor="#b9a8ff" stopOpacity=".18" />
           <stop offset="1" stopColor="#b9a8ff" stopOpacity="0" />
         </radialGradient>
+        <radialGradient id="sb-city-gridglow" cx=".5" cy=".5" r=".5">
+          <stop offset="0" stopColor="#b28cff" stopOpacity=".28" />
+          <stop offset="1" stopColor="#b28cff" stopOpacity="0" />
+        </radialGradient>
         <linearGradient id="sb-city-fog" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#9a84e6" stopOpacity="0" />
-          <stop offset=".6" stopColor="#9a84e6" stopOpacity=".22" />
-          <stop offset="1" stopColor="#9a84e6" stopOpacity=".35" />
+          <stop offset=".6" stopColor="#9a84e6" stopOpacity=".2" />
+          <stop offset="1" stopColor="#9a84e6" stopOpacity=".32" />
         </linearGradient>
       </defs>
 
@@ -100,55 +111,67 @@ export default function City({ className = '' }) {
       <circle cx="735" cy="100" r="34" fill="#ece8ff" />
       <circle cx="747" cy="91" r="34" fill="#cfc4ff" opacity=".35" />
 
-      {/* Kaukainen kerros: vaaleampi ja sumuinen */}
-      <g className="sb-city-far" fill="#1d1447">
-        {FAR.map((b, i) => (
+      {/* Kaukaiset kukkulat ja metsän reuna horisontissa */}
+      <path
+        d={`M0 ${HORIZON - 40} C120 ${HORIZON - 90} 220 ${HORIZON - 60} 320 ${HORIZON - 70} C430 ${HORIZON - 82} 520 ${HORIZON - 30} 640 ${HORIZON - 58} C760 ${HORIZON - 86} 880 ${HORIZON - 50} 1000 ${HORIZON - 72} V${HORIZON} H0Z`}
+        fill="#1c1446"
+      />
+      <path
+        d={`M0 ${HORIZON - 12} l18 -26 l14 20 l16 -34 l18 30 l12 -18 l20 26 l16 -22 l18 24 l14 -14 l22 20 V${HORIZON} H0Z M800 ${HORIZON - 10} l16 -24 l14 18 l18 -30 l16 26 l14 -16 l20 22 l16 -20 l18 24 l20 -12 l18 14 l16 -18 l14 12 V${HORIZON} H800Z`}
+        fill="#120c30"
+      />
+
+      {/* Haamukaupunki: vanha kaupunki muistona (piilossa, intro näyttää ja häivyttää) */}
+      <g className="sb-city-ghost">
+        {GHOST.map((b, i) => (
           <g key={i}>
-            <rect x={b.x} y={GROUND - b.h - 40} width={b.w} height={b.h + 40} />
-            {b.spire && <path d={`M${b.x + b.w / 2 - 6} ${GROUND - b.h - 40} l6 -60 l6 60z`} />}
+            <rect x={b.x} y={HORIZON - b.h} width={b.w} height={b.h} className="sb-city-ghost-house" />
+            {b.spire && <path d={`M${b.x + b.w / 2 - 6} ${HORIZON - b.h} l6 -50 l6 50z`} className="sb-city-ghost-house" />}
           </g>
         ))}
+        <g className="sb-city-ghost-windows">
+          {GHOST_WINDOWS.map((w, i) => (
+            <rect key={i} x={w.x} y={w.y} width="7" height="10" />
+          ))}
+        </g>
       </g>
-      <rect y="520" width="1000" height="360" fill="url(#sb-city-fog)" className="sb-city-fog sb-city-fog--far" />
 
-      {/* Lähikerros: tummat siluetit, katoilla antenneja ja vesitorneja */}
-      <g className="sb-city-near" fill="#0c0822">
-        {NEAR.map((b, i) => (
-          <g key={i}>
-            <rect x={b.x} y={GROUND - b.h} width={b.w} height={b.h} />
-            {b.spire && <path d={`M${b.x + 12} ${GROUND - b.h} v-34 h3 v34z`} />}
-            {b.tank && (
-              <path d={`M${b.x + b.w - 34} ${GROUND - b.h} v-10 h4 v10z M${b.x + b.w - 18} ${GROUND - b.h} v-10 h4 v10z M${b.x + b.w - 38} ${GROUND - b.h - 10} h28 v-22 a14 6 0 0 0 -28 0z`} />
-            )}
-          </g>
+      {/* Tyhjä aukea */}
+      <rect y={HORIZON} width="1000" height={1000 - HORIZON} fill="url(#sb-city-ground)" />
+      <rect y={HORIZON} width="1000" height="2" fill="#b28cff" opacity=".18" />
+
+      {/* Raunioiden kivijalat: täällä oli ennen taloja */}
+      <g className="sb-city-ruins" fill="#0f0a2a" stroke="#3a2f7a" strokeWidth="1">
+        <path d={`M70 ${HORIZON + 26} h70 v-14 h-14 v-10 h-22 v8 h-34z`} />
+        <path d={`M210 ${HORIZON + 12} h44 v-22 h-10 v8 h-12 v-14 h-22z`} />
+        <path d={`M690 ${HORIZON + 18} h60 v-10 h-18 v-16 h-14 v12 h-28z`} />
+        <path d={`M880 ${HORIZON + 34} h80 v-12 h-26 v-8 h-30 v6 h-24z`} />
+        <path d={`M560 ${HORIZON + 8} h30 v-12 h-8 v-6 h-22z`} />
+      </g>
+
+      {/* Rakennusruudukko: hehkuu maassa, johon kaupunki nousee */}
+      <ellipse cx={GRID.cx} cy={GRID.top + GRID.n * GRID.hh} rx="360" ry="150" fill="url(#sb-city-gridglow)" className="sb-city-grid-glow" />
+      <g className="sb-city-grid">
+        <path d={`M${GRID_EDGE}Z`} className="sb-city-grid-edge" pathLength="1" />
+        {GRID_LINES.map((d, i) => (
+          <path key={i} d={d} className="sb-city-grid-line" pathLength="1" style={{ '--d': `${(i % 9) * 0.07}s` }} />
         ))}
+        {/* Keskimmäinen ruutu: kaupungin ensimmäinen kivi */}
+        <path d={`M${GRID_HEART}Z`} className="sb-city-grid-heart" />
       </g>
 
-      <g className="sb-city-windows">
-        {WINDOWS.map((w, i) => (
-          <rect
-            key={i}
-            className={`sb-city-window${w.warm ? '' : ' sb-city-window--violet'}`}
-            x={w.x}
-            y={w.y}
-            width="7"
-            height="10"
-            style={{ '--d': `${w.d}s` }}
-          />
-        ))}
+      {/* Yksinäinen neonkyltti tolpan päässä: ainoa valo, joka jäi */}
+      <g className="sb-city-neon sb-city-neon--main" transform="translate(800 470)">
+        <path d="M17 150 V300" className="sb-city-post" />
+        <rect x="0" y="0" width="34" height="150" rx="4" className="sb-city-neon-glow" />
+        <rect x="0" y="0" width="34" height="150" rx="4" className="sb-city-neon-tube" />
+        <path d="M9 22 l8 -14 l8 14z M17 46 l9 10 l-9 10 l-9 -10z M8 84 h18 M8 92 h18 M17 118 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0 M9 134 l16 8" className="sb-city-neon-glyph" />
       </g>
+      <ellipse cx="817" cy="772" rx="70" ry="10" fill="#b28cff" opacity=".12" className="sb-city-reflection" />
 
-      {/* Neonkyltit katujen yllä */}
-      <NeonSign x={784} y={560} h={170} className="sb-city-neon--main" glyphs="M9 22 l8 -14 l8 14z M17 48 l9 10 l-9 10 l-9 -10z M8 86 h18 M8 94 h18 M17 124 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0 M9 150 l16 10" />
-      <NeonSign x={92} y={640} h={110} glyphs="M9 18 h16 v16 h-16z M17 52 v22 M9 63 h16 M9 92 l16 0 l-8 -10z" />
-
-      {/* Katu ja märkä heijastus */}
-      <rect y={GROUND} width="1000" height={1000 - GROUND} fill="#07051a" />
-      <rect y={GROUND} width="1000" height="3" fill="#b28cff" opacity=".25" />
-      <rect x="760" y={GROUND + 10} width="80" height="90" fill="#b28cff" opacity=".08" className="sb-city-reflection" />
-
-      {/* Lähisumu ajelehtii kadun yllä */}
-      <rect x="-200" y="700" width="1400" height="300" fill="url(#sb-city-fog)" className="sb-city-fog sb-city-fog--near" />
+      {/* Sumu ajelehtii aukean yllä */}
+      <rect x="-200" y="520" width="1400" height="200" fill="url(#sb-city-fog)" className="sb-city-fog sb-city-fog--far" />
+      <rect x="-200" y="760" width="1400" height="240" fill="url(#sb-city-fog)" className="sb-city-fog sb-city-fog--near" />
     </svg>
   );
 }
