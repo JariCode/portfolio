@@ -2,10 +2,12 @@
 // jos monta ehtoa täyttyy yhtä aikaa. after: repliikki tulee vasta tietyn toisen jälkeen,
 // jotta ohjeet etenevät askel kerrallaan.
 //
-// s on pelin tilanne (Game.jsx, stats): rakennusten määrät, tieyhteydet, varjot ja valo.
-// Tekstit eivät puhu klikkaamisesta tai napauttamisesta: sama teksti käy hiirelle ja sormelle.
+// s on pelin tilanne (Game.jsx, stats): rakennusten määrät, tieyhteydet, varjot, valo,
+// raha, sähkö, päivä ja luku. Tekstit eivät puhu klikkaamisesta tai napauttamisesta: sama
+// teksti käy hiirelle ja sormelle.
 
 export const LINES = [
+  // ── Luku 1: ensimmäiset askeleet ──
   {
     id: 'start',
     mood: 'rauhallinen',
@@ -30,13 +32,20 @@ export const LINES = [
     id: 'lost',
     mood: 'huolissaan',
     when: (s) => s.unlinked > 0,
-    text: 'Tuo rakennus jäi irralleen. Ilman tietä raatihuoneelle sen valot eivät syty.',
+    text: 'Tuo rakennus jäi irralleen. Ilman tietä raatihuoneelle se ei toimi.',
   },
   {
     id: 'firstLight',
     mood: 'iloinen',
     when: (s) => s.linkedHouse > 0,
-    text: 'Ensimmäinen ikkuna syttyi. Kaupunki muistaa valonsa.',
+    text: 'Ensimmäinen ikkuna syttyi. Asukkaat muuttavat taloon yön aikana.',
+  },
+  {
+    id: 'firstDay',
+    after: 'firstLight',
+    mood: 'rauhallinen',
+    when: (s) => s.day >= 2,
+    text: 'Yö vaihtui. Joka keskiyö asukkaat maksavat veronsa ja taloihin muuttaa lisää väkeä.',
   },
   {
     id: 'rotate',
@@ -49,8 +58,14 @@ export const LINES = [
     id: 'solar',
     after: 'firstLight',
     mood: 'rauhallinen',
-    when: (s) => s.solar === 0,
+    when: (s) => s.solar === 0 && s.house >= 2,
     text: 'Talot tarvitsevat sähköä. Valokenno kerää valoa, kunhan mikään ei varjosta sitä.',
+  },
+  {
+    id: 'dark',
+    mood: 'huolissaan',
+    when: (s) => s.dark,
+    text: 'Sähkö ei riitä. Talot pimenevät, ja pimeästä talosta asukkaat lähtevät. Lisää valokennoja.',
   },
   {
     id: 'shadows',
@@ -66,13 +81,6 @@ export const LINES = [
     text: 'Valokenno jäi varjoon. Varjossa se ei tuota mitään.',
   },
   {
-    id: 'solarLit',
-    after: 'shadows',
-    mood: 'iloinen',
-    when: (s) => s.solarLit > 0,
-    text: 'Kenno hehkuu. Valo on puolellamme.',
-  },
-  {
     id: 'night',
     after: 'shadows',
     mood: 'yllattynyt',
@@ -80,32 +88,73 @@ export const LINES = [
     text: 'Kuu nousi. Sen valo heittää himmeämpiä varjoja, eikä kenno saa siitä voimaa.',
   },
   {
+    id: 'grass',
+    after: 'firstDay',
+    mood: 'rauhallinen',
+    when: (s) => s.house >= 2 && s.grass === 0,
+    text: 'Nurmi talon vieressä saa asukkaat viihtymään, ja talo täyttyy nopeammin. Se on halpaa.',
+  },
+  {
     id: 'shop',
-    after: 'firstLight',
+    after: 'firstDay',
     mood: 'rauhallinen',
     when: (s) => s.house >= 3 && s.shop === 0,
-    text: 'Asukkaat kaipaavat kauppaa. Sen neonkyltti näkyy kauas.',
+    text: 'Asukkaat kaipaavat kauppaa. Se tuo tuloja ja houkuttelee väkeä lähitaloihin.',
   },
   {
     id: 'park',
     after: 'shop',
     mood: 'rauhallinen',
     when: (s) => s.shop > 0 && s.park === 0,
-    text: 'Puisto tuo viihtyvyyttä. Puidenkin varjot ovat varjoja.',
+    text: 'Puisto tuo viihtyvyyttä kahden ruudun säteelle. Myöhemmin se avaa tien kerrostaloille.',
+  },
+  {
+    id: 'poor',
+    after: 'firstDay',
+    mood: 'huolissaan',
+    when: (s) => s.poor && s.buildings > 0,
+    text: 'Kassa on lähes tyhjä. Odota yötä: raatihuone tuo aina tuloja, eikä mikään ole lopullista.',
   },
   {
     id: 'demolish',
-    after: 'firstLight',
+    after: 'firstDay',
     mood: 'rauhallinen',
     when: (s) => s.buildings >= 6,
-    text: 'Väärä paikka? Valitse Pura. Mikään ei ole lopullista.',
+    text: 'Väärä paikka? Valitse Pura. Saat puolet hinnasta takaisin.',
+  },
+  // ── Luku 2: kaupunki ──
+  {
+    id: 'chapter2',
+    mood: 'yllattynyt',
+    when: (s) => s.chapter >= 2,
+    text: 'Kylästä tuli kaupunki! Talon voi nyt korottaa kerrostaloksi, kunhan puisto on lähellä.',
   },
   {
-    id: 'village',
-    after: 'park',
+    id: 'mushroom',
+    after: 'chapter2',
+    mood: 'rauhallinen',
+    when: (s) => s.tower > 0 && s.mushroom === 0,
+    text: 'Varjoista on hyötyäkin. Sienitarha tuottaa korkeiden talojen varjossa.',
+  },
+  {
+    id: 'plant',
+    after: 'chapter2',
+    mood: 'rauhallinen',
+    when: (s) => s.tower >= 2 && s.plant === 0,
+    text: 'Kerrostalot janoavat sähköä. Voimala tuottaa sitä yölläkin, mutta sen savu karkottaa naapurit.',
+  },
+  // ── Luku 3 ja loppu ──
+  {
+    id: 'chapter3',
     mood: 'iloinen',
-    when: (s) => s.buildings >= 12,
-    text: 'Kylä herää. Pian tarvitsemme rahaa ja sähköä, mutta se on huomisen tarina.',
+    when: (s) => s.chapter >= 3,
+    text: 'Suurkaupunki herää. Tuhat asukasta on enää kivenheiton päässä.',
+  },
+  {
+    id: 'goal',
+    mood: 'iloinen',
+    when: (s) => s.done,
+    text: 'Kaupunki on herännyt. Tuhat valoa palaa taas. Kiitos, rakentaja.',
   },
 ];
 

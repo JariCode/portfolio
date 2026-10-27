@@ -27,6 +27,10 @@
   text-overflow: ellipsis;
 }
 
+.sb-toolbar-info.is-error {
+  color: #ffc2d6;
+}
+
 .sb-toolbar-info strong {
   margin-right: 0.5em;
   color: var(--sb-neon-hot);
@@ -89,7 +93,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  width: max(38px, 10.4cqw);
+  /* Kymmenen nappia rivissä: leveys jaetaan reunusten ja välien jälkeen */
+  width: calc((100cqw - 4cqw - 9 * 1.2cqw) / 10);
   aspect-ratio: 1;
   padding: 0 0 0.5cqw;
   border: 1px solid color-mix(in srgb, var(--sb-neon) 45%, transparent);
@@ -156,6 +161,10 @@
   cursor: not-allowed;
 }
 
+.sb-tool.is-poor .sb-tool-icon {
+  opacity: 0.45;
+}
+
 .sb-tool.is-locked .sb-tool-icon,
 .sb-tool.is-locked .sb-tool-name {
   opacity: 0.25;
@@ -184,6 +193,7 @@
 /* Pieni näkymä (puhelin): nimet pois napeista, valitun nimi näkyy yläpuolella */
 @container (max-width: 420px) {
   .sb-tool-name,
+  .sb-tool-key,
   .sb-tool-rotate span,
   .sb-tool-rotate kbd {
     display: none;
@@ -198,8 +208,7 @@
     gap: 3px;
   }
 
-  /* Kahdeksan nappia mahtuu riviin: leveys jaetaan reunusten ja välien jälkeen */
   .sb-tool {
-    width: calc((100cqw - 4cqw - 21px) / 8);
+    width: calc((100cqw - 4cqw - 27px) / 10);
   }
 }

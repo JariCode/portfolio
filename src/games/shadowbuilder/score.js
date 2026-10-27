@@ -30,21 +30,27 @@ export function saveRecord(result) {
 }
 
 // ── Keskeneräinen kaupunki ──
-// { grid, rots, seen, t }: ruudukko, rakennusten käännöt (null = kääntyy tietä kohti),
-// vartijan jo sanomat repliikit ja vuorokauden kohta. Tallennetaan jokaisen rakennuksen
-// ja purun jälkeen, joten sivun päivitys ei hävitä mitään.
+// { grid, rots, res, money, day, chapter, done, seen, t }: ruudukko, rakennusten käännöt
+// (null = kääntyy tietä kohti), asukkaat ruuduittain, raha, päivä, saavutettu luku, onko
+// tavoite jo saavutettu, vartijan jo sanomat repliikit ja vuorokauden kohta. Tallennetaan
+// jokaisen rakennuksen, purun ja päivän jälkeen, joten sivun päivitys ei hävitä mitään.
 const TYPES = new Set([...TOOLS.map((t) => t.id), 'hall']);
 const HALL_INDEX = HALL.y * SIZE + HALL.x;
 
 // Väärän muotoinen tai muokattu tallennus ohitetaan kokonaan, ettei peli kaadu siihen
 function valid(city) {
   if (!city || !Array.isArray(city.grid) || !Array.isArray(city.rots) || !Array.isArray(city.seen)) return false;
-  if (city.grid.length !== SIZE * SIZE || city.rots.length !== SIZE * SIZE) return false;
+  if (!Array.isArray(city.res)) return false;
+  if (city.grid.length !== SIZE * SIZE || city.rots.length !== SIZE * SIZE || city.res.length !== SIZE * SIZE) return false;
   if (city.grid[HALL_INDEX] !== 'hall') return false;
   const cellsOk = city.grid.every((g, i) => g === null || (TYPES.has(g) && g !== 'demolish' && (g !== 'hall' || i === HALL_INDEX)));
   const rotsOk = city.rots.every((r) => r === null || [0, 1, 2, 3].includes(r));
+  const resOk = city.res.every((r) => Number.isInteger(r) && r >= 0);
   const seenOk = city.seen.every((s) => typeof s === 'string');
-  return cellsOk && rotsOk && seenOk && typeof city.t === 'number' && city.t >= 0 && city.t < 1;
+  const numbersOk =
+    Number.isFinite(city.money) && Number.isInteger(city.day) && city.day > 0 && [1, 2, 3].includes(city.chapter);
+  const timeOk = typeof city.t === 'number' && city.t >= 0 && city.t < 1;
+  return cellsOk && rotsOk && resOk && seenOk && numbersOk && timeOk && typeof city.done === 'boolean';
 }
 
 export function readCity() {
@@ -72,8 +78,8 @@ export function clearCity() {
   }
 }
 
-// Rakennusten määrä aloitusnäkymän Jatka-nappiin (tiet ja raatihuone eivät ole rakennuksia)
-export const buildingCount = (city) => city.grid.filter((g) => g && g !== 'road' && g !== 'hall').length;
+// Asukkaiden määrä aloitusnäkymään
+export const cityPopulation = (city) => city.res.reduce((a, b) => a + b, 0);
 
 // Tyhjennä tallennukset: poistaa vain tämän pelin avaimet, muiden pelien tallennukset jäävät
 export function clearSaves() {

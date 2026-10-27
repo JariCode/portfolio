@@ -1,28 +1,41 @@
-// Rakennustyypit ja ruudukon perussäännöt. Yksi paikka, josta valikko, piirto, varjot ja
-// vartijan repliikit lukevat tiedot. Hinnat, tuotot ja sähkö tulevat vaiheessa 2.
+// Rakennustyypit ja ruudukon perussäännöt. Yksi paikka, josta valikko, piirto, varjot,
+// talous ja vartijan repliikit lukevat tiedot.
 
 export const SIZE = 10;
 
 // Raatihuone on valmiina keskellä; samassa ruudussa kuin aloitusnäkymän hehkuva keskiruutu
 export const HALL = { x: 4, y: 4 };
 
-// height: korkeus ruudun leveyksinä (varjon pituus). key: näppäin valikossa.
-// locked: avautuu myöhemmässä luvussa (näytetään valikossa lukittuna).
+// Luvut asukasmäärän mukaan: suora jatkumo kylästä suurkaupunkiin. Tavoite on viimeisen loppu.
+export const CHAPTERS = [
+  { n: 1, name: 'Kylä', from: 0, to: 100 },
+  { n: 2, name: 'Kaupunki', from: 100, to: 500 },
+  { n: 3, name: 'Suurkaupunki', from: 500, to: 1000 },
+];
+export const GOAL = 1000;
+export const chapterOf = (pop) => CHAPTERS.find((c) => pop < c.to) ?? CHAPTERS[CHAPTERS.length - 1];
+
+// price: hinta. height: korkeus ruudun leveyksinä (varjon pituus). key: näppäin valikossa.
+// chapter: luku, jossa rakennus avautuu (valikossa lukittuna siihen asti).
 export const TOOLS = [
-  { id: 'road', key: '1', name: 'Tie', info: 'Yhdistää rakennukset raatihuoneeseen', height: 0 },
-  { id: 'house', key: '2', name: 'Talo', info: 'Koti asukkaille. Tarvitsee tien.', height: 0.95 },
-  { id: 'shop', key: '3', name: 'Kauppa', info: 'Neonkyltti houkuttelee ostajia', height: 0.8 },
-  { id: 'solar', key: '4', name: 'Valokenno', info: 'Tuottaa sähköä vain valossa', height: 0.22 },
-  { id: 'park', key: '5', name: 'Puisto', info: 'Viihtyvyyttä. Puut heittävät pieniä varjoja.', height: 0.55 },
-  { id: 'mushroom', key: '6', name: 'Sienitarha', info: 'Kasvaa vain varjossa', height: 0.3, locked: 'Luku 2' },
-  { id: 'power', key: '7', name: 'Voimala', info: 'Sähköä säästä riippumatta', height: 1.3, locked: 'Luku 2' },
-  { id: 'demolish', key: 'Delete', name: 'Pura', info: 'Poista rakennus tai tie' },
+  { id: 'road', key: '1', name: 'Tie', price: 5, info: 'Yhdistää rakennukset raatihuoneeseen', height: 0 },
+  { id: 'grass', key: '2', name: 'Nurmi', price: 5, info: 'Viihtyvyyttä viereisille taloille', height: 0 },
+  { id: 'house', key: '3', name: 'Talo', price: 50, info: '10 asukasta. Tarvitsee tien ja sähköä.', height: 0.95 },
+  { id: 'tower', key: '4', name: 'Kerrostalo', price: 150, info: 'Talon päälle, 60 asukasta. Vaatii puiston lähelle.', height: 2.2, chapter: 2 },
+  { id: 'shop', key: '5', name: 'Kauppa', price: 100, info: 'Tuloja lähiasukkaista. Lähellä talot kasvavat nopeammin.', height: 0.8 },
+  { id: 'solar', key: '6', name: 'Valokenno', price: 60, info: 'Sähköä vain valossa, ei varjossa', height: 0.22 },
+  { id: 'park', key: '7', name: 'Puisto', price: 40, info: 'Viihtyvyyttä kahden ruudun säteelle', height: 0.55 },
+  { id: 'mushroom', key: '8', name: 'Sienitarha', price: 80, info: 'Tuloja vain varjossa', height: 0.3, chapter: 2 },
+  { id: 'power', key: '9', name: 'Voimala', price: 250, info: 'Paljon sähköä säästä riippumatta. Savu karkottaa.', height: 1.3, chapter: 2 },
+  { id: 'demolish', key: 'Delete', name: 'Pura', price: 0, info: 'Poistaa rakennuksen, puolet hinnasta takaisin' },
 ];
 
 export const HEIGHT = Object.fromEntries(TOOLS.map((t) => [t.id, t.height ?? 0]));
 HEIGHT.hall = 1.7;
 
 export const toolById = (id) => TOOLS.find((t) => t.id === id);
+export const priceOf = (id) => toolById(id)?.price ?? 0;
+export const unlocked = (id, chapter) => (toolById(id)?.chapter ?? 1) <= chapter;
 
 // Ruudukko on taulukko SIZE × SIZE: null = tyhjä, muuten rakennuksen id
 export function emptyGrid() {
@@ -39,6 +52,19 @@ const NEIGHBOURS = [
   [0, 1],
   [0, -1],
 ];
+
+// Onko säteellä r (ruutuina, myös vinottain) jotain annetuista tyypeistä
+export function near(grid, x, y, r, types) {
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      if ((dx || dy) && types.includes(at(grid, x + dx, y + dy))) return true;
+    }
+  }
+  return false;
+}
+
+// Viereisissä ruuduissa (ei vinottain) jotain annetuista tyypeistä
+export const touches = (grid, x, y, types) => NEIGHBOURS.some(([dx, dy]) => types.includes(at(grid, x + dx, y + dy)));
 
 // Mitkä ruudut ovat yhteydessä raatihuoneeseen: tiet leveyshaulla raatihuoneelta, ja
 // rakennus on yhteydessä, jos sen vieressä on yhteydessä oleva tie tai raatihuone itse.
@@ -58,7 +84,7 @@ export function connectedSet(grid) {
     }
   }
   grid.forEach((type, i) => {
-    if (!type || type === 'road' || type === 'hall') return;
+    if (!type || type === 'road' || type === 'hall' || type === 'grass') return;
     const x = i % SIZE;
     const y = Math.floor(i / SIZE);
     if (NEIGHBOURS.some(([dx, dy]) => linked.has((y + dy) * SIZE + x + dx) && at(grid, x + dx, y + dy) !== undefined)) {
@@ -94,13 +120,28 @@ export function autoRot(grid, x, y) {
   return r ?? 0;
 }
 
-// Tiellä ja raatihuoneella ei ole käännettävää julkisivua
-export const rotatable = (type) => Boolean(type) && type !== 'road' && type !== 'hall' && type !== 'demolish';
+// Tiellä, nurmella ja raatihuoneella ei ole käännettävää julkisivua
+export const rotatable = (type) => Boolean(type) && !['road', 'grass', 'hall', 'demolish'].includes(type);
 
-// Voiko ruutuun rakentaa valitulla työkalulla
-export function canPlace(grid, x, y, tool) {
+// Asukkaita mahtuu taloon ja kerrostaloon
+export const isHome = (type) => type === 'house' || type === 'tower';
+
+// Miksi ruutuun ei voi rakentaa: null = voi, muuten lyhyt syy valikon tietoriville.
+// Nurmen päälle saa rakentaa suoraan; kerrostalo korottaa olemassa olevan talon.
+export function placeError(grid, x, y, tool, chapter, money) {
   const here = at(grid, x, y);
-  if (here === undefined || !tool || toolById(tool)?.locked) return false;
-  if (tool === 'demolish') return Boolean(here) && here !== 'hall';
-  return here === null;
+  const def = toolById(tool);
+  if (here === undefined || !def) return 'Ei ruudukolla';
+  if (!unlocked(tool, chapter)) return `Avautuu: Luku ${def.chapter}`;
+  if (tool === 'demolish') return here && here !== 'hall' ? null : 'Ei purettavaa';
+  if (tool === 'tower') {
+    if (here !== 'house') return 'Rakennetaan talon päälle';
+    if (!near(grid, x, y, 2, ['park'])) return 'Tarvitsee puiston kahden ruudun säteelle';
+  } else if (here !== null && !(here === 'grass' && tool !== 'grass')) {
+    return 'Ruutu on varattu';
+  }
+  if (money < def.price) return 'Rahat eivät riitä';
+  return null;
 }
+
+export const canPlace = (grid, x, y, tool, chapter, money) => placeError(grid, x, y, tool, chapter, money) === null;

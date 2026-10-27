@@ -240,6 +240,31 @@
   animation: sb-orb 3.2s ease-in-out infinite;
 }
 
+/* Kerrostalon antennin valo vilkkuu hitaasti */
+.sb-b-beacon {
+  fill: #ff7aa6;
+  animation: sb-beacon 2.4s linear infinite;
+}
+
+/* Nurmi: tumma turkoosinvihreä, jotta se erottuu violetista maasta mutta pysyy yössä */
+.sb-b-grass {
+  fill: #1c4440;
+  stroke: #2f6a5f;
+  stroke-width: 0.8;
+}
+
+.sb-b-tuft {
+  fill: none;
+  stroke: #5fbfa6;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-opacity: 0.8;
+}
+
+.sb-b--grass {
+  animation-name: sb-b-fade;
+}
+
 /* Tie: tumma laatta ja himmeä neonkeskiviiva */
 .sb-b-road {
   fill: #2b2160;
@@ -271,6 +296,11 @@
   to { opacity: 1; }
 }
 
+@keyframes sb-beacon {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.2; }
+}
+
 @keyframes sb-cursor {
   0%, 100% { stroke-opacity: 1; }
   50% { stroke-opacity: 0.45; }
@@ -289,6 +319,7 @@
   .sb-b,
   .sb-b-sign.is-on,
   .sb-b-orb-glow,
+  .sb-b-beacon,
   .sb-board-cursor {
     animation: none;
   }

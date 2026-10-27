@@ -1,0 +1,124 @@
+/* ═══ Luvun välianimaatio (ChapterScene.jsx) ═══ */
+/* Kesto 3,6 s: verho tummuu (0–0,4), kyltti syttyy välähdellen (0,3–1,3), nimi pyyhkäistään
+   näkyviin (0,9–1,9), kaikki häipyy (2,8–3,6). Ei klikattavaa: peli jatkuu alla. */
+.sb-chapter {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4cqw;
+  pointer-events: none;
+  animation: sb-ch-out 0.8s 2.8s ease-in forwards;
+}
+
+.sb-chapter-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, rgb(7 5 26 / 0.55), rgb(7 5 26 / 0.85));
+  animation: sb-ch-fade 0.4s ease-out both;
+}
+
+.sb-chapter-sign {
+  position: relative;
+  height: 34cqw;
+  overflow: visible;
+  opacity: 0;
+  animation: sb-ch-ignite 1s 0.3s linear forwards;
+}
+
+.sb-chapter-sign-tube,
+.sb-chapter-sign-glyph {
+  fill: none;
+  stroke: var(--sb-neon);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sb-chapter-sign-glyph {
+  stroke: var(--sb-neon-hot);
+  stroke-width: 2;
+}
+
+.sb-chapter-sign-glow {
+  fill: color-mix(in srgb, var(--sb-neon) 12%, transparent);
+  stroke: var(--sb-neon);
+  stroke-width: 12;
+  stroke-opacity: 0.25;
+}
+
+.sb-chapter-text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4cqw;
+  max-width: none;
+  mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  mask-size: 260% 100%;
+  -webkit-mask-size: 260% 100%;
+  mask-position: 100% 0;
+  -webkit-mask-position: 100% 0;
+  animation: sb-ch-sweep 1s 0.9s ease-out forwards;
+}
+
+.sb-chapter-n {
+  color: var(--sb-neon);
+  font-family: var(--sb-font);
+  font-size: max(12px, 2.8cqw);
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.sb-chapter-name {
+  color: #f4eeff;
+  font-family: var(--sb-font);
+  font-size: max(22px, 7.4cqw);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 0.04em #fff,
+    0 0 0.12em var(--sb-neon),
+    0 0 0.4em color-mix(in srgb, var(--sb-neon) 55%, transparent);
+}
+
+@keyframes sb-ch-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sb-ch-out {
+  to { opacity: 0; }
+}
+
+/* Neon syttyy: kovat portaat vierekkäisillä prosenteilla (ei steps()) */
+@keyframes sb-ch-ignite {
+  0%, 9% { opacity: 0; }
+  10%, 24% { opacity: 1; }
+  25%, 39% { opacity: 0.2; }
+  40%, 54% { opacity: 1; }
+  55%, 64% { opacity: 0.5; }
+  65%, 100% { opacity: 1; }
+}
+
+@keyframes sb-ch-sweep {
+  from { mask-position: 100% 0; -webkit-mask-position: 100% 0; }
+  to { mask-position: 0 0; -webkit-mask-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-chapter,
+  .sb-chapter-veil,
+  .sb-chapter-sign,
+  .sb-chapter-text {
+    animation: none;
+    opacity: 1;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+}

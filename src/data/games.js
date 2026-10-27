@@ -44,7 +44,7 @@ export const GAMES = [
     description:
       'Rakenna yökaupunki tyhjästä. Pidä sähköt päällä, kassa plussalla ja kasvata väkiluku tuhanteen.',
     controls: {
-      desktop: 'Hiiri, numerot 1–7 ja välilyönti (tauko)',
+      desktop: 'Hiiri, numerot 1–9, R (kääntö) ja välilyönti (tauko)',
       mobile: 'Valitse valikosta, napauta ruutua',
     },
   },

@@ -2,16 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import City from './City.jsx';
 import Guardian from './Guardian.jsx';
 import Logo from './Logo.jsx';
-import { buildingCount, clearSaves, readCity, readRecord } from './score.js';
+import { cityPopulation, clearSaves, readCity, readRecord } from './score.js';
 import './Title.css';
 
 // Ohjaimet näytetään Ohjeet-paneelissa; sama lista kuin pelin näppäinkäsittelyssä
 const CONTROLS = [
-  { keys: ['1–7'], label: 'Valitse rakennus tai tie' },
+  { keys: ['1–9'], label: 'Valitse rakennus, tie tai nurmi' },
   { keys: ['Hiiri'], label: 'Rakenna ruutuun' },
   { keys: ['R'], label: 'Käännä rakennusta' },
   { keys: ['Delete'], label: 'Pura' },
   { keys: ['Välilyönti'], label: 'Tauko' },
+  { keys: ['F'], label: 'Nopeus 1× / 2× / 3×' },
   { keys: ['M'], label: 'Äänet päälle/pois' },
   { keys: ['Esc'], label: 'Sulje peli' },
 ];
@@ -97,7 +98,7 @@ export default function Title({ onStart, onResume }) {
           {city && (
             <>
               <br />
-              Kaupungissasi <strong>{buildingCount(city)} rakennusta</strong>
+              Kaupungissasi <strong>{cityPopulation(city)} asukasta</strong>, päivä {city.day}
             </>
           )}
         </p>
@@ -140,9 +141,9 @@ export default function Title({ onStart, onResume }) {
             ))}
           </dl>
           <p>
-            Rakenna taloja, kauppoja ja sähköä, ja kasvata kaupunki tuhanteen asukkaaseen. Rakennukset heittävät
-            varjoja: valokenno tarvitsee valoa, sienitarha varjoa. Puhelimella valitse rakennus valikosta ja napauta
-            ruutua kahdesti.
+            Kasvata kaupunki tuhanteen asukkaaseen mahdollisimman harvassa päivässä. Talot tarvitsevat tien ja
+            sähköä; joka keskiyö kerätään verot ja taloihin muuttaa väkeä. Rakennukset heittävät varjoja: valokenno
+            tarvitsee valoa, sienitarha varjoa. Puhelimella valitse rakennus valikosta ja napauta ruutua kahdesti.
           </p>
           <button type="button" className="sb-btn sb-help-close" onClick={() => setHelp(false)}>
             Selvä

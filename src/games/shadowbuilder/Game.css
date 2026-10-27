@@ -1,6 +1,7 @@
 /* ═══ Shadow Builderin pelikenttä (Game.jsx) ═══ */
 /* Kerrokset alhaalta ylös: maisema, päivän sävy, taivaan valo, ruudukko, HUD, vartija, valikko.
-   Valon paikka ja päivän voimakkuus tulevat CSS-muuttujina (--lx, --ly, --day). */
+   Valon paikka ja päivän voimakkuus tulevat CSS-muuttujina (--lx, --ly, --day).
+   Yläreunan tiedot ovat Hud.css:ssä, luvun välianimaatio ChapterScene.css:ssä. */
 .sb-game {
   position: absolute;
   inset: 0;
@@ -52,93 +53,10 @@
 /* Ruudukko HUDin ja valikon välissä */
 .sb-game-board {
   position: absolute;
-  top: 10cqw;
+  top: 15cqw;
   left: 1cqw;
   right: 1cqw;
   bottom: 18cqw;
-}
-
-/* ── HUD: luku vasemmalla, tauko, mykistys ja valikko oikealla ── */
-.sb-hud {
-  position: absolute;
-  top: 2.4cqw;
-  left: 3cqw;
-  right: 3cqw;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2cqw;
-}
-
-.sb-hud-chapter {
-  display: flex;
-  align-items: center;
-  gap: 1.4cqw;
-  max-width: none;
-  padding: 0.8cqw 0;
-  border-block: 1px solid color-mix(in srgb, var(--sb-neon) 50%, transparent);
-  color: var(--sb-neon);
-  font-family: var(--sb-font);
-  font-size: max(10px, 2.2cqw);
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.sb-hud-sep {
-  width: 0.8cqw;
-  height: 0.8cqw;
-  min-width: 4px;
-  min-height: 4px;
-  background: var(--sb-neon-hot);
-  rotate: 45deg;
-}
-
-.sb-hud-actions {
-  display: flex;
-  align-items: center;
-  gap: 1.6cqw;
-}
-
-/* Kuvakenappi: sama ilme kuin mykistysnapissa */
-.sb-icon-btn {
-  display: grid;
-  place-items: center;
-  width: max(30px, 5.6cqw);
-  aspect-ratio: 1;
-  padding: 0;
-  border: 1px solid color-mix(in srgb, var(--sb-neon) 65%, transparent);
-  background: var(--sb-glass);
-  box-shadow:
-    inset 0 0 0 2px #0b0820,
-    inset 0 0 0 3px color-mix(in srgb, var(--sb-neon) 30%, transparent);
-  color: var(--sb-neon-hot);
-  cursor: pointer;
-  transition: border-color 0.25s, box-shadow 0.25s;
-}
-
-.sb-icon-btn svg {
-  width: 52%;
-  height: 52%;
-  fill: currentColor;
-}
-
-.sb-icon-btn:hover,
-.sb-icon-btn.is-active {
-  border-color: var(--sb-neon-hot);
-  box-shadow:
-    inset 0 0 0 2px #0b0820,
-    inset 0 0 0 3px var(--sb-neon),
-    0 0 1.6cqw color-mix(in srgb, var(--sb-neon) 50%, transparent);
-}
-
-/* Kaksi luokkaa: yhteinen .sb-btn (ShadowBuilder.css) tulee buildissa tämän tiedoston jälkeen */
-.sb-btn.sb-hud-exit {
-  min-height: max(30px, 5.6cqw);
-  padding: 0 max(12px, 2.6cqw);
-  font-size: max(10px, 1.8cqw);
 }
 
 /* ── Tauko: valo pysähtyy, ruudukko himmenee hieman ja keskelle tulee merkintä ── */
@@ -148,7 +66,7 @@
 
 .sb-paused {
   position: absolute;
-  top: 12cqw;
+  top: 19cqw;
   left: 50%;
   z-index: 3;
   max-width: none;
@@ -164,11 +82,70 @@
   animation: sb-paused 1.6s ease-in-out infinite;
 }
 
-/* Hyvin pieni näkymä (puhelin vaakatasossa): luvun nimi pois, jotta napit mahtuvat */
-@container (max-width: 300px) {
-  .sb-hud-chapter {
-    visibility: hidden;
-  }
+/* ── Voittoruutu: tuhat asukasta ── */
+.sb-victory {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.4cqw;
+  height: fit-content;
+  margin: auto 10%;
+  padding: 5cqw;
+  border: 1px solid var(--sb-neon);
+  background: rgb(10 7 30 / 0.94);
+  box-shadow:
+    inset 0 0 0 5px rgb(10 7 30),
+    inset 0 0 0 6px color-mix(in srgb, var(--sb-neon) 35%, transparent),
+    0 0 6cqw color-mix(in srgb, var(--sb-neon) 40%, transparent);
+  text-align: center;
+  animation: sb-victory 0.6s ease-out both;
+}
+
+.sb-victory h4 {
+  color: #fff;
+  font-family: var(--sb-font);
+  font-size: max(18px, 5cqw);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 0 0.4em var(--sb-neon);
+}
+
+.sb-victory p {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1cqw;
+  max-width: none;
+  color: var(--muted);
+  font-size: max(12px, 2.4cqw);
+}
+
+.sb-victory strong {
+  color: var(--sb-neon-hot);
+}
+
+.sb-victory-record {
+  color: var(--sb-window);
+  font-family: var(--sb-font);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.sb-victory-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2.6cqw;
+}
+
+@keyframes sb-victory {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes sb-paused {
@@ -177,6 +154,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sb-victory,
   .sb-paused {
     animation: none;
   }

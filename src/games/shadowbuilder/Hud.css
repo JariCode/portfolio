@@ -1,0 +1,232 @@
+/* ═══ Yläreunan tiedot (Hud.jsx) ═══ */
+.sb-hud {
+  position: absolute;
+  top: 2.2cqw;
+  left: 3cqw;
+  right: 3cqw;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2cqw;
+  pointer-events: none;
+}
+
+.sb-hud button {
+  pointer-events: auto;
+}
+
+.sb-hud-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2cqw;
+}
+
+/* ── Luku ja eteneminen ── */
+.sb-hud-chapter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6cqw;
+  min-width: 0;
+}
+
+.sb-hud-title {
+  display: flex;
+  align-items: center;
+  gap: 1.4cqw;
+  max-width: none;
+  color: var(--sb-neon);
+  font-family: var(--sb-font);
+  font-size: max(10px, 2.2cqw);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sb-hud-sep {
+  width: 0.8cqw;
+  height: 0.8cqw;
+  min-width: 4px;
+  min-height: 4px;
+  background: var(--sb-neon-hot);
+  rotate: 45deg;
+}
+
+/* Ohut neonviiva täyttyy kohti seuraavaa lukua (transform, ei leveyttä) */
+.sb-hud-progress {
+  position: relative;
+  height: 2px;
+  background: color-mix(in srgb, var(--sb-neon) 25%, transparent);
+}
+
+.sb-hud-progress span {
+  position: absolute;
+  inset: 0;
+  background: var(--sb-neon-hot);
+  box-shadow: 0 0 6px var(--sb-neon);
+  transform: scaleX(var(--p));
+  transform-origin: left;
+  transition: transform 0.8s ease-out;
+}
+
+.sb-hud-goal {
+  max-width: none;
+  color: var(--muted);
+  font-size: max(9px, 1.6cqw);
+  letter-spacing: 0.06em;
+}
+
+/* ── Napit ── */
+.sb-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.4cqw;
+}
+
+/* Kuvakenappi: sama ilme kuin mykistysnapissa */
+.sb-icon-btn {
+  display: grid;
+  place-items: center;
+  width: max(30px, 5.6cqw);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--sb-neon) 65%, transparent);
+  background: var(--sb-glass);
+  box-shadow:
+    inset 0 0 0 2px #0b0820,
+    inset 0 0 0 3px color-mix(in srgb, var(--sb-neon) 30%, transparent);
+  color: var(--sb-neon-hot);
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.sb-icon-btn svg {
+  width: 52%;
+  height: 52%;
+  fill: currentColor;
+}
+
+.sb-icon-btn:hover,
+.sb-icon-btn.is-active {
+  border-color: var(--sb-neon-hot);
+  box-shadow:
+    inset 0 0 0 2px #0b0820,
+    inset 0 0 0 3px var(--sb-neon),
+    0 0 1.6cqw color-mix(in srgb, var(--sb-neon) 50%, transparent);
+}
+
+.sb-hud-speed {
+  font-family: var(--sb-font);
+  font-size: max(10px, 1.9cqw);
+  font-weight: 700;
+}
+
+/* Kaksi luokkaa: yhteinen .sb-btn (ShadowBuilder.css) tulee buildissa tämän tiedoston jälkeen */
+.sb-btn.sb-hud-exit {
+  min-height: max(30px, 5.6cqw);
+  padding: 0 max(12px, 2.6cqw);
+  font-size: max(10px, 1.8cqw);
+}
+
+/* ── Resurssit: tummat lasilaput, punertavat kun jotain puuttuu ── */
+.sb-hud-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1cqw;
+}
+
+.sb-stat {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8cqw;
+  padding: 0.5cqw 1.6cqw;
+  border: 1px solid color-mix(in srgb, var(--sb-neon) 35%, transparent);
+  background: rgb(10 7 30 / 0.72);
+  color: var(--sb-neon-hot);
+  font-size: max(10px, 1.9cqw);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sb-stat svg {
+  width: max(11px, 2cqw);
+  height: max(11px, 2cqw);
+  fill: var(--sb-neon);
+}
+
+.sb-stat.is-bad {
+  border-color: #ff7aa6;
+  color: #ffc2d6;
+}
+
+.sb-stat.is-bad svg {
+  fill: #ff7aa6;
+}
+
+/* Päivän kulku ohuena viivana laatan alareunassa */
+.sb-stat--day::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--sb-neon);
+  transform: scaleX(var(--t));
+  transform-origin: left;
+}
+
+/* ── Päivän tulos: liukuu esiin resurssien alle ja häipyy ── */
+.sb-hud-report {
+  align-self: flex-start;
+  max-width: none;
+  padding: 0.5cqw 1.6cqw;
+  border-left: 2px solid var(--sb-window);
+  background: rgb(10 7 30 / 0.8);
+  color: var(--sb-window);
+  font-size: max(10px, 1.9cqw);
+  font-weight: 600;
+  animation: sb-report 3.4s ease-out forwards;
+}
+
+.sb-hud-report.is-bad {
+  border-color: #ff7aa6;
+  color: #ffc2d6;
+}
+
+@keyframes sb-report {
+  0% { opacity: 0; transform: translateY(-1cqw); }
+  10%, 75% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
+}
+
+/* Pieni näkymä (puhelin): luvusta vain nimi, jotta napit mahtuvat samalle riville */
+@container (max-width: 420px) {
+  .sb-hud-title {
+    letter-spacing: 0.12em;
+  }
+
+  .sb-hud-title span:first-child,
+  .sb-hud-title .sb-hud-sep {
+    display: none;
+  }
+}
+
+/* Hyvin pieni näkymä (puhelin vaakatasossa): luvun nimi pois, jotta napit mahtuvat */
+@container (max-width: 300px) {
+  .sb-hud-title {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-hud-report {
+    animation: none;
+  }
+
+  .sb-hud-progress span {
+    transition: none;
+  }
+}

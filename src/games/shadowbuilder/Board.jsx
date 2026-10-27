@@ -21,10 +21,14 @@ const [rx, ry] = iso(SIZE, 0);
 const SIDE_LEFT = `${lx},${ly} ${bx},${by} ${bx},${by + DEPTH} ${lx},${ly + DEPTH}`;
 const SIDE_RIGHT = `${bx},${by} ${rx},${ry} ${rx},${ry + DEPTH} ${bx},${by + DEPTH}`;
 
+// Sähköä kuluttavat rakennukset pimenevät sähköpulassa
+const USES_POWER = ['house', 'tower', 'shop'];
+
 const VIEW = `${-SIZE * TW - 20} -70 ${SIZE * TW * 2 + 40} ${SIZE * TH * 2 + 70 + DEPTH + 20}`;
 
 // rots: rakennusten käännöt (null = kääntyy tietä kohti). previewRot: esikatselun kääntö.
-export default function Board({ grid, rots, previewRot, tool, hover, light, shadows, shaded, onPoint }) {
+// chapter ja money ratkaisevat, voiko ruutuun rakentaa. dark: sähköpula, talojen valot sammuvat.
+export default function Board({ grid, rots, previewRot, tool, hover, light, shadows, shaded, chapter, money, dark, onPoint }) {
   const svgRef = useRef(null);
   const linked = connectedSet(grid);
 
@@ -48,19 +52,19 @@ export default function Board({ grid, rots, previewRot, tool, hover, light, shad
     return x >= 0 && y >= 0 && x < SIZE && y < SIZE ? { x, y } : null;
   };
 
-  const valid = hover && canPlace(grid, hover.x, hover.y, tool);
+  const valid = hover && canPlace(grid, hover.x, hover.y, tool, chapter, money);
   const building = tool && tool !== 'demolish';
   const ghostShadow = hover && valid && building ? shadowOf(tool, hover.x, hover.y, light) : null;
 
   // Piirtojärjestys takaa eteen (x + y), jotta lähempi rakennus peittää kauempana olevan
   const items = [];
   grid.forEach((type, i) => {
-    if (!type || type === 'road') return;
+    if (!type || type === 'road' || type === 'grass') return;
     const x = i % SIZE;
     const y = Math.floor(i / SIZE);
     items.push({ i, type, x, y, rot: rots[i] ?? autoRot(grid, x, y) });
   });
-  if (hover && valid && building && tool !== 'road') {
+  if (hover && valid && building && tool !== 'road' && tool !== 'grass') {
     items.push({ i: 'ghost', type: tool, x: hover.x, y: hover.y, rot: previewRot, ghost: true });
   }
   items.sort((a, b) => a.x + a.y - (b.x + b.y) || (a.ghost ? 1 : 0) - (b.ghost ? 1 : 0));
@@ -92,16 +96,16 @@ export default function Board({ grid, rots, previewRot, tool, hover, light, shad
         ))}
       </g>
 
-      {/* Tiet maan tasossa, jotta varjot lankeavat niiden päälle */}
+      {/* Tiet ja nurmi maan tasossa, jotta varjot lankeavat niiden päälle */}
       <g>
         {grid.map((type, i) => {
-          if (type !== 'road') return null;
+          if (type !== 'road' && type !== 'grass') return null;
           const x = i % SIZE;
           const y = Math.floor(i / SIZE);
-          return <Building key={i} type="road" x={x} y={y} links={roadLinks(grid, x, y)} connected={linked.has(i)} />;
+          return <Building key={`${i}-${type}`} type={type} x={x} y={y} links={type === 'road' ? roadLinks(grid, x, y) : []} />;
         })}
-        {hover && valid && tool === 'road' && (
-          <Building type="road" x={hover.x} y={hover.y} links={roadLinks(grid, hover.x, hover.y)} ghost />
+        {hover && valid && (tool === 'road' || tool === 'grass') && (
+          <Building type={tool} x={hover.x} y={hover.y} links={tool === 'road' ? roadLinks(grid, hover.x, hover.y) : []} ghost />
         )}
       </g>
 
@@ -121,7 +125,7 @@ export default function Board({ grid, rots, previewRot, tool, hover, light, shad
           y={b.y}
           rot={b.rot}
           ghost={b.ghost}
-          connected={!b.ghost && linked.has(b.i)}
+          connected={!b.ghost && linked.has(b.i) && !(dark && USES_POWER.includes(b.type))}
           lit={b.type === 'solar' && light.sun && light.alpha > 0.05 && !shaded.has(b.i)}
         />
       ))}

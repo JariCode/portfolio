@@ -3,7 +3,7 @@ import { iso } from './iso.js';
 
 // Rakennusten SVG-piirrokset isometrisessä projektiossa. Rakennus on laatikoita ja
 // monikulmioita: kaksi näkyvää seinää ja katto. Ikkunat syttyvät, kun rakennuksella on
-// tieyhteys raatihuoneeseen (connected); valokenno hehkuu vain valossa (lit).
+// tieyhteys raatihuoneeseen ja sähköä riittää (connected); valokenno hehkuu vain valossa (lit).
 //
 // rot (0–3) kääntää rakennuksen julkisivun: 0 = kohti katsojaa vasemmalle (+y), 3 = oikealle
 // (+x), 1 ja 2 = poispäin. Näkyvät seinät ovat aina samat (+y ja +x), joten kääntö vaihtaa
@@ -109,6 +109,53 @@ function House({ f, rot, win }) {
           <polygon className={win} points={onFace(other(back), f, 0.32, 0.68, 0.24, 0.42)} />
         </>
       )}
+    </>
+  );
+}
+
+// Kerrostalo: korkea laatikko, ikkunarivit molemmilla seinillä, ovi julkisivussa,
+// katolla kaide ja antenni, jonka päässä pieni valo
+function Tower({ f, rot, win }) {
+  const { x0, y0, x1, y1 } = f;
+  const h = 2.0;
+  const front = FRONT[rot] ?? BACK[rot];
+  const [ax, ay] = iso((x0 + x1) / 2, (y0 + y1) / 2, h + 0.06);
+  const [, at] = iso((x0 + x1) / 2, (y0 + y1) / 2, h + 0.5);
+  const rows = [0.42, 0.74, 1.06, 1.38, 1.7];
+  return (
+    <>
+      <Box b={box(x0, y0, x1, y1, 0, h)} />
+      <Box b={box(x0 + 0.05, y0 + 0.05, x1 - 0.05, y1 - 0.05, h, h + 0.06)} className="sb-b-parapet" />
+      {rows.map((z) =>
+        ['L', 'R'].map((face) =>
+          [0.14, 0.42, 0.7].map((u) => (
+            <polygon key={`${face}${z}${u}`} className={win} points={onFace(face, f, u, u + 0.16, z, z + 0.18)} />
+          )),
+        ),
+      )}
+      {FRONT[rot] && <polygon className="sb-b-door" points={onFace(front, f, 0.4, 0.6, 0, 0.3)} />}
+      <line className="sb-b-spire" x1={ax} y1={ay} x2={ax} y2={at} />
+      <circle className="sb-b-beacon" cx={ax} cy={at} r="2.6" />
+    </>
+  );
+}
+
+// Nurmi: koko ruudun nurmikko ja muutama ruohotupsu
+function Grass({ x, y }) {
+  const tufts = [
+    [0.25, 0.3],
+    [0.7, 0.25],
+    [0.45, 0.55],
+    [0.2, 0.75],
+    [0.75, 0.7],
+  ];
+  return (
+    <>
+      <polygon className="sb-b-grass" points={pts([[x, y, 0], [x + 1, y, 0], [x + 1, y + 1, 0], [x, y + 1, 0]])} />
+      {tufts.map(([u, v]) => {
+        const [cx, cy] = iso(x + u, y + v, 0);
+        return <path key={`${u}${v}`} className="sb-b-tuft" d={`M${cx - 3} ${cy} l1 -4 M${cx} ${cy} v-5 M${cx + 3} ${cy} l-1 -4`} />;
+      })}
     </>
   );
 }
@@ -307,7 +354,9 @@ export default function Building({ type, x, y, rot = 0, connected = false, lit =
   return (
     <g className={cls} style={{ transformOrigin: `${ox}px ${oy}px` }}>
       {type === 'road' && <Road x={x} y={y} links={links} />}
+      {type === 'grass' && <Grass x={x} y={y} />}
       {type === 'house' && <House f={f} rot={rot} win={win} />}
+      {type === 'tower' && <Tower f={f} rot={rot} win={win} />}
       {type === 'shop' && <Shop f={f} rot={rot} win={win} connected={connected} />}
       {type === 'solar' && <Solar f={f} rot={rot} lit={lit} />}
       {type === 'park' && <Park f={f} rot={rot} connected={connected} />}
