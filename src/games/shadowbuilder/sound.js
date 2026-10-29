@@ -24,8 +24,8 @@ export const SOUNDS = {
 };
 
 // Äänenvoimakkuudet: musiikki taustalla, efektit selvästi sen päällä
-const MUSIC_VOLUME = 0.35;
-const SFX_VOLUME = 0.7;
+const MUSIC_VOLUME = 0.65;
+const SFX_VOLUME = 0.35;
 
 // Eri lähteistä ladatut tiedostot on tallennettu hyvin eri voimakkuuksilla. Siksi jokainen
 // tiedosto tasataan latauksessa samaan keskimääräiseen voimakkuuteen (RMS), ja vasta sen
