@@ -29,38 +29,40 @@ export default function Toolbar({ tool, chapter, money, hint, onSelect, onRotate
   const current = toolById(tool);
   return (
     <div className="sb-toolbar">
-      <p className={`sb-toolbar-info${hint?.error ? ' is-error' : ''}`} aria-live="polite">
-        {hint?.title ? (
-          <>
-            <strong>{hint.title}</strong> {hint.text}
-          </>
-        ) : (
-          <>
-            <strong>
-              {current.name}
-              {current.price > 0 && ` ${current.price} €`}
-            </strong>{' '}
-            {hint?.error ?? current.info}
-          </>
+      <div className="sb-toolbar-head">
+        <p className={`sb-toolbar-info${hint?.error ? ' is-error' : ''}`} aria-live="polite">
+          {hint?.title ? (
+            <>
+              <strong>{hint.title}</strong> {hint.text}
+            </>
+          ) : (
+            <>
+              <strong>
+                {current.name}
+                {current.price > 0 && ` ${current.price} €`}
+              </strong>{' '}
+              {hint?.error ?? current.info}
+            </>
+          )}
+        </p>
+        {rotatable(tool) && (
+          <button
+            type="button"
+            className={`sb-tool-rotate${manual ? ' is-active' : ''}`}
+            title="Käännä rakennusta (R)"
+            tabIndex={-1}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onRotate}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19 12a7 7 0 1 1-2.05-4.95" />
+              <path d="M17.5 3.5v4h-4" />
+            </svg>
+            <span>Käännä</span>
+            <kbd aria-hidden="true">R</kbd>
+          </button>
         )}
-      </p>
-      {rotatable(tool) && (
-        <button
-          type="button"
-          className={`sb-tool-rotate${manual ? ' is-active' : ''}`}
-          title="Käännä rakennusta (R)"
-          tabIndex={-1}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={onRotate}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M19 12a7 7 0 1 1-2.05-4.95" />
-            <path d="M17.5 3.5v4h-4" />
-          </svg>
-          <span>Käännä</span>
-          <kbd aria-hidden="true">R</kbd>
-        </button>
-      )}
+      </div>
       <div className="sb-toolbar-row" role="toolbar" aria-label="Rakennukset">
         {TOOLS.map((t) => {
           const locked = !unlocked(t.id, chapter);
