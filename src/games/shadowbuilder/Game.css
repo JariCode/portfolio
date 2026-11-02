@@ -59,6 +59,13 @@
   bottom: 18cqw;
 }
 
+/* Puhelin pystyssä: valikko on kaksirivinen (Toolbar.css), ruudukko jää sen yläpuolelle */
+@container (orientation: portrait) {
+  .sb-game-board {
+    bottom: calc(44cqw + 4px);
+  }
+}
+
 /* ── Tauko: valo pysähtyy, ruudukko himmenee hieman ja keskelle tulee merkintä ── */
 .sb-game.is-paused .sb-game-board {
   filter: saturate(0.6) brightness(0.8);
