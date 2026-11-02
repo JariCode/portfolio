@@ -94,12 +94,4 @@ export const CREDITS = [
     licenseUrl: PIXABAY_URL,
     file: 'luku.mp3',
   },
-  {
-    type: 'ääni',
-    name: 'Aurora',
-    author: 'u_loz16u6uca',
-    license: PIXABAY,
-    licenseUrl: PIXABAY_URL,
-    file: 'revontulet.mp3',
-  },
 ];
