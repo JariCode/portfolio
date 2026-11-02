@@ -249,3 +249,31 @@
     width: calc((100cqw - 4cqw - 33px) / 12);
   }
 }
+/* Puhelin pystyssä (pelinäkymä korkeampi kuin leveä, games.js tallRatio): napit kahdessa
+   rivissä, jolloin ne ovat kaksi kertaa isommat ja nimet mahtuvat taas mukaan */
+@container (orientation: portrait) {
+  /* Tietorivi aina kahden rivin korkuinen, jotta valikon korkeus ei hypi (Game.css ja
+     Guide.css mitoittavat ruudukon ja vartijan sen yläpuolelle) */
+  .sb-toolbar-info {
+    min-height: 2.6em;
+  }
+
+  .sb-toolbar-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.6cqw;
+  }
+
+  .sb-tool {
+    width: calc((100cqw - 4cqw - 5 * 1.6cqw) / 6);
+  }
+
+  .sb-tool-name {
+    display: block;
+    font-size: 2.3cqw;
+  }
+
+  .sb-tool-lock {
+    inset: 0 0 calc(2.3cqw * 1.1 + 0.5cqw);
+  }
+}

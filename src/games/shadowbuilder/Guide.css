@@ -137,3 +137,10 @@
     -webkit-mask-image: none;
   }
 }
+
+/* Puhelin pystyssä: vartija nousee kaksirivisen valikon yläpuolelle (Toolbar.css) */
+@container (orientation: portrait) {
+  .sb-guide {
+    bottom: calc(44cqw + 6px);
+  }
+}

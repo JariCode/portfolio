@@ -77,9 +77,10 @@
 }
 
 /* Pelinäkymä on niin suuri kuin näyttö sallii pelin kuvasuhteessa
-   (--ratio JSX:stä). Korkeudesta vähennetään modaalin välit, otsikkopalkki ja reunat.
+   (--ratio-base JSX:stä; puhelimen pystytilassa --ratio-tall, ks. alla). Korkeudesta vähennetään modaalin välit, otsikkopalkki ja reunat.
    100dvh toisena huomioi mobiiliselaimen työkalupalkit, 100vh on varamuoto. */
 .games-screen {
+  --ratio: var(--ratio-base);
   display: grid;
   place-items: center;
   width: min(
@@ -97,6 +98,14 @@
   background: var(--ink);
   /* Sormella vetäminen ohjaa peliä eikä rullaa tai zoomaa sivua */
   touch-action: none;
+}
+
+/* Puhelin pystyssä: peli voi käyttää korkeampaa kuvasuhdetta (games.js tallRatio),
+   koska leveys on niukka ja korkeutta jää yli */
+@media (orientation: portrait) and (max-width: 600px) {
+  .games-screen {
+    --ratio: var(--ratio-tall);
+  }
 }
 
 /* Matala näyttö (puhelin vaakatilassa): matalampi otsikkopalkki ja Sulje-nappi sen

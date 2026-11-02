@@ -108,7 +108,7 @@ export default function Games() {
             <h2 className="games-modal-name">{game.name}</h2>
             {/* Kuvasuhde tulee pelin tiedoista, jotta pysty- ja vaakapelit mahtuvat näytölle.
                 tabIndex: pelinäkymä saa fokuksen, joten näppäimet menevät peliin */}
-            <div ref={screenRef} className="games-screen" style={{ '--ratio': game.ratio }} tabIndex={-1}>
+            <div ref={screenRef} className="games-screen" style={{ '--ratio-base': game.ratio, '--ratio-tall': game.tallRatio ?? game.ratio }} tabIndex={-1}>
               {GameView ? (
                 <GameErrorBoundary key={game.id}>
                   <Suspense fallback={<p className="games-msg">Ladataan peliä…</p>}>

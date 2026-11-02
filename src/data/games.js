@@ -4,6 +4,8 @@
 //
 // color: korostusväri (magenta, cyan tai violet, ks. Games.css)
 // ratio: pelinäkymän leveys jaettuna korkeudella
+// tallRatio: kuvasuhde puhelimen pystytilassa (valinnainen). Neliö jäisi kapeaksi, joten
+//   peli saa käyttöön enemmän korkeutta: isommat napit ja tilaa valikolle.
 // planned: keskeneräisen pelin kortissa ohjaimien tilalla näytettävät tulevat ominaisuudet
 
 export const GAMES = [
@@ -40,6 +42,7 @@ export const GAMES = [
     genre: 'Kaupunginrakennus',
     color: 'violet',
     ratio: 1,
+    tallRatio: 2 / 3,
     load: () => import('../games/shadowbuilder/ShadowBuilder.jsx'),
     description:
       'Rakenna yökaupunki tyhjästä. Pidä sähköt päällä, kassa plussalla ja kasvata väkiluku tuhanteen.',
