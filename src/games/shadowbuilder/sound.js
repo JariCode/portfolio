@@ -20,7 +20,6 @@ export const SOUNDS = {
   blackout: 'katko.mp3',
   speak: 'puhe.mp3',
   chapter: 'luku.mp3',
-  aurora: 'revontulet.mp3',
 };
 
 // Äänenvoimakkuudet: musiikki taustalla, efektit selvästi sen päällä
