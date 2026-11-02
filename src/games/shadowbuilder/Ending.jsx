@@ -7,6 +7,15 @@ import './Ending.css';
 // tämä luku vastaa viimeisen vaiheen loppua.
 const DURATION = 12000;
 
+// Revontuliääni on lyhyt, joten se soi animaation tärkeissä kohdissa eri nopeuksilla:
+// hitaampi toisto kuulostaa matalammalta ja pidemmältä, nopeampi kirkkaammalta.
+// [hetki ms, toistonopeus]: revontulet leviävät, vartija hajoaa valoksi, valo täyttää ruudun.
+const CHIMES = [
+  [1000, 1],
+  [7600, 1.3],
+  [10400, 0.6],
+];
+
 // Valohiukkaset, joiksi vartija hajoaa: vaakapaikka (% vartijan leveydestä), viive (s) ja
 // nousun pituus (cqw). Kiinteä lista, jotta animaatio on joka kerta sama.
 const MOTES = [
@@ -27,12 +36,17 @@ export default function Ending({ onDone }) {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const timer = setTimeout(onDone, reduce ? 0 : DURATION);
     skipRef.current?.focus({ preventScroll: true });
-    // Revontulten ääni; hiljenee, jos loppu ohitetaan. gap: 0, koska StrictMode ajaa efektin
+    // Revontuliäänet introkappaleen päällä (Game.jsx käynnistää kappaleen). Ohitettaessa
+    // tulevat äänet perutaan ja soiva hiljenee. gap: 0, koska StrictMode ajaa efektin
     // kehitystilassa kahdesti ja toinen soitto muuten estyisi.
-    const stop = reduce ? null : play('aurora', { volume: 0.8, gap: 0 });
+    const stops = [];
+    const chimes = reduce
+      ? []
+      : CHIMES.map(([at, rate]) => setTimeout(() => stops.push(play('aurora', { volume: 0.8, rate, gap: 0 })), at));
     return () => {
       clearTimeout(timer);
-      stop?.(0.6);
+      chimes.forEach(clearTimeout);
+      stops.forEach((stop) => stop?.(0.6));
     };
   }, [onDone]);
 

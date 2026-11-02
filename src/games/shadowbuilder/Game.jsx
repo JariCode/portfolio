@@ -27,7 +27,7 @@ import {
   sunShares,
 } from './economy.js';
 import { nextLine } from './story.js';
-import { play, playMusic, stopMusic } from './sound.js';
+import { play, playMusic } from './sound.js';
 import { clearCity, clearSaves, saveCity, saveRecord } from './score.js';
 import './Game.css';
 
@@ -134,18 +134,20 @@ export default function Game({ onExit, onRestart, saved }) {
     }
   }, [city.chapter, city.done, city.report, city.day, city.res]);
 
-  // Valmis kaupunki näkyy hetken, sitten musiikki hiljenee ja loppuanimaatio alkaa
+  // Valmis kaupunki näkyy hetken, sitten loppuanimaatio alkaa. Introkappale alkaa jo nyt ja
+  // jatkuu katkeamatta lopputeksteihin (revontuliäänet soivat sen päällä, Ending.jsx).
   useEffect(() => {
     if (victory?.stage !== 'hold') return undefined;
     const id = setTimeout(() => {
       setVictory((v) => ({ ...v, stage: 'ending' }));
-      stopMusic(1.5);
+      playMusic('intro', { loop: false, fadeIn: 2 });
     }, HOLD);
     return () => clearTimeout(id);
   }, [victory?.stage]);
 
-  // Loppuanimaation jälkeen lopputekstit introkappaleen soidessa, sitten loppuruutu ja pelin
-  // oma musiikki. Pysyvät funktiot: animaatiot käynnistävät ajastimensa uudelleen, jos onDone vaihtuu.
+  // Loppuanimaation jälkeen lopputekstit (introkappale jatkuu), sitten loppuruutu ja pelin oma
+  // musiikki. Pysyvät funktiot: animaatiot käynnistävät ajastimensa uudelleen, jos onDone vaihtuu.
+  // Sama kappale ei ala alusta (sound.js playMusic), joten tämä vain varmistaa sen soimisen.
   const toCredits = useCallback(() => {
     setVictory((v) => ({ ...v, stage: 'credits' }));
     playMusic('intro', { loop: false, fadeIn: 1 });
