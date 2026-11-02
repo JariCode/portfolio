@@ -65,7 +65,7 @@ export default function ShadowBuilder() {
       {phase !== 'play' && <MuteButton className="sb-mute--float" />}
       {phase === 'play' && (
         <Suspense fallback={<p className="sb-loading">Kaupunki herää…</p>}>
-          <Game onExit={toTitle} saved={saved} />
+          <Game onExit={toTitle} onRestart={start} saved={saved} />
         </Suspense>
       )}
     </div>

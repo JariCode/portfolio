@@ -203,7 +203,7 @@ export const LINES = [
     id: 'goal',
     mood: 'iloinen',
     when: (s) => s.done,
-    text: 'Kaupunki on herännyt. Tuhat valoa palaa taas. Kiitos, rakentaja.',
+    text: 'Kaupunki on herännyt, ja sen valot loistavat taas. Kiitos, rakentaja.',
   },
 ];
 

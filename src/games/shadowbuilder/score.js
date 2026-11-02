@@ -56,7 +56,8 @@ function valid(city) {
 export function readCity() {
   try {
     const city = JSON.parse(localStorage.getItem(CITY_KEY));
-    return valid(city) ? city : null;
+    // Valmis kaupunki ei jatku: peli päättyi lopputeksteihin, ennätys on tallessa erikseen
+    return valid(city) && !city.done ? city : null;
   } catch {
     return null;
   }

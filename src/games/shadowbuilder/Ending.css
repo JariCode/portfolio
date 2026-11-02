@@ -111,16 +111,17 @@
 .sb-end-line {
   grid-area: 1 / 1;
   max-width: 90%;
-  color: var(--sb-moon);
+  /* Molemmat rivit samaa lämmintä valoa kuin kaupungin ikkunat */
+  color: #fff4dc;
   font-family: var(--sb-font);
-  font-size: 4.4cqw;
+  font-size: 4cqw;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-align: center;
   white-space: nowrap;
   text-shadow:
-    0 0 0.4em var(--sb-neon),
-    0 0 1.2em rgb(80 255 190 / 0.35);
+    0 0 0.35em rgb(255 210 122 / 0.7),
+    0 0 1.2em rgb(178 140 255 / 0.45);
   opacity: 0;
 }
 
@@ -131,8 +132,6 @@
 }
 
 .sb-end-line--2 {
-  color: var(--sb-window);
-  font-size: 5cqw;
   animation:
     sb-end-line-in 1.2s 6.2s ease-out forwards,
     sb-end-out 0.8s 10s ease-in forwards;
