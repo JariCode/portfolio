@@ -77,13 +77,14 @@ export function sunShares(grid) {
   return { lit, shade };
 }
 
-// Sähköntuotanto ja -kulutus (yhteydessä olevat rakennukset). Näytetään myös HUDissa.
+// Sähköntuotanto ja -kulutus. Näytetään myös HUDissa. Valokenno tuottaa ilman tietäkin;
+// muut rakennukset tuottavat ja kuluttavat vain, kun niillä on tieyhteys.
 export function power(grid, linked, shares) {
   let prod = HALL_POWER;
   let use = 0;
   grid.forEach((type, i) => {
-    if (!linked.has(i)) return;
     if (type === 'solar') prod += SOLAR_MAX * (shares.lit.get(i) ?? 0);
+    if (!linked.has(i)) return;
     if (type === 'power') prod += PLANT_POWER;
     use += POWER_USE[type] ?? 0;
   });

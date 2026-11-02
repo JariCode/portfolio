@@ -8,7 +8,7 @@ import ChapterScene from './ChapterScene.jsx';
 import Ending from './Ending.jsx';
 import Outro from './Outro.jsx';
 import MuteButton from './MuteButton.jsx';
-import { autoRot, CHAPTERS, connectedSet, isHome, placeError, rotatable, SIZE, toolById, TOOLS, unlocked } from './buildings.js';
+import { autoRot, CHAPTERS, connectedSet, isHome, needsRoad, placeError, rotatable, SIZE, toolById, TOOLS, unlocked } from './buildings.js';
 import { castShadows, DAY, lightAt } from './shadows.js';
 import {
   build,
@@ -263,7 +263,7 @@ export default function Game({ onExit, onRestart, saved }) {
         const next = [...grid];
         next[i] = tool;
         const def = toolById(tool);
-        const road = ['road', 'grass'].includes(tool) || connectedSet(next).has(i) ? '' : ' · tarvitsee tien';
+        const road = !needsRoad(tool) || connectedSet(next).has(i) ? '' : ' · tarvitsee tien';
         const title = `${def.name} ${def.price} €`;
         let text = null;
         if (isHome(tool)) {
@@ -312,7 +312,8 @@ export default function Game({ onExit, onRestart, saved }) {
     cinema: count('cinema'),
     casino: count('casino'),
     buildings: grid.filter((g) => g && !['road', 'hall', 'grass'].includes(g)).length,
-    unlinked: grid.filter((g, i) => g && !['road', 'hall', 'grass'].includes(g) && !linked.has(i)).length,
+    // Irralliset rakennukset, jotka tarvitsisivat tien (valokenno ja puisto toimivat ilmankin)
+    unlinked: grid.filter((g, i) => needsRoad(g) && !linked.has(i)).length,
     linkedHouse: grid.filter((g, i) => isHome(g) && linked.has(i)).length,
     solarShaded: light.sun && light.alpha > 0.05 ? grid.filter((g, i) => g === 'solar' && shaded.has(i)).length : 0,
     solarLit: light.sun && light.alpha > 0.05 ? grid.filter((g, i) => g === 'solar' && !shaded.has(i)).length : 0,
