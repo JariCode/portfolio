@@ -82,6 +82,13 @@ export const LINES = [
     text: 'Sähkö ei riitä. Talot pimenevät, ja pimeästä talosta asukkaat lähtevät. Lisää valokennoja.',
   },
   {
+    id: 'solarMap',
+    after: 'firstLight',
+    mood: 'rauhallinen',
+    when: (s) => s.tool === 'solar',
+    text: 'Luku ruudun päällä kertoo, paljonko kenno tuottaisi juuri siinä. Korkeiden talojen varjossa se jää pieneksi.',
+  },
+  {
     id: 'shadows',
     after: 'solar',
     mood: 'rauhallinen',
@@ -123,6 +130,13 @@ export const LINES = [
     text: 'Puisto nopeuttaa talojen kasvua kahden ruudun päässä, viereisiä kaksin verroin. Myöhemmin se avaa tien kerrostaloille.',
   },
   {
+    id: 'stack',
+    after: 'park',
+    mood: 'iloinen',
+    when: (s) => s.park > 0 && s.grass > 0,
+    text: 'Eri rakennukset lisäävät kukin oman osansa. Nurmi, puisto ja kauppa saman talon lähellä kasvattavat sitä yhdessä.',
+  },
+  {
     id: 'poor',
     after: 'firstDay',
     mood: 'huolissaan',
@@ -144,6 +158,13 @@ export const LINES = [
     text: 'Kylästä tuli kaupunki! Talon voi nyt korottaa kerrostaloksi, kunhan puisto on lähellä.',
   },
   {
+    id: 'mushroomMap',
+    after: 'chapter2',
+    mood: 'rauhallinen',
+    when: (s) => s.tool === 'mushroom',
+    text: 'Luku ruudun päällä kertoo sienitarhan tuoton. Mitä pidempään varjo viipyy ruudussa, sitä enemmän rahaa.',
+  },
+  {
     id: 'mushroom',
     after: 'chapter2',
     mood: 'rauhallinen',
@@ -157,12 +178,26 @@ export const LINES = [
     when: (s) => s.tower >= 2 && s.plant === 0,
     text: 'Kerrostalot janoavat sähköä. Voimala tuottaa sitä yölläkin, mutta sen savu hidastaa talojen kasvua kahden ruudun päässä.',
   },
-  // ── Luku 3 ja loppu ──
+  // ── Luku 3: suurkaupunki ──
   {
     id: 'chapter3',
     mood: 'iloinen',
     when: (s) => s.chapter >= 3,
-    text: 'Suurkaupunki herää. Tuhat asukasta on enää kivenheiton päässä.',
+    text: 'Suurkaupunki herää! Kaupunki kaipaa iltaelämää: elokuvateatteri ja kasino houkuttelevat lisää asukkaita.',
+  },
+  {
+    id: 'cinema',
+    after: 'chapter3',
+    mood: 'rauhallinen',
+    when: (s) => s.cinema === 0,
+    text: 'Elokuvateatteri nopeuttaa kaikkien kotien kasvua kahden ruudun päässä, kaksi asukasta yössä.',
+  },
+  {
+    id: 'casino',
+    after: 'cinema',
+    mood: 'rauhallinen',
+    when: (s) => s.casino === 0 && s.tower > 0,
+    text: 'Kasino tuo rahaa joka yö. Sen ympärillä kerrostaloihin mahtuu kaksikymmentä asukasta enemmän.',
   },
   {
     id: 'goal',

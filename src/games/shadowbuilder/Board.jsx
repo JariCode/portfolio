@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import Building from './Building.jsx';
 import { iso, TH, TW } from './iso.js';
 import { autoRot, canPlace, connectedSet, HEIGHT, isHome, RANGE, roadLinks, SIZE } from './buildings.js';
-import { growthOf } from './economy.js';
+import { capOf, growthOf, mushroomOutput, solarOutput } from './economy.js';
 import { shadowOf } from './shadows.js';
 import './Board.css';
 
@@ -23,13 +23,15 @@ const SIDE_LEFT = `${lx},${ly} ${bx},${by} ${bx},${by + DEPTH} ${lx},${ly + DEPT
 const SIDE_RIGHT = `${bx},${by} ${rx},${ry} ${rx},${ry + DEPTH} ${bx},${by + DEPTH}`;
 
 // Sähköä kuluttavat rakennukset pimenevät sähköpulassa
-const USES_POWER = ['house', 'tower', 'shop'];
+const USES_POWER = ['house', 'tower', 'shop', 'cinema', 'casino'];
 
 const VIEW = `${-SIZE * TW - 20} -70 ${SIZE * TW * 2 + 40} ${SIZE * TH * 2 + 70 + DEPTH + 20}`;
 
 // rots: rakennusten käännöt (null = kääntyy tietä kohti). previewRot: esikatselun kääntö.
 // chapter ja money ratkaisevat, voiko ruutuun rakentaa. dark: sähköpula, talojen valot sammuvat.
-export default function Board({ grid, rots, previewRot, tool, hover, light, shadows, shaded, chapter, money, dark, onPoint }) {
+// sun: päivän valo ja varjo ruuduittain (economy.js sunMap), kun valittuna on valokenno tai
+// sienitarha (tuoton laskentaan); null muuten. gain: esikatseltavan rakennuksen tuotto ruudun päälle ("+5 sähköä").
+export default function Board({ grid, rots, previewRot, tool, hover, light, shadows, shaded, chapter, money, dark, sun, gain, onPoint }) {
   const svgRef = useRef(null);
   const linked = connectedSet(grid);
 
@@ -87,11 +89,28 @@ export default function Board({ grid, rots, previewRot, tool, hover, light, shad
         area.push([x, y]);
         const i = y * SIZE + x;
         if (isHome(grid[i])) {
+          const z = HEIGHT[grid[i]];
           const delta = growthOf(next, i) - growthOf(grid, i);
-          if (delta) badges.push({ i, x, y, delta, z: HEIGHT[grid[i]] });
+          const room = capOf(next, i) - capOf(grid, i);
+          if (delta) badges.push({ i, x, y, z, bad: delta < 0, text: `${delta > 0 ? '+' : '−'}${Math.abs(delta)}/yö` });
+          if (room) badges.push({ i, x, y, z, text: `+${room} asukasta` });
         }
       }
     }
+  }
+
+  const gainAt = hover ? iso(hover.x + 0.5, hover.y + 0.5, (HEIGHT[tool] ?? 0) + 0.6) : null;
+
+  // Jo rakennettujen kennojen ja tarhojen päälle niiden nykyinen tuotto (ei esikatselun vieressä,
+  // ettei merkki peitä esikatselun lukua)
+  if (sun) {
+    grid.forEach((type, i) => {
+      const x = i % SIZE;
+      const y = Math.floor(i / SIZE);
+      if (type !== tool || (hover && Math.abs(hover.x - x) <= 1 && Math.abs(hover.y - y) <= 1)) return;
+      const text = tool === 'solar' ? `${Math.round(solarOutput(sun, i))} sähköä` : `${mushroomOutput(sun, i)} €`;
+      badges.push({ i, x, y, z: HEIGHT[type], text, own: true });
+    });
   }
 
   return (
@@ -164,15 +183,25 @@ export default function Board({ grid, rots, previewRot, tool, hover, light, shad
         />
       ))}
 
-      {/* Kasvun muutos talojen päällä */}
-      {badges.map((b) => {
+      {/* Kasvun ja tilan muutos talojen päällä, kennojen ja tarhojen nykyinen tuotto */}
+      {badges.map((b, k) => {
         const [bx2, by2] = iso(b.x + 0.5, b.y + 0.5, b.z + 0.45);
+        // Kaksi merkkiä samassa talossa (kasvu ja tila): jälkimmäinen ylemmäs
+        const lift = badges.slice(0, k).some((o) => o.i === b.i) ? 20 : 0;
+        const cls = ['sb-board-badge', b.bad && 'is-bad', b.own && 'is-own'].filter(Boolean).join(' ');
         return (
-          <text key={b.i} className={`sb-board-badge${b.delta < 0 ? ' is-bad' : ''}`} x={bx2} y={by2}>
-            {b.delta > 0 ? `+${b.delta}` : `−${-b.delta}`}/yö
+          <text key={`${b.i}-${k}`} className={cls} x={bx2} y={by2 - lift}>
+            {b.text}
           </text>
         );
       })}
+
+      {/* Esikatseltavan rakennuksen tuotto ennen rakentamista */}
+      {hover && valid && gain && (
+        <text className={`sb-board-badge sb-board-gain${gain.bad ? ' is-bad' : ''}`} x={gainAt[0]} y={gainAt[1]}>
+          {gain.text}
+        </text>
+      )}
 
       {hover && (
         <polygon

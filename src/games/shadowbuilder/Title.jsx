@@ -7,7 +7,7 @@ import './Title.css';
 
 // Ohjaimet näytetään Ohjeet-paneelissa; sama lista kuin pelin näppäinkäsittelyssä
 const CONTROLS = [
-  { keys: ['1–9'], label: 'Valitse rakennus, tie tai nurmi' },
+  { keys: ['1–9', '0', 'K'], label: 'Valitse rakennus, tie tai nurmi' },
   { keys: ['Hiiri'], label: 'Rakenna ruutuun' },
   { keys: ['R'], label: 'Käännä rakennusta' },
   { keys: ['Delete'], label: 'Pura' },

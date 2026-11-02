@@ -9,6 +9,9 @@ import './Toolbar.css';
 // hint: kodin asukkaat kursorin kohdalla ({ title, text }) tai syy, miksi ruutuun ei voi
 // rakentaa ({ error }). Rakennus, johon rahat eivät riitä, näkyy himmeänä.
 
+// Korkeiden rakennusten kuvakkeissa näkymä on isompi, jotta katto mahtuu mukaan
+const VIEWS = { tower: '-62 -80 124 124', casino: '-52 -56 104 104', cinema: '-48 -40 96 96' };
+
 function Icon({ id }) {
   if (id === 'demolish') {
     return (
@@ -17,9 +20,9 @@ function Icon({ id }) {
       </svg>
     );
   }
-  // Rakennus ruudussa (0, 0): näkymä rajataan ruudun ja katon ympärille (kerrostalo on korkea)
+  // Rakennus ruudussa (0, 0): näkymä rajataan ruudun ja katon ympärille
   return (
-    <svg viewBox={id === 'tower' ? '-62 -80 124 124' : '-44 -28 88 88'} aria-hidden="true" className="sb-tool-icon">
+    <svg viewBox={VIEWS[id] ?? '-44 -28 88 88'} aria-hidden="true" className="sb-tool-icon">
       <Building type={id} x={0} y={0} connected lit links={id === 'road' ? [[1, 0], [-1, 0]] : []} ghost />
     </svg>
   );

@@ -298,6 +298,76 @@ function Power({ f, rot }) {
   );
 }
 
+// Elokuvateatteri: matala sali, julkisivussa katos vilkkuvine lamppuineen ja kulmassa
+// pystysuora neonkyltti. Valot syttyvät, kun teatterilla on tie ja sähkö.
+function Cinema({ f, rot, win, connected }) {
+  const { x0, y0, x1, y1 } = f;
+  const h = 0.82;
+  const face = FRONT[rot] ?? BACK[rot];
+  const front = Boolean(FRONT[rot]);
+  // Katos: ohut laatta, joka työntyy näkyvän seinän eteen
+  const canopy =
+    face === 'L' ? box(x0 + 0.1, y1, x1 - 0.1, y1 + 0.12, 0.36, 0.42) : box(x1, y0 + 0.1, x1 + 0.12, y1 - 0.1, 0.36, 0.42);
+  const bulbs = [0.18, 0.34, 0.5, 0.66, 0.82];
+  const bulbAt = (u) => (face === 'L' ? iso(x0 + (x1 - x0) * u, y1 + 0.12, 0.39) : iso(x1 + 0.12, y0 + (y1 - y0) * u, 0.39));
+  // Pystykyltti etukulmassa: työntyy sivulle (x-suuntaan), jotta se näkyy kapeana lippuna
+  const blade = pts([
+    [x1, y1 - 0.02, 0.46],
+    [x1, y1 - 0.02, h + 0.42],
+    [x1 + 0.16, y1 - 0.02, h + 0.42],
+    [x1 + 0.16, y1 - 0.02, 0.46],
+  ]);
+  return (
+    <>
+      <Box b={box(x0, y0, x1, y1, 0, h)} />
+      <Box b={box(x0 + 0.04, y0 + 0.04, x1 - 0.04, y1 - 0.04, h, h + 0.05)} className="sb-b-parapet" />
+      {/* Julisteet katoksen yläpuolella, ovi sen alla */}
+      <polygon className={win} points={onFace(face, f, 0.14, 0.4, 0.5, 0.74)} />
+      <polygon className={win} points={onFace(face, f, 0.6, 0.86, 0.5, 0.74)} />
+      {front && <polygon className="sb-b-door" points={onFace(face, f, 0.36, 0.64, 0, 0.32)} />}
+      <polygon className={win} points={onFace(other(face), f, 0.3, 0.7, 0.4, 0.62)} />
+      <Box b={canopy} className="sb-b-canopy" />
+      {bulbs.map((u, k) => {
+        const [bx, by] = bulbAt(u);
+        return <circle key={u} className={connected ? `sb-b-bulb is-on${k % 2 ? ' is-alt' : ''}` : 'sb-b-bulb'} cx={bx} cy={by} r="1.8" />;
+      })}
+      <polygon className={connected ? 'sb-b-blade is-on' : 'sb-b-blade'} points={blade} />
+    </>
+  );
+}
+
+// Kasino: porrastettu rakennus, julkisivussa kultainen neonraita ja katolla hehkuva
+// timanttikyltti, joka kääntyy hitaasti
+function Casino({ f, rot, win, connected }) {
+  const { x0, y0, x1, y1 } = f;
+  const face = FRONT[rot] ?? BACK[rot];
+  const front = Boolean(FRONT[rot]);
+  const cx = (x0 + x1) / 2;
+  const cy = (y0 + y1) / 2;
+  const [tx, ty] = iso(cx, cy, 1.38);
+  const r = 11;
+  return (
+    <>
+      <Box b={box(x0, y0, x1, y1, 0, 0.72)} />
+      <Box b={box(x0 + 0.16, y0 + 0.16, x1 - 0.16, y1 - 0.16, 0.72, 1.04)} />
+      {/* Neonraidat kerrosten reunoilla */}
+      <polygon className={connected ? 'sb-b-stripe is-on' : 'sb-b-stripe'} points={onFace('L', f, 0, 1, 0.62, 0.68)} />
+      <polygon className={connected ? 'sb-b-stripe is-on' : 'sb-b-stripe'} points={onFace('R', f, 0, 1, 0.62, 0.68)} />
+      {[0.1, 0.3, 0.7, 0.9].map((u) => (
+        <polygon key={u} className={win} points={onFace(face, f, u - 0.06, u + 0.06, 0.18, 0.5)} />
+      ))}
+      {front && <polygon className="sb-b-door" points={onFace(face, f, 0.4, 0.6, 0, 0.4)} />}
+      {[0.25, 0.5, 0.75].map((u) => (
+        <polygon key={u} className={win} points={onFace(other(face), f, u - 0.07, u + 0.07, 0.24, 0.46)} />
+      ))}
+      <line className="sb-b-spire" x1={tx} y1={iso(cx, cy, 1.04)[1]} x2={tx} y2={ty + r} />
+      <g className={connected ? 'sb-b-gem is-on' : 'sb-b-gem'} style={{ transformOrigin: `${tx}px ${ty}px` }}>
+        <polygon points={`${tx},${ty - r} ${tx + r * 0.75},${ty} ${tx},${ty + r} ${tx - r * 0.75},${ty}`} />
+      </g>
+    </>
+  );
+}
+
 function Hall({ x, y }) {
   const a = x + 0.08;
   const b = x + 0.92;
@@ -362,6 +432,8 @@ export default function Building({ type, x, y, rot = 0, connected = false, lit =
       {type === 'park' && <Park f={f} rot={rot} connected={connected} />}
       {type === 'mushroom' && <Mushroom f={f} rot={rot} />}
       {type === 'power' && <Power f={f} rot={rot} />}
+      {type === 'cinema' && <Cinema f={f} rot={rot} win={win} connected={connected} />}
+      {type === 'casino' && <Casino f={f} rot={rot} win={win} connected={connected} />}
       {type === 'hall' && <Hall x={x} y={y} />}
     </g>
   );

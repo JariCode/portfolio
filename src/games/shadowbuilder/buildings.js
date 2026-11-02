@@ -27,6 +27,8 @@ export const TOOLS = [
   { id: 'park', key: '7', name: 'Puisto', price: 40, info: 'Talot 2 ruudun päässä +1/yö, viereiset +2/yö', height: 0.55 },
   { id: 'mushroom', key: '8', name: 'Sienitarha', price: 80, info: 'Jopa 18 €/yö varjossa. Paras korkean talon takana.', height: 0.3, chapter: 2 },
   { id: 'power', key: '9', name: 'Voimala', price: 250, info: '30 sähköä, ylläpito 10 €/yö. Talot 2 ruudun päässä −1/yö.', height: 1.3, chapter: 2 },
+  { id: 'cinema', key: '0', name: 'Elokuvat', price: 300, info: 'Elokuvateatteri: kodit 2 ruudun päässä +2/yö. Kuluttaa 4 sähköä.', height: 1.05, chapter: 3 },
+  { id: 'casino', key: 'K', name: 'Kasino', price: 450, info: '40 €/yö. Kerrostaloihin 2 ruudun päässä +20 asukasta. 6 sähköä.', height: 1.4, chapter: 3 },
   { id: 'demolish', key: 'Delete', name: 'Pura', price: 0, info: 'Puolet hinnasta takaisin' },
 ];
 
@@ -125,12 +127,15 @@ export const rotatable = (type) => Boolean(type) && !['road', 'grass', 'hall', '
 
 // Vaikutusalueet taloihin (economy.js growthOf): säde ruutuina (myös vinottain) ja vaikutus
 // kasvuun. Nurmen ja puiston +1 koskee vain viereisiä ruutuja (ei vinottain). Näytetään
-// ruudukolla, kun rakennusta esikatsellaan.
+// ruudukolla, kun rakennusta esikatsellaan. Talojen päälle tulee kasvun todellinen muutos.
 export const RANGE = {
   grass: { r: 1, adjacent: true, effect: 1 },
   park: { r: 2, effect: 1 },
   shop: { r: 3, effect: 1 },
   power: { r: 2, effect: -1 },
+  cinema: { r: 2, effect: 2 },
+  // Kasino ei nopeuta kasvua vaan tuo kerrostaloihin lisää tilaa (economy.js capOf)
+  casino: { r: 2, effect: 1, cap: true },
 };
 
 // Asukkaita mahtuu taloon ja kerrostaloon

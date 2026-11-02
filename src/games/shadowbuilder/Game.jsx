@@ -7,7 +7,24 @@ import Hud from './Hud.jsx';
 import ChapterScene from './ChapterScene.jsx';
 import { autoRot, CHAPTERS, connectedSet, isHome, placeError, rotatable, SIZE, toolById, TOOLS, unlocked } from './buildings.js';
 import { castShadows, DAY, lightAt } from './shadows.js';
-import { build, CAP, endDay, growthOf, newCity, population, power, sunShares } from './economy.js';
+import {
+  build,
+  CASINO_CAP,
+  CASINO_INCOME,
+  capOf,
+  endDay,
+  growthOf,
+  mushroomOutput,
+  newCity,
+  PLANT_POWER,
+  PLANT_UPKEEP,
+  population,
+  power,
+  shopIncome,
+  solarOutput,
+  sunMap,
+  sunShares,
+} from './economy.js';
 import { nextLine } from './story.js';
 import { play } from './sound.js';
 import { clearCity, saveCity, saveRecord } from './score.js';
@@ -80,6 +97,8 @@ export default function Game({ onExit, saved }) {
   const energy = useMemo(() => power(grid, linked, sunShares(grid)), [grid, linked]);
   const pop = population(res);
   const dark = energy.use > energy.prod;
+  // Varjokartta valokennon ja sienitarhan sijoittamiseen (Board.jsx)
+  const sun = useMemo(() => (tool === 'solar' || tool === 'mushroom' ? sunMap(grid) : null), [grid, tool]);
 
   // ── Päivän raportti: rahan kilinä ja sähkökatkon ääni ──
   useEffect(() => {
@@ -172,7 +191,8 @@ export default function Game({ onExit, saved }) {
   // Esc sulkee pelin (Games.jsx). ──
   useEffect(() => {
     const onKey = (e) => {
-      const byKey = TOOLS.find((x) => x.key === e.key);
+      // Kirjainnäppäin (K) toimii isona ja pienenä
+      const byKey = TOOLS.find((x) => x.key.toLowerCase() === e.key.toLowerCase());
       if (byKey) select(byKey.id);
       else if (e.key === 'Backspace') select('demolish');
       else if (e.code === 'KeyR' && !e.repeat) rotate();
@@ -186,24 +206,52 @@ export default function Game({ onExit, saved }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [select, rotate, nextSpeed]);
 
-  // ── Valikon tietorivi: asukkaat kodin kohdalla, muuten miksi ruutuun ei voi rakentaa ──
+  // ── Valikon tietorivi ja esikatselun tuotto ──
+  // Kodin kohdalla asukkaat ja kasvu. Muuten joko syy, miksi ruutuun ei voi rakentaa, tai mitä
+  // rakennus tuottaisi juuri tässä ruudussa: tietorivillä selitys, ruudun päällä luku (gain).
   let hint = null;
+  let gain = null;
   if (hover) {
     const i = hover.y * SIZE + hover.x;
     const here = grid[i];
     if (isHome(here) && tool !== 'tower' && tool !== 'demolish') {
       const growth = linked.has(i) ? `+${growthOf(grid, i)}/pv` : 'ei tietä';
-      hint = { title: toolById(here).name, text: `${res[i]}/${CAP[here]} asukasta · ${growth}` };
+      hint = { title: toolById(here).name, text: `${res[i]}/${capOf(grid, i)} asukasta · ${growth}` };
     } else {
       const error = placeError(grid, hover.x, hover.y, tool, chapter, money);
       if (error) hint = { error };
-      else if (isHome(tool)) {
-        // Esikatselu kertoo, paljonko talo kasvaisi juuri tässä ruudussa
+      else if (tool !== 'demolish') {
         const next = [...grid];
         next[i] = tool;
         const def = toolById(tool);
-        const road = connectedSet(next).has(i) ? '' : ' · tarvitsee tien';
-        hint = { title: `${def.name} ${def.price} €`, text: `kasvaa tässä +${growthOf(next, i)} asukasta/yö${road}` };
+        const road = ['road', 'grass'].includes(tool) || connectedSet(next).has(i) ? '' : ' · tarvitsee tien';
+        const title = `${def.name} ${def.price} €`;
+        let text = null;
+        if (isHome(tool)) {
+          text = `kasvaa tässä +${growthOf(next, i)} asukasta/yö`;
+        } else if (tool === 'solar') {
+          const out = Math.round(solarOutput(sun, i));
+          const pct = Math.round(sun.lit[i] * 100);
+          text = out > 0 ? `tuottaa tässä ${out} sähköä · aurinkoa ${pct} % päivästä` : 'varjossa koko päivän: ei tuota sähköä';
+          gain = { text: `+${out} sähköä`, bad: out < 3 };
+        } else if (tool === 'mushroom') {
+          const out = mushroomOutput(sun, i);
+          const pct = Math.round(sun.shade[i] * 100);
+          text = `tuottaa tässä ${out} €/yö · varjoa ${pct} % päivästä`;
+          gain = { text: `+${out} €/yö`, bad: out < 8 };
+        } else if (tool === 'power') {
+          text = `+${PLANT_POWER} sähköä yölläkin · ylläpito ${PLANT_UPKEEP} €/yö`;
+          gain = { text: `+${PLANT_POWER} sähköä` };
+        } else if (tool === 'shop') {
+          const out = shopIncome(next, res, i);
+          text = `tuottaa tässä ${out} €/yö`;
+          gain = { text: `+${out} €/yö` };
+        } else if (tool === 'casino') {
+          const towers = grid.filter((g, j) => g === 'tower' && capOf(next, j) > capOf(grid, j)).length;
+          text = `+${CASINO_INCOME} €/yö · ${towers} kerrostaloa saa +${CASINO_CAP} asukasta`;
+          gain = { text: `+${CASINO_INCOME} €/yö` };
+        }
+        if (text) hint = { title, text: text + road };
       }
     }
   }
@@ -222,6 +270,8 @@ export default function Game({ onExit, saved }) {
     park: count('park'),
     mushroom: count('mushroom'),
     plant: count('power'),
+    cinema: count('cinema'),
+    casino: count('casino'),
     buildings: grid.filter((g) => g && !['road', 'hall', 'grass'].includes(g)).length,
     unlinked: grid.filter((g, i) => g && !['road', 'hall', 'grass'].includes(g) && !linked.has(i)).length,
     linkedHouse: grid.filter((g, i) => isHome(g) && linked.has(i)).length,
@@ -283,6 +333,8 @@ export default function Game({ onExit, saved }) {
           chapter={chapter}
           money={money}
           dark={dark}
+          sun={sun}
+          gain={gain}
           onPoint={onPoint}
         />
       </div>

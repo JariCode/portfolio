@@ -103,8 +103,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  /* Kymmenen nappia rivissä: leveys jaetaan reunusten ja välien jälkeen */
-  width: calc((100cqw - 4cqw - 9 * 1.2cqw) / 10);
+  /* Kaksitoista nappia rivissä: leveys jaetaan reunusten ja välien jälkeen */
+  width: calc((100cqw - 4cqw - 11 * 1.2cqw) / 12);
   aspect-ratio: 1;
   padding: 0 0 0.5cqw;
   border: 1px solid color-mix(in srgb, var(--sb-neon) 45%, transparent);
@@ -228,6 +228,6 @@
   }
 
   .sb-tool {
-    width: calc((100cqw - 4cqw - 27px) / 10);
+    width: calc((100cqw - 4cqw - 33px) / 12);
   }
 }
