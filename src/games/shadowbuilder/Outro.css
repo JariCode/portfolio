@@ -1,0 +1,220 @@
+/* ═══ Shadow Builderin lopputekstit (Outro.jsx) ═══ */
+/* Varjoteatteri: lämmin, lyhdyn valaisema kangas ja sen päällä tummat varjot. Erottuu muiden
+   pelien lopputeksteistä (Z-Runner: tuulilasi, Space Driver: kallistettu rullaus avaruudessa).
+   Liike vain transformilla, ettei teksti värise (Z-Runnerin opit). */
+.sb-out {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  overflow: hidden;
+  background: #07051a;
+  animation: sb-out-in 1.2s ease-out both;
+}
+
+/* Kangas: kirkkain keskellä, reunoilta violettiin pimeyteen */
+.sb-out-screen {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 62% at 50% 42%, #fff1d8 0%, #f2d4a6 30%, #b78a62 58%, #4a2f52 82%, #120a26 100%);
+}
+
+/* Lyhdyn liekki elää: valo värähtää hiljaa kankaan päällä */
+.sb-out-lamp {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 45% 40% at 50% 40%, rgb(255 236 200 / 0.55), transparent 70%);
+  animation: sb-out-flicker 3.4s ease-in-out infinite;
+}
+
+/* ── Rullaavat tekstit: varjot kankaalla ── */
+.sb-out-stage {
+  position: absolute;
+  inset: 0 0 18cqw;
+  overflow: hidden;
+  mask-image: linear-gradient(180deg, transparent 2%, #000 16%, #000 84%, transparent 98%);
+}
+
+.sb-out-roll {
+  position: absolute;
+  top: 0;
+  left: 16%;
+  right: 16%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5cqw;
+  color: #1b1030;
+  text-align: center;
+  /* Pehmeä reuna kuin varjolla, joka lankeaa kankaalle */
+  text-shadow: 0 0 0.12em rgb(27 16 48 / 0.55);
+  animation: sb-out-roll var(--sb-roll) linear forwards;
+}
+
+.sb-out-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: none;
+  font-family: var(--sb-font);
+  font-size: 9cqw;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sb-out-logo span + span {
+  font-size: 0.72em;
+  letter-spacing: 0.2em;
+}
+
+.sb-out-lead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  max-width: none;
+  font-family: var(--sb-font);
+  font-size: 3.6cqw;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.sb-out-lead span {
+  font-family: var(--font-body);
+  font-size: 0.62em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+.sb-out-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.2cqw;
+}
+
+.sb-out-section h3 {
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid rgb(27 16 48 / 0.45);
+  color: #3a1f5c;
+  font-family: var(--sb-font);
+  font-size: max(10px, 2.4cqw);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.sb-out-section p {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  max-width: none;
+}
+
+.sb-out-section strong {
+  font-size: max(12px, 3cqw);
+  font-weight: 700;
+}
+
+.sb-out-section span {
+  font-size: max(10px, 2.3cqw);
+}
+
+.sb-out-section small {
+  font-size: max(9px, 1.8cqw);
+  opacity: 0.7;
+}
+
+.sb-out-thanks {
+  max-width: none;
+  margin-top: 10cqw;
+  font-family: var(--sb-font);
+  font-size: 5cqw;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* ── Vartija siluettina kankaan oikeassa reunassa ── */
+.sb-out-guardian {
+  position: absolute;
+  right: 3cqw;
+  bottom: 9cqw;
+  height: 42cqw;
+  aspect-ratio: 300 / 650;
+  filter: brightness(0);
+  opacity: 0.92;
+}
+
+.sb-out-guardian .sb-guardian {
+  width: 100%;
+  height: 100%;
+}
+
+/* Siluetissa valopallon hehku näkyisi mustana renkaana */
+.sb-out .sb-guardian-orb-glow,
+.sb-out .sb-guardian-orb-ring {
+  display: none;
+}
+
+/* ── Kaupungin siluetti alareunassa: liukuu hitaasti, ikkunoista paistaa valo ── */
+.sb-out-skyline {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 200%;
+  height: 22cqw;
+  animation: sb-out-slide 60s linear infinite;
+}
+
+.sb-out-house {
+  fill: #0d0820;
+}
+
+.sb-out-window {
+  fill: #ffd98f;
+  opacity: 0.85;
+}
+
+.sb-btn.sb-out-skip {
+  position: absolute;
+  right: 4cqw;
+  bottom: 4cqw;
+  z-index: 2;
+  min-height: 30px;
+  padding: max(5px, 1cqw) max(14px, 3.4cqw);
+  font-size: max(10px, 1.9cqw);
+}
+
+/* ═══ Keyframet ═══ */
+@keyframes sb-out-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Alkaa kankaan alareunasta ja päättyy, kun viimeinenkin rivi on kadonnut yläreunaan */
+@keyframes sb-out-roll {
+  from { transform: translateY(82cqw); }
+  to { transform: translateY(-100%); }
+}
+
+@keyframes sb-out-flicker {
+  0%, 100% { opacity: 1; }
+  30% { opacity: 0.8; }
+  55% { opacity: 0.95; }
+  75% { opacity: 0.75; }
+}
+
+/* Puolikas leveys: toinen kopio jatkaa täsmälleen siitä, mihin ensimmäinen päättyi */
+@keyframes sb-out-slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-out,
+  .sb-out-lamp,
+  .sb-out-skyline {
+    animation: none;
+  }
+}

@@ -143,6 +143,59 @@
   gap: 2.6cqw;
 }
 
+.sb-victory-clear {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: max(11px, 1.8cqw);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.sb-victory-clear:hover,
+.sb-victory-clear:focus-visible {
+  color: var(--sb-neon-hot);
+}
+
+/* ── Loppu (Ending.jsx, Outro.jsx): HUD, valikko ja vartijan kupla väistyvät, ja
+   kaupungin kaikki ikkunat ja kyltit syttyvät ── */
+.sb-game .sb-hud,
+.sb-game .sb-toolbar,
+.sb-game .sb-guide {
+  transition: opacity 0.8s;
+}
+
+.sb-game.is-ending .sb-hud,
+.sb-game.is-ending .sb-toolbar,
+.sb-game.is-ending .sb-guide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sb-game.is-ending .sb-b-win {
+  fill: var(--sb-window);
+  transition-duration: 2.4s;
+}
+
+.sb-game.is-ending .sb-b-sign,
+.sb-game.is-ending .sb-b-blade,
+.sb-game.is-ending .sb-b-stripe,
+.sb-game.is-ending .sb-b-lamp,
+.sb-game.is-ending .sb-b-bulb {
+  fill: var(--sb-window);
+}
+
+/* Ruudukko lähenee hieman, kun taivas tummuu */
+.sb-game-board {
+  transition: transform 3s ease-out;
+}
+
+.sb-game.is-ending .sb-game-board {
+  transform: scale(1.05);
+}
+
 @keyframes sb-victory {
   from { opacity: 0; transform: scale(0.94); }
   to { opacity: 1; transform: none; }
@@ -158,4 +211,9 @@
   .sb-paused {
     animation: none;
   }
+}
+
+/* Mykistysnappi lopun aikana loppuanimaation ja lopputekstien päällä */
+.sb-game .sb-mute--float {
+  z-index: 8;
 }

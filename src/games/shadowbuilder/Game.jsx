@@ -5,6 +5,9 @@ import Toolbar from './Toolbar.jsx';
 import Guide from './Guide.jsx';
 import Hud from './Hud.jsx';
 import ChapterScene from './ChapterScene.jsx';
+import Ending from './Ending.jsx';
+import Outro from './Outro.jsx';
+import MuteButton from './MuteButton.jsx';
 import { autoRot, CHAPTERS, connectedSet, isHome, placeError, rotatable, SIZE, toolById, TOOLS, unlocked } from './buildings.js';
 import { castShadows, DAY, lightAt } from './shadows.js';
 import {
@@ -26,8 +29,8 @@ import {
   sunShares,
 } from './economy.js';
 import { nextLine } from './story.js';
-import { play } from './sound.js';
-import { clearCity, saveCity, saveRecord } from './score.js';
+import { play, playMusic, stopMusic } from './sound.js';
+import { clearCity, clearSaves, saveCity, saveRecord } from './score.js';
 import './Game.css';
 
 // Valon kulku päivitetään noin 20 kertaa sekunnissa: varjot liikkuvat hitaasti, joten
@@ -63,7 +66,10 @@ export default function Game({ onExit, saved }) {
   const [seen, setSeen] = useState(() => new Set(saved?.seen ?? []));
   // Luvun välianimaatio ja voittoruutu näytetään kerran, kun ne saavutetaan
   const [scene, setScene] = useState(null);
-  const [victory, setVictory] = useState(false);
+  // Tuhat asukasta: { days, record, stage }. stage etenee loppuanimaatiosta ('ending')
+  // lopputeksteihin ('credits') ja loppuruutuun ('panel').
+  const [victory, setVictory] = useState(null);
+  const cinematic = victory && victory.stage !== 'panel';
   const clock = useRef((saved?.t ?? START) * DAY);
   const shownChapter = useRef(city.chapter);
   const shownDone = useRef(city.done);
@@ -97,7 +103,7 @@ export default function Game({ onExit, saved }) {
   const energy = useMemo(() => power(grid, linked, sunShares(grid)), [grid, linked]);
   const pop = population(res);
   const dark = energy.use > energy.prod;
-  // Varjokartta valokennon ja sienitarhan sijoittamiseen (Board.jsx)
+  // Valo ja varjo ruuduittain valokennon ja sienitarhan tuoton esikatseluun (Board.jsx)
   const sun = useMemo(() => (tool === 'solar' || tool === 'mushroom' ? sunMap(grid) : null), [grid, tool]);
 
   // ── Päivän raportti: rahan kilinä ja sähkökatkon ääni ──
@@ -115,10 +121,24 @@ export default function Game({ onExit, saved }) {
     }
     if (city.done && !shownDone.current) {
       shownDone.current = true;
-      setVictory({ days: city.report?.day ?? city.day, record: saveRecord({ days: city.report?.day ?? city.day }) });
+      const days = city.report?.day ?? city.day;
+      setVictory({ days, record: saveRecord({ days }), stage: 'ending' });
       setPaused(true);
+      setHover(null);
+      stopMusic(1.5);
     }
   }, [city.chapter, city.done, city.report, city.day]);
+
+  // Loppuanimaation jälkeen lopputekstit introkappaleen soidessa, sitten loppuruutu ja pelin
+  // oma musiikki. Pysyvät funktiot: animaatiot käynnistävät ajastimensa uudelleen, jos onDone vaihtuu.
+  const toCredits = useCallback(() => {
+    setVictory((v) => ({ ...v, stage: 'credits' }));
+    playMusic('intro', { loop: false, fadeIn: 1 });
+  }, []);
+  const toPanel = useCallback(() => {
+    setVictory((v) => ({ ...v, stage: 'panel' }));
+    playMusic('music');
+  }, []);
 
   // Välianimaatio poistuu itsestään (ChapterScene.css kestää saman ajan)
   useEffect(() => {
@@ -191,6 +211,8 @@ export default function Game({ onExit, saved }) {
   // Esc sulkee pelin (Games.jsx). ──
   useEffect(() => {
     const onKey = (e) => {
+      // Lopun aikana pelinäppäimet eivät toimi (välilyönti jatkaisi aikaa loppuruudun takana)
+      if (victory) return;
       // Kirjainnäppäin (K) toimii isona ja pienenä
       const byKey = TOOLS.find((x) => x.key.toLowerCase() === e.key.toLowerCase());
       if (byKey) select(byKey.id);
@@ -204,7 +226,7 @@ export default function Game({ onExit, saved }) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [select, rotate, nextSpeed]);
+  }, [select, rotate, nextSpeed, victory]);
 
   // ── Valikon tietorivi ja esikatselun tuotto ──
   // Kodin kohdalla asukkaat ja kasvu. Muuten joko syy, miksi ruutuun ei voi rakentaa, tai mitä
@@ -287,9 +309,10 @@ export default function Game({ onExit, saved }) {
   });
   const stats = useMemo(() => JSON.parse(statsKey), [statsKey]);
 
-  // Uusi repliikki pienen tauon jälkeen, kun edellinen on suljettu
+  // Uusi repliikki pienen tauon jälkeen, kun edellinen on suljettu. Loppuanimaation ja
+  // lopputekstien aikana vartija odottaa (repliikki näytetään loppuruudun kanssa).
   useEffect(() => {
-    if (line) return undefined;
+    if (line || cinematic) return undefined;
     const next = nextLine(stats, seen);
     if (!next) return undefined;
     const id = setTimeout(() => {
@@ -298,7 +321,7 @@ export default function Game({ onExit, saved }) {
       play('speak', { volume: 0.5 });
     }, 900);
     return () => clearTimeout(id);
-  }, [line, stats, seen]);
+  }, [line, stats, seen, cinematic]);
 
   // Kupla sulkeutuu itsestään luettavan ajan jälkeen
   useEffect(() => {
@@ -315,7 +338,7 @@ export default function Game({ onExit, saved }) {
   };
 
   return (
-    <div className={`sb-game${paused ? ' is-paused' : ''}`} style={sky}>
+    <div className={`sb-game${paused && !cinematic ? ' is-paused' : ''}${cinematic ? ' is-ending' : ''}`} style={sky}>
       <City className="sb-game-city" />
       <div className="sb-game-day" aria-hidden="true" />
       <div className={`sb-game-light${light.sun ? ' is-sun' : ' is-moon'}`} aria-hidden="true" />
@@ -369,7 +392,12 @@ export default function Game({ onExit, saved }) {
         manual={rotMode !== null}
       />
 
-      {victory && (
+      {victory?.stage === 'ending' && <Ending onDone={toCredits} />}
+      {victory?.stage === 'credits' && <Outro days={victory.days} onDone={toPanel} />}
+      {/* HUD on piilossa lopun aikana, joten mykistysnappi kelluu kulmassa */}
+      {cinematic && <MuteButton className="sb-mute--float" />}
+
+      {victory?.stage === 'panel' && (
         <div className="sb-victory" role="dialog" aria-label="Kaupunki heräsi">
           <h4>Kaupunki heräsi</h4>
           <p>
@@ -381,7 +409,7 @@ export default function Game({ onExit, saved }) {
               type="button"
               className="sb-btn sb-btn--start"
               onClick={() => {
-                setVictory(false);
+                setVictory(null);
                 setPaused(false);
               }}
             >
@@ -391,6 +419,17 @@ export default function Game({ onExit, saved }) {
               Valikkoon
             </button>
           </div>
+          {/* Poistaa kaupungin ja ennätyksen (score.js) ja palaa aloitusnäkymään */}
+          <button
+            type="button"
+            className="sb-victory-clear"
+            onClick={() => {
+              clearSaves();
+              onExit();
+            }}
+          >
+            Tyhjennä tallennukset
+          </button>
         </div>
       )}
     </div>

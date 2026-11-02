@@ -1,0 +1,208 @@
+/* ═══ Shadow Builderin loppuanimaatio (Ending.jsx) ═══ */
+/* Aikajana (s): 0 taivas tummuu, ikkunat syttyvät · 1,0 revontulet leviävät · 1,5 vartija
+   nousee · 2,6 ensimmäinen rivi · 6,2 toinen rivi · 7,6 vartija hajoaa valoksi ·
+   10,4 valo täyttää ruudun · 12,0 loppu (DURATION). Pelaajan kaupunki näkyy koko ajan alla.
+   Liike vain transformilla ja läpinäkyvyydellä (ei top/left), jotta mikään ei värise. */
+.sb-end {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  overflow: hidden;
+}
+
+.sb-end > * {
+  position: absolute;
+}
+
+/* Yötaivas: ylhäältä tumma, ruudukon kohdalla läpinäkyvä, jotta kaupungin valot näkyvät */
+.sb-end-veil {
+  inset: 0;
+  background: linear-gradient(180deg, #02010a 0%, rgb(4 2 18 / 0.85) 30%, rgb(4 2 18 / 0.25) 62%, rgb(4 2 18 / 0.6) 100%);
+  opacity: 0;
+  animation: sb-end-in 1.5s ease-out forwards;
+}
+
+/* ── Revontulet: pehmeäreunaiset nauhat, jotka aaltoilevat ja vaihtavat sävyä ── */
+.sb-end-aurora {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48cqh;
+  opacity: 0;
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  animation: sb-end-in 3s 1s ease-out forwards;
+}
+
+.sb-end-ribbon {
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  transform-origin: 50% 100%;
+}
+
+.sb-end-ribbon--1 {
+  top: 6cqh;
+  height: 22cqh;
+  background: linear-gradient(180deg, transparent, rgb(80 255 190 / 0.5) 55%, rgb(60 220 170 / 0.15) 80%, transparent);
+  animation: sb-end-wave 7s ease-in-out infinite alternate;
+}
+
+.sb-end-ribbon--2 {
+  top: 14cqh;
+  height: 18cqh;
+  background: linear-gradient(180deg, transparent, rgb(150 110 255 / 0.45) 50%, rgb(255 120 200 / 0.15) 85%, transparent);
+  animation: sb-end-wave 9s -3s ease-in-out infinite alternate-reverse;
+}
+
+.sb-end-ribbon--3 {
+  top: 2cqh;
+  height: 14cqh;
+  background: linear-gradient(180deg, transparent, rgb(120 230 255 / 0.35) 60%, transparent);
+  animation: sb-end-wave 11s -6s ease-in-out infinite alternate;
+}
+
+/* ── Vartija nousee vasempaan reunaan ja hajoaa lopuksi valohiukkasiksi ── */
+.sb-end-guardian {
+  left: 4cqw;
+  bottom: 12cqw;
+  height: 54cqw;
+  aspect-ratio: 300 / 650;
+  opacity: 0;
+  animation: sb-end-rise 1.8s 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.sb-end-guardian .sb-guardian {
+  width: 100%;
+  height: 100%;
+  animation: sb-end-dissolve 2.2s 7.6s ease-in forwards;
+}
+
+/* Valopallo leimahtaa juuri ennen kuin vartija hajoaa */
+.sb-end .sb-guardian-orb-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sb-end-orb 1.4s 6.6s ease-in-out forwards;
+}
+
+.sb-end-mote {
+  position: absolute;
+  left: var(--x);
+  bottom: 40%;
+  width: 0.9cqw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff6d8;
+  box-shadow: 0 0 1.4cqw 0.4cqw rgb(190 160 255 / 0.8);
+  opacity: 0;
+  animation: sb-end-mote 2.6s calc(7.6s + var(--delay)) ease-out forwards;
+}
+
+/* ── Tekstit taivaalla ── */
+.sb-end-story {
+  top: 16cqh;
+  left: 0;
+  right: 0;
+  display: grid;
+  justify-items: center;
+}
+
+.sb-end-line {
+  grid-area: 1 / 1;
+  max-width: 90%;
+  color: var(--sb-moon);
+  font-family: var(--sb-font);
+  font-size: 4.4cqw;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow:
+    0 0 0.4em var(--sb-neon),
+    0 0 1.2em rgb(80 255 190 / 0.35);
+  opacity: 0;
+}
+
+.sb-end-line--1 {
+  animation:
+    sb-end-line-in 1.2s 2.6s ease-out forwards,
+    sb-end-out 0.8s 5.6s ease-in forwards;
+}
+
+.sb-end-line--2 {
+  color: var(--sb-window);
+  font-size: 5cqw;
+  animation:
+    sb-end-line-in 1.2s 6.2s ease-out forwards,
+    sb-end-out 0.8s 10s ease-in forwards;
+}
+
+/* Valo täyttää ruudun ja tummuu lopputekstien taustaksi */
+.sb-end-flash {
+  inset: 0;
+  background: radial-gradient(circle at 50% 55%, #fff6d8 0%, #b89cff 30%, #07051a 75%);
+  opacity: 0;
+  animation: sb-end-flash 1.6s 10.4s ease-in-out forwards;
+}
+
+.sb-btn.sb-end-skip {
+  position: absolute;
+  right: 4cqw;
+  bottom: 4cqw;
+  z-index: 2;
+  min-height: 30px;
+  padding: max(5px, 1cqw) max(14px, 3.4cqw);
+  font-size: max(10px, 1.9cqw);
+}
+
+/* ═══ Keyframet ═══ */
+@keyframes sb-end-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sb-end-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes sb-end-wave {
+  0% { transform: translateX(-4%) skewX(-12deg) scaleY(0.8); }
+  50% { transform: translateX(3%) skewX(8deg) scaleY(1.15); }
+  100% { transform: translateX(6%) skewX(-6deg) scaleY(0.9); }
+}
+
+@keyframes sb-end-rise {
+  from { opacity: 0; transform: translateY(6cqw); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes sb-end-dissolve {
+  0% { opacity: 1; transform: none; filter: brightness(1); }
+  40% { opacity: 0.9; filter: brightness(1.8); }
+  100% { opacity: 0; transform: translateY(-3cqw) scale(0.94); filter: brightness(3); }
+}
+
+@keyframes sb-end-orb {
+  0% { transform: scale(1); opacity: 0.6; }
+  70% { transform: scale(2.4); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0.4; }
+}
+
+@keyframes sb-end-mote {
+  0% { opacity: 0; transform: translateY(0) scale(0.6); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(var(--rise)) scale(1.2); }
+}
+
+@keyframes sb-end-line-in {
+  from { opacity: 0; transform: translateY(1.5cqw); letter-spacing: 0.02em; }
+  to { opacity: 1; transform: none; letter-spacing: 0.08em; }
+}
+
+@keyframes sb-end-flash {
+  0% { opacity: 0; }
+  45% { opacity: 1; }
+  100% { opacity: 1; filter: brightness(0.15); }
+}
