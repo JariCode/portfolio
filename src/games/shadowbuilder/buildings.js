@@ -22,7 +22,7 @@ export const TOOLS = [
   { id: 'grass', key: '2', name: 'Nurmi', price: 5, info: 'Viereinen talo +1 asukas/yö. Päälle saa rakentaa.', height: 0 },
   { id: 'house', key: '3', name: 'Talo', price: 50, info: '10 asukasta, kasvaa 2/yö. Kuluttaa 2 sähköä.', height: 0.95 },
   { id: 'tower', key: '4', name: 'Kerrostalo', price: 150, info: 'Talon päälle: 60 asukasta, 6 sähköä. Puisto 2 ruudun päähän.', height: 2.2, chapter: 2 },
-  { id: 'shop', key: '5', name: 'Kauppa', price: 100, info: '10 €/yö + osuus lähiasukkaista. Talot 3 ruudun päässä +1/yö.', height: 0.8 },
+     { id: 'shop', key: '5', name: 'Kauppa', price: 100, info: '10 €/yö + osuus lähiasukkaista. Talot 3 ruudun päässä +1/yö. 2 sähköä.', height: 0.8 },
   { id: 'solar', key: '6', name: 'Valokenno', price: 60, info: 'Jopa 6 sähköä, riittää noin kahdelle talolle. Ei varjoon.', height: 0.22 },
   { id: 'park', key: '7', name: 'Puisto', price: 40, info: 'Talot 2 ruudun päässä +1/yö, viereiset +2/yö', height: 0.55 },
   { id: 'mushroom', key: '8', name: 'Sienitarha', price: 80, info: 'Jopa 18 €/yö varjossa. Paras korkean talon takana.', height: 0.3, chapter: 2 },

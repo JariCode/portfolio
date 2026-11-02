@@ -50,21 +50,21 @@ Portfoliosivusto, joka kokoaa esittelyn, projektit, CV:n ja yhteydenottolomakkee
 - Somekortit seuraavat hiirtä magneettimaisesti
 
 ### Pelialue (`/pelit/`)
-Kolme selaimessa pelattavaa peliä. Z-Runner ja Space Driver 2026 ovat valmiita, Shadow Builder on tulossa.
+Kolme selaimessa pelattavaa peliä.
 
 - **Z-Runner:** tasohyppely neonvaloisessa yökaupungissa (valmis)
 - **Space Driver 2026:** pystysuuntainen avaruusammuskelu (valmis)
-- **Shadow Builder:** kaupunginrakennus (tulossa)
+- **Shadow Builder:** kaupunginrakennus isometrisellä ruudukolla (valmis)
 
-Peli käynnistyy samalle sivulle kelluvaan pelinäkymään, eikä kävijää ohjata muualle. Pelin koodi ladataan vasta, kun peli avataan, joten se ei hidasta sivun latautumista. Pelinäkymän muoto tulee pelin kuvasuhteesta: pystysuuntainen ammuskelu ja vaakasuuntainen tasohyppely mahtuvat kumpikin kerralla näytölle. Jos peli kaatuu, virhe näkyy pelinäkymässä ja muu sivu toimii normaalisti.
+Peli käynnistyy samalle sivulle kelluvaan pelinäkymään, eikä kävijää ohjata muualle. Pelin koodi ladataan vasta, kun peli avataan, joten se ei hidasta sivun latautumista. Pelinäkymän muoto tulee pelin kuvasuhteesta: pystysuuntainen ammuskelu, vaakasuuntainen tasohyppely ja neliön muotoinen kaupunki mahtuvat kaikki kerralla näytölle. Jos peli kaatuu, virhe näkyy pelinäkymässä ja muu sivu toimii normaalisti.
 
 Jokaisella pelillä on oma ilmeensä: omat fontit, värit, napit ja animaatiot. Yhteistä valmiille peleille:
 
-- **Aloitusnäkymä:** Aloita peli, ohjeet ja ennätys. Keskeneräistä peliä voi jatkaa Jatka-napista sen maailman tai sektorin alusta, johon pääsi, myös myöhemmin tai sivun päivityksen jälkeen. Tallennukset voi tyhjentää jo aloitusnäkymässä (vahvistus estää vahinkopoiston).
+- **Aloitusnäkymä:** Aloita peli, ohjeet ja ennätys. Keskeneräistä peliä voi jatkaa Jatka-napista myös myöhemmin tai sivun päivityksen jälkeen: Z-Runneria ja Space Driveria sen maailman tai sektorin alusta, johon pääsi, ja Shadow Builderia rakennetusta kaupungista. Tallennukset voi tyhjentää jo aloitusnäkymässä (vahvistus estää vahinkopoiston).
 - **Animaatiot:** alkuanimaatio, välianimaatiot ja lopputekstit on tehty Reactilla, SVG:llä ja CSS-animaatioilla pelin päälle. Ne voi ohittaa, ja "Vähennä liikettä" -asetus ohittaa ne kokonaan.
 - **Äänet:** Web Audio API:lla. Jokainen äänitiedosto tasataan latauksessa samaan voimakkuuteen, koska eri lähteiden tiedostot on tallennettu hyvin eri tasoilla. Mykistysnappi näkyy jo aloitusnäkymässä ja animaatioissa, pelissä HUDissa, ja M-näppäin mykistää missä vaiheessa tahansa.
-- **Kaatuminen:** uusi yritys alkaa saman maailman tai sektorin alusta ehjällä energialla.
-- **Puhelin:** kosketusnapit ruudulla. Pitkä painallus ei avaa iPhonen suurennuslasia tai valintavalikkoa, eikä tuplanapautus zoomaa.
+- **Kaatuminen** (Z-Runner ja Space Driver): uusi yritys alkaa saman maailman tai sektorin alusta ehjällä energialla.
+- **Puhelin:** kosketusnapit ruudulla (Shadow Builderissa rakennusvalikko ja napautus ruutuun). Pitkä painallus ei avaa iPhonen suurennuslasia tai valintavalikkoa, eikä tuplanapautus zoomaa.
 
 ### Z-Runner
 Zombitasohyppely kolmessa maailmassa: pelaaja pakenee yön yli kaupungin halki ja pääsee lopulta karkuun autolla.
@@ -104,6 +104,21 @@ Pystysuuntainen avaruusammuskelu kolmessa sektorissa: yksi alus lähtee kolmea r
 - **Rakenne:** kartat on piirretty Tiledissä kolmelle tasolle (Tausta, Esteet, Edusta). Viholliset, tehostimet ja pomo ovat listoina tiedostossa `sectors.js`, joten niitä ei merkitä karttaan. Tähtitausta piirretään koodilla.
 - **Ilme:** aluksen ohjaamon näyttö: kulmakiinnikkeet, tilarivit, mittarinäytön lukemat, Orbitron-fontti, syaani ja meripihka, viistetyt napit. Pikseligrafiikka näytetään terävänä kaksinkertaisena.
 
+### Shadow Builder
+Kaupunginrakennus tyhjästä: kaupunki katosi yhtenä yönä varjoihin, ja varjojen vartija opastaa rakentamaan sen uudelleen. Tavoite on 1000 asukasta mahdollisimman harvassa päivässä.
+
+- **Luvut:** kylä (0–100 asukasta), kaupunki (100–500) ja suurkaupunki (500–1000). Jokainen luku avaa uusia rakennuksia, ja luvun vaihtuessa taivaalle syttyy neonkyltti.
+- **Rakennukset:** tie, nurmi, talo, kerrostalo, kauppa, valokenno, puisto, sienitarha, voimala, elokuvateatteri ja kasino. Talot ja muut oikeat rakennukset tarvitsevat tien raatihuoneelle. Nurmi, puisto, sienitarha ja valokenno toimivat ilman tietä.
+- **Varjot ovat pelimekaniikka:** aurinko ja kuu kiertävät taivasta, ja jokainen rakennus heittää korkeutensa mukaisen varjon. Valokenno tuottaa sähköä vain valossa, sienitarha rahaa vain varjossa, ja kerrostalon pitkä varjo voi pimentää naapurin kennot.
+- **Talous:** joka keskiyö asukkaat maksavat veron, kaupat, kasinot ja sienitarhat tuottavat, voimalat maksavat ylläpitonsa ja taloihin muuttaa lisää väkeä. Sähköpulassa talot pimenevät eivätkä kasva. Nurmi, puisto, kauppa ja elokuvateatteri nopeuttavat kasvua, ja eri tyyppien vaikutukset summautuvat. Kasino tuo kerrostaloihin lisää tilaa.
+- **Vihjeet:** ennen rakentamista näkyy, mihin asti rakennuksen vaikutus ulottuu, paljonko lähitalojen kasvu muuttuu ja mitä rakennus tuottaa juuri siinä ruudussa. Luvut lasketaan samalla koodilla kuin yön tulos, joten ne pitävät paikkansa.
+- **Vartija:** kertoo tarinaa ja neuvoo tilanteen mukaan, esimerkiksi kun rakennus jää ilman tietä, kenno jää varjoon tai sähkö loppuu. Jokainen neuvo kuullaan kerran.
+- **Tallennus:** kaupunki tallentuu jokaisen rakennuksen ja päivän jälkeen. Ennätys on vähiten päiviä tavoitteeseen.
+- **Animaatiot:** alkuanimaatio, jossa vanha kaupunki vajoaa varjoihin ja vartija herättää maan, luvun vaihtumisen välianimaatio sekä loppu, jossa valmiin kaupungin kaikki valot syttyvät ja taivaalle leviävät revontulet. Lopputekstit ovat varjoteatteri: lyhdyn valaisemalla kankaalla rullaavat tekstit varjoina, ja alareunassa liukuu kaupungin siluetti.
+- **Ohjaus:** hiiri, numerot 0–9 ja K valitsevat rakennuksen, R kääntää, Delete purkaa, välilyönti pysäyttää ja F vaihtaa nopeutta (1×, 2×, 3×). Puhelimella rakennus valitaan valikosta, ja ruutua napautetaan kahdesti: ensin esikatselu, sitten rakentaminen.
+- **Rakenne:** React, SVG ja CSS ilman pelimoottoria. Talous on puhtaita funktioita (`economy.js`), joita sama koodi käyttää peliin ja tasapainon simulointiin. Kaikki grafiikka on piirretty koodilla isometrisessä projektiossa.
+- **Ilme:** violetti neon ja tumma lasi, kaksoisviivakehykset ja Cinzel-fontti.
+
 ### Muuta
 - Hiireen reagoiva partikkelitausta canvasilla
 - Navigaatio korostaa näkyvissä olevan osion tai sivun ja vie pelialueelta suoraan etusivun oikeaan osioon
@@ -131,6 +146,7 @@ src/
   games/
     zrunner/     Z-Runner: pelikenttä (Phaser), välianimaatiot, äänet, kartat (maps/) ja tekijät
     spacedriver/ Space Driver 2026: pelikenttä (Phaser), HUD, animaatiot, äänet, kartat (maps/) ja tekijät
+    shadowbuilder/ Shadow Builder: ruudukko ja rakennukset (SVG), talous, varjot, vartija, animaatiot, äänet ja tekijät
   main.jsx       etusivun käynnistys, fontit ja liikkeen vähennysasetus
   App.jsx        etusivun rakenne ja yhteinen tila
   index.css      väripaletti, typografia, perustyylit
@@ -160,7 +176,7 @@ src/
 
 ## Responsiivisuus
 
-Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakatilassa. Mobiilissa navigaatio muuttuu koko ruudun valikoksi, ja videot sekä projektikuvat mitoittuvat matalalle näytölle. Pelialue mahtuu tavallisella näytöllä footereineen kerralla näkyviin. Peli skaalautuu pelinäkymään kuvasuhteensa mukaan (Z-Runner 16:9, Space Driver 3:4), ja kosketusnäytöillä näkyvät ohjausnapit. Pelien tekstit ja napit mitoitetaan pelinäkymän koon mukaan (container query -yksiköt), ei ikkunan.
+Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakatilassa. Mobiilissa navigaatio muuttuu koko ruudun valikoksi, ja videot sekä projektikuvat mitoittuvat matalalle näytölle. Pelialue mahtuu tavallisella näytöllä footereineen kerralla näkyviin. Peli skaalautuu pelinäkymään kuvasuhteensa mukaan (Z-Runner 16:9, Space Driver 3:4, Shadow Builder 1:1), ja kosketusnäytöillä näkyvät ohjausnapit. Pelien tekstit ja napit mitoitetaan pelinäkymän koon mukaan (container query -yksiköt), ei ikkunan.
 
 ## Tietoturva ja yksityisyys
 
@@ -176,7 +192,7 @@ Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakati
   - liian suuret pyynnöt hylätään
 - Ei evästeitä, analytiikkaa eikä ulkoisia fontteja
 - Pelit toteutetaan kokonaan selaimessa: ei palvelinta, ei API-avaimia eikä ulkoisia lähteitä
-- Pelit tallentavat selaimen omaan muistiin (`localStorage`, avaimet muotoa `jaricode:<peli>:<nimi>`) vain ennätyksen ja keskeneräisen pelin jatkokohdan. Tallennus tehdään vasta pelatessa, ja pelin aloitus- tai loppuruudun Tyhjennä tallennukset -napilla ne saa poistettua. Äänten mykistys on vain muistissa, eikä sitä tallenneta.
+- Pelit tallentavat selaimen omaan muistiin (`localStorage`, avaimet muotoa `jaricode:<peli>:<nimi>`) vain ennätyksen ja keskeneräisen pelin jatkokohdan (Shadow Builderissa keskeneräisen kaupungin). Tallennus tehdään vasta pelatessa, ja pelin aloitus- tai loppuruudun Tyhjennä tallennukset -napilla ne saa poistettua. Äänten mykistys on vain muistissa, eikä sitä tallenneta.
 - YouTube-upotus ladataan vasta, kun kävijä käynnistää videon, ja se käyttää yksityisyyttä parantavaa tilaa
 - Repossa ei ole salaisuuksia
 
@@ -241,6 +257,23 @@ Peli ja sektorien kartat ovat Jari Karrin. HUD ja animaatiot on piirretty koodil
 | Pommi | `pommi.mp3` | Medium Explosion | JuveriSetila (Freesound), julkaisija freesound_community |
 | Tehostimen keräys | `tehostin.mp3` | Win | Musheran |
 | Hyperhyppy | `hyperhyppy.mp3` | Hyper-Drive Spaceship Flyby | SoundShelfStudio |
+
+### Shadow Builder
+
+Peli, idea ja tarina ovat Jari Karrin. Kaupunki, rakennukset, varjojen vartija ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Fontti on [Cinzel](https://github.com/NDISCOVER/Cinzel) (Natanael Gama, [SIL Open Font License 1.1](https://openfontlicense.org/)). Tekijät: `src/games/shadowbuilder/credits.js`.
+
+**Musiikki ja äänet** (Pixabay, `public/audio/shadowbuilder/`).
+
+| Käyttö | Tiedosto | Nimi Pixabayssa | Tekijä |
+|---|---|---|---|
+| Taustamusiikki | `musiikki.mp3` | Tokyo city - synthwave music | lofidreams |
+| Alkuanimaatio, loppu ja lopputekstit | `intro.mp3` | Le Royaume Blanc | MAFE70 |
+| Rakentaminen | `rakenna.mp3` | Hammer nails | spinopel |
+| Purku | `pura.mp3` | BIGSMASH | Stu9 |
+| Päivän tulos | `raha.mp3` | Spinning Coin on Table | Universfield |
+| Sähköpula | `katko.mp3` | ERROR FX | dbsound |
+| Vartijan puhe | `puhe.mp3` | Video Game Speak | CreatorsHome |
+| Luvun vaihtuminen ja tavoite | `luku.mp3` | Level Up 07 | Universfield |
 
 ### Tilesetit
 
