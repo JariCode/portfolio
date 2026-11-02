@@ -56,8 +56,8 @@ function Skyline() {
   );
 }
 
-// days: monennenko päivän aikana tuhat asukasta saavutettiin
-export default function Outro({ days, onDone }) {
+// days: monennenko päivän aikana tavoite täyttyi, pop: asukkaat sillä hetkellä
+export default function Outro({ days, pop, onDone }) {
   const skipRef = useRef(null);
 
   useEffect(() => {
@@ -87,7 +87,9 @@ export default function Outro({ days, onDone }) {
           </p>
           <p className="sb-out-lead">
             Kaupunki heräsi
-            <span>Tuhat asukasta {days}. päivänä</span>
+            <span>
+              {pop} asukasta · {days} päivää
+            </span>
           </p>
 
           <section className="sb-out-section">

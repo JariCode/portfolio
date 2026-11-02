@@ -79,7 +79,7 @@ export const LINES = [
     id: 'dark',
     mood: 'huolissaan',
     when: (s) => s.dark,
-    text: 'Sähkö ei riitä. Talot pimenevät, ja pimeästä talosta asukkaat lähtevät. Lisää valokennoja.',
+    text: 'Sähkö ei riitä. Talot pimenevät eivätkä kasva, ja suuressa pulassa asukkaita lähtee. Lisää valokennoja.',
   },
   {
     id: 'solarMap',
@@ -99,7 +99,7 @@ export const LINES = [
     id: 'solarShade',
     mood: 'huolissaan',
     when: (s) => s.solarShaded > 0,
-    text: 'Valokenno jäi varjoon. Varjossa se ei tuota mitään.',
+    text: 'Tuo valokenno on suurimman osan päivästä varjossa ja tuottaa vain vähän. Siirrä se aurinkoon.',
   },
   {
     id: 'night',

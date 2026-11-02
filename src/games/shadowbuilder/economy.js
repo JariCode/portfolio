@@ -3,9 +3,11 @@
 // ja tuotot säädetään (tavoite: hyvällä pelillä 1000 asukasta noin 15–20 päivässä).
 //
 // Päivän lopussa:
-//  - sähkö: tuotanto (raatihuone, valokennot valossa, voimalat) vs. kulutus (talot, kaupat)
+//  - sähkö: tuotanto (raatihuone, valokennot valossa, voimalat) vs. kulutus (kodit, kaupat,
+//    teatterit, kasinot)
 //  - asukkaat: talo täyttyy, jos sillä on tie ja sähköä riittää; viihtyvyys nopeuttaa
 //  - rahat: vero asukkaista, raatihuone, kaupat, kasinot ja sienitarhat, voimaloiden ylläpito
+// Valokenno ja sienitarha toimivat ilman tietä (buildings.js needsRoad), muut tarvitsevat tien.
 // Umpikujaa ei tule: raatihuoneen tulo tulee aina ja minkä tahansa rakennuksen voi purkaa.
 
 import { connectedSet, emptyGrid, GOAL, isHome, near, placeError, priceOf, SIZE, touches, chapterOf } from './buildings.js';
@@ -43,8 +45,8 @@ export const population = (res) => res.reduce((a, b) => a + b, 0);
 
 // Valon ja varjon osuus päivän aikana jokaisessa ruudussa: aurinko 12 hetkenä.
 // lit = auringonvalon osuus (valokenno), shade = varjon tai hämärän osuus (sienitarha), 0–1.
-// Lasketaan koko ruudukolle, jotta valokennoa tai sienitarhaa valitessa nähdään etukäteen,
-// mitkä ruudut jäävät varjoon (Board.jsx).
+// Lasketaan koko ruudukolle, jotta valokennon ja sienitarhan tuotto voidaan näyttää jo
+// ennen rakentamista (Game.jsx, Board.jsx).
 export function sunMap(grid) {
   const lit = Array(grid.length).fill(0);
   const shade = Array(grid.length).fill(0);
@@ -62,7 +64,7 @@ export function sunMap(grid) {
 }
 
 // Valokennon sähkö ja sienitarhan tuotto yhdestä ruudusta (sunMap)
-export const solarOutput = (map, i) => SOLAR_MAX * map.lit[i];
+export const solarOutput = (map, i) => Math.round(SOLAR_MAX * map.lit[i]);
 export const mushroomOutput = (map, i) => Math.round(MUSHROOM_MAX * map.shade[i]);
 
 // Valokennojen valo-osuus ja sienitarhojen varjo-osuus ruuduittain (Map: ruutu → osuus)
@@ -83,12 +85,13 @@ export function power(grid, linked, shares) {
   let prod = HALL_POWER;
   let use = 0;
   grid.forEach((type, i) => {
-    if (type === 'solar') prod += SOLAR_MAX * (shares.lit.get(i) ?? 0);
+    // Jokainen kenno pyöristetään erikseen, jotta esikatselun luku täsmää HUDin summaan
+    if (type === 'solar') prod += Math.round(SOLAR_MAX * (shares.lit.get(i) ?? 0));
     if (!linked.has(i)) return;
     if (type === 'power') prod += PLANT_POWER;
     use += POWER_USE[type] ?? 0;
   });
-  return { prod: Math.round(prod), use };
+  return { prod, use };
 }
 
 // Kodin kasvu päivässä: perus 2, ja jokainen rakennustyyppi lisää oman osuutensa, vaikka
@@ -177,11 +180,13 @@ export function endDay(city) {
 
   let income = HALL_INCOME + TAX * pop;
   grid.forEach((type, i) => {
+    // Sienitarha tuottaa ilman tietäkin
+    if (type === 'mushroom') income += Math.round(MUSHROOM_MAX * (shares.shade.get(i) ?? 0));
     if (!linked.has(i)) return;
-    if (type === 'shop' && ratio >= 0.8) income += shopIncome(grid, res, i);
+    // Kaupan asiakkaat ovat illan asukkaat (sama luku kuin esikatselussa)
+    if (type === 'shop' && ratio >= 0.8) income += shopIncome(grid, city.res, i);
     // Kasinon yöelämä tuottaa vain, kun sähköä riittää
     if (type === 'casino' && ratio >= 0.8) income += CASINO_INCOME;
-    if (type === 'mushroom') income += Math.round(MUSHROOM_MAX * (shares.shade.get(i) ?? 0));
     if (type === 'power') income -= PLANT_UPKEEP;
   });
 

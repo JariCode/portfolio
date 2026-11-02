@@ -108,7 +108,7 @@ export default function Board({ grid, rots, previewRot, tool, hover, light, shad
       const x = i % SIZE;
       const y = Math.floor(i / SIZE);
       if (type !== tool || (hover && Math.abs(hover.x - x) <= 1 && Math.abs(hover.y - y) <= 1)) return;
-      const text = tool === 'solar' ? `${Math.round(solarOutput(sun, i))} sähköä` : `${mushroomOutput(sun, i)} €`;
+      const text = tool === 'solar' ? `${solarOutput(sun, i)} sähköä` : `${mushroomOutput(sun, i)} €`;
       badges.push({ i, x, y, z: HEIGHT[type], text, own: true });
     });
   }

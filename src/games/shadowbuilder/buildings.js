@@ -18,7 +18,7 @@ export const chapterOf = (pop) => CHAPTERS.find((c) => pop < c.to) ?? CHAPTERS[C
 // price: hinta. height: korkeus ruudun leveyksinä (varjon pituus). key: näppäin valikossa.
 // chapter: luku, jossa rakennus avautuu (valikossa lukittuna siihen asti).
 export const TOOLS = [
-  { id: 'road', key: '1', name: 'Tie', price: 5, info: 'Rakennukset tarvitsevat tien. Valokenno ja puisto toimivat ilmankin.', height: 0 },
+  { id: 'road', key: '1', name: 'Tie', price: 5, info: 'Rakennukset tarvitsevat tien. Nurmi, puisto, sienitarha ja valokenno eivät.', height: 0 },
   { id: 'grass', key: '2', name: 'Nurmi', price: 5, info: 'Viereinen talo +1 asukas/yö. Päälle saa rakentaa.', height: 0 },
   { id: 'house', key: '3', name: 'Talo', price: 50, info: '10 asukasta, kasvaa 2/yö. Kuluttaa 2 sähköä.', height: 0.95 },
   { id: 'tower', key: '4', name: 'Kerrostalo', price: 150, info: 'Talon päälle: 60 asukasta, 6 sähköä. Puisto 2 ruudun päähän.', height: 2.2, chapter: 2 },
@@ -138,9 +138,11 @@ export const RANGE = {
   casino: { r: 2, effect: 1, cap: true },
 };
 
-// Valokenno ja puisto toimivat ilman tietä: kenno tuottaa sähköä ja puisto viihtyvyyttä
-// pelkällä sijainnillaan. Muut rakennukset tarvitsevat tieyhteyden raatihuoneelle.
-export const needsRoad = (type) => Boolean(type) && !['road', 'grass', 'hall', 'solar', 'park', 'demolish'].includes(type);
+// Nurmi, puisto, sienitarha ja valokenno toimivat ilman tietä: ne vaikuttavat pelkällä
+// sijainnillaan. Oikeat rakennukset (kodit, kauppa, voimala, teatteri, kasino) tarvitsevat
+// tieyhteyden raatihuoneelle.
+export const needsRoad = (type) =>
+  Boolean(type) && !['road', 'grass', 'hall', 'solar', 'park', 'mushroom', 'demolish'].includes(type);
 
 // Asukkaita mahtuu taloon ja kerrostaloon
 export const isHome = (type) => type === 'house' || type === 'tower';

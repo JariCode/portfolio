@@ -1,138 +1,72 @@
 import { useEffect, useRef } from 'react';
 import Guardian from './Guardian.jsx';
-import { CREDITS } from './credits.js';
-import './Outro.css';
+import { play } from './sound.js';
+import './Ending.css';
 
-// Lopputekstit varjoteatterina: lyhdyn valaisema kangas, jonka päällä tekstit rullaavat
-// varjoina. Alareunassa liukuu kaupungin siluetti, ja sen ikkunoista paistaa valo läpi.
-// Vartija seisoo siluettina kankaan reunassa. Tekijät luetaan credits.js:stä, joten uusi
-// ääni tai kuva päätyy lopputeksteihin ilman muutoksia tähän. Kun tekstit ovat rullanneet
-// loppuun (tai pelaaja ohittaa), näytetään loppuruutu.
-const ROLL_S = 44;
+// Loppuanimaation kesto millisekunteina. Ajoitukset ovat Ending.css:ssä (animation-delay);
+// tämä luku vastaa viimeisen vaiheen loppua.
+const DURATION = 12000;
 
-// credits.js:n tyypit lopputekstien järjestyksessä
-const SECTIONS = [
-  { type: 'grafiikka', title: 'Grafiikka ja animaatiot' },
-  { type: 'fontti', title: 'Fontti' },
-  { type: 'musiikki', title: 'Musiikki' },
-  { type: 'ääni', title: 'Äänet' },
+// Valohiukkaset, joiksi vartija hajoaa: vaakapaikka (% vartijan leveydestä), viive (s) ja
+// nousun pituus (cqw). Kiinteä lista, jotta animaatio on joka kerta sama.
+const MOTES = [
+  [22, 0, 30], [48, 0.2, 38], [70, 0.1, 26], [35, 0.5, 44], [58, 0.4, 34], [80, 0.7, 28],
+  [15, 0.8, 36], [42, 1, 46], [64, 0.9, 40], [28, 1.2, 32], [52, 1.3, 50], [74, 1.4, 30],
+  [38, 1.6, 42], [60, 1.7, 36], [46, 1.9, 48], [20, 2, 28], [68, 2.1, 38], [54, 2.3, 44],
 ];
 
-// Siluetin talot: [x, leveys, korkeus, ikkunarivejä]. Sama rivi piirretään kahdesti
-// peräkkäin, jotta liukuminen jatkuu saumatta (Outro.css siirtää puolikkaan leveyden).
-const SKYLINE = [
-  [0, 60, 70, 2], [64, 44, 120, 4], [112, 80, 56, 1], [196, 40, 150, 5], [240, 70, 92, 3],
-  [314, 36, 64, 2], [354, 90, 132, 4], [448, 50, 80, 2], [502, 64, 170, 6], [570, 84, 60, 1],
-  [658, 46, 110, 3], [708, 72, 84, 2], [784, 40, 140, 5],
-];
-const SKYLINE_W = 824;
-
-function Skyline() {
-  return (
-    <svg className="sb-out-skyline" viewBox={`0 0 ${SKYLINE_W * 2} 180`} preserveAspectRatio="none" aria-hidden="true">
-      {[0, SKYLINE_W].map((shift) => (
-        <g key={shift} transform={`translate(${shift} 0)`}>
-          {SKYLINE.map(([x, w, h, rows]) => (
-            <g key={x}>
-              <rect className="sb-out-house" x={x} y={180 - h} width={w} height={h} />
-              {/* Ikkunat ovat aukkoja siluetissa: lyhdyn valo paistaa niistä läpi */}
-              {Array.from({ length: rows }, (_, r) =>
-                Array.from({ length: Math.max(1, Math.floor(w / 18)) }, (__, c) => (
-                  <rect
-                    key={`${r}-${c}`}
-                    className="sb-out-window"
-                    x={x + 7 + c * 18}
-                    y={180 - h + 12 + r * 24}
-                    width="7"
-                    height="10"
-                  />
-                )),
-              )}
-            </g>
-          ))}
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-// days: monennenko päivän aikana tavoite täyttyi, pop: asukkaat sillä hetkellä
-export default function Outro({ days, pop, onDone }) {
+// Loppu, kun tavoite täyttyy. Pelaajan oma kaupunki jää näkyviin: taivas tummuu,
+// kaikki ikkunat syttyvät (Game.css, .is-ending), revontulet leviävät taivaalle ja vartija
+// nousee katsomaan kaupunkia. Lopuksi se hajoaa valoksi, ja peli siirtyy lopputeksteihin.
+// Rivit ovat tavallista tekstiä, joten ruudunlukija lukee ne.
+export default function Ending({ onDone }) {
   const skipRef = useRef(null);
 
   useEffect(() => {
-    // "Vähennä liikettä": rullaus ohitetaan
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      onDone();
-      return;
-    }
+    // "Vähennä liikettä" -asetuksella animaatio ohitetaan kokonaan
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timer = setTimeout(onDone, reduce ? 0 : DURATION);
     skipRef.current?.focus({ preventScroll: true });
+    // Revontulten ääni; hiljenee, jos loppu ohitetaan. gap: 0, koska StrictMode ajaa efektin
+    // kehitystilassa kahdesti ja toinen soitto muuten estyisi.
+    const stop = reduce ? null : play('aurora', { volume: 0.8, gap: 0 });
+    return () => {
+      clearTimeout(timer);
+      stop?.(0.6);
+    };
   }, [onDone]);
 
-  // Vain rullauksen oma animaatio päättää lopputekstit (ei lyhdyn tai siluetin animaatiot)
-  const rollEnded = (e) => {
-    if (e.target === e.currentTarget) onDone();
-  };
-
   return (
-    <div className="sb-out" role="region" aria-label="Lopputekstit">
-      <div className="sb-out-screen" aria-hidden="true" />
-      <div className="sb-out-lamp" aria-hidden="true" />
+    <div className="sb-end" role="region" aria-label="Loppu">
+      <div className="sb-end-veil" aria-hidden="true" />
 
-      <div className="sb-out-stage">
-        <div className="sb-out-roll" style={{ '--sb-roll': `${ROLL_S}s` }} onAnimationEnd={rollEnded}>
-          <p className="sb-out-logo">
-            <span>Shadow</span>
-            <span>Builder</span>
-          </p>
-          <p className="sb-out-lead">
-            Kaupunki heräsi
-            <span>
-              {pop} asukasta · {days} päivää
-            </span>
-          </p>
-
-          <section className="sb-out-section">
-            <h3>Peli</h3>
-            <p>
-              <strong>Jari Karri</strong>
-              <span>JariCode</span>
-            </p>
-          </section>
-          <section className="sb-out-section">
-            <h3>Idea, tarina ja suunnittelu</h3>
-            <p>
-              <strong>Jari Karri</strong>
-            </p>
-          </section>
-
-          {SECTIONS.map(({ type, title }) => {
-            const items = CREDITS.filter((c) => c.type === type);
-            if (!items.length) return null;
-            return (
-              <section key={type} className="sb-out-section">
-                <h3>{title}</h3>
-                {items.map((c) => (
-                  <p key={c.name}>
-                    <strong>{c.name}</strong>
-                    <span>{c.author}</span>
-                    <small>{c.license}</small>
-                  </p>
-                ))}
-              </section>
-            );
-          })}
-
-          <p className="sb-out-thanks">Kiitos, rakentaja.</p>
-        </div>
+      {/* Revontulet: kolme liukuvärinauhaa, jotka aaltoilevat eri tahdissa */}
+      <div className="sb-end-aurora" aria-hidden="true">
+        <span className="sb-end-ribbon sb-end-ribbon--1" />
+        <span className="sb-end-ribbon sb-end-ribbon--2" />
+        <span className="sb-end-ribbon sb-end-ribbon--3" />
       </div>
 
-      <div className="sb-out-guardian" aria-hidden="true">
-        <Guardian />
+      <div className="sb-end-guardian" aria-hidden="true">
+        <Guardian mood="iloinen" />
+        {MOTES.map(([x, delay, rise]) => (
+          <span
+            key={`${x}-${delay}`}
+            className="sb-end-mote"
+            style={{ '--x': `${x}%`, '--delay': `${delay}s`, '--rise': `${-rise}cqw` }}
+          />
+        ))}
       </div>
-      <Skyline />
 
-      <button ref={skipRef} type="button" className="sb-btn sb-out-skip" onClick={onDone}>
+      <div className="sb-end-story">
+        <p className="sb-end-line sb-end-line--1">Varjot väistyvät.</p>
+        <p className="sb-end-line sb-end-line--2">Kaupungin valot loistavat taas.</p>
+      </div>
+
+      {/* Lopuksi valo täyttää ruudun ja häipyy lopputeksteihin */}
+      <div className="sb-end-flash" aria-hidden="true" />
+
+      <button ref={skipRef} type="button" className="sb-btn sb-end-skip" onClick={onDone}>
         Ohita
       </button>
     </div>

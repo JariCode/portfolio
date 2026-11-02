@@ -19,12 +19,10 @@ import {
   growthOf,
   mushroomOutput,
   newCity,
-  PLANT_POWER,
   PLANT_UPKEEP,
   population,
   power,
   shopIncome,
-  solarOutput,
   sunMap,
   sunShares,
 } from './economy.js';
@@ -105,7 +103,8 @@ export default function Game({ onExit, onRestart, saved }) {
 
   // Sähkö lasketaan päivän keskimääräisestä valosta, joten se muuttuu vain rakentaessa
   const linked = useMemo(() => connectedSet(grid), [grid]);
-  const energy = useMemo(() => power(grid, linked, sunShares(grid)), [grid, linked]);
+  const shares = useMemo(() => sunShares(grid), [grid]);
+  const energy = useMemo(() => power(grid, linked, shares), [grid, linked, shares]);
   const pop = population(res);
   const dark = energy.use > energy.prod;
   // Valo ja varjo ruuduittain valokennon ja sienitarhan tuoton esikatseluun (Board.jsx)
@@ -248,52 +247,68 @@ export default function Game({ onExit, onRestart, saved }) {
   // ── Valikon tietorivi ja esikatselun tuotto ──
   // Kodin kohdalla asukkaat ja kasvu. Muuten joko syy, miksi ruutuun ei voi rakentaa, tai mitä
   // rakennus tuottaisi juuri tässä ruudussa: tietorivillä selitys, ruudun päällä luku (gain).
-  let hint = null;
-  let gain = null;
-  if (hover) {
+  // Lasketaan vain, kun osoitin, kaupunki tai työkalu muuttuu (ei joka valon päivityksellä):
+  // esikatselu laskee koko kaupungin sähkön uudelleen, jotta luvut täsmäävät HUDin kanssa.
+  const { hint, gain } = useMemo(() => {
+    if (!hover) return { hint: null, gain: null };
     const i = hover.y * SIZE + hover.x;
     const here = grid[i];
     if (isHome(here) && tool !== 'tower' && tool !== 'demolish') {
-      const growth = linked.has(i) ? `+${growthOf(grid, i)}/pv` : 'ei tietä';
-      hint = { title: toolById(here).name, text: `${res[i]}/${capOf(grid, i)} asukasta · ${growth}` };
-    } else {
-      const error = placeError(grid, hover.x, hover.y, tool, chapter, money);
-      if (error) hint = { error };
-      else if (tool !== 'demolish') {
-        const next = [...grid];
-        next[i] = tool;
-        const def = toolById(tool);
-        const road = !needsRoad(tool) || connectedSet(next).has(i) ? '' : ' · tarvitsee tien';
-        const title = `${def.name} ${def.price} €`;
-        let text = null;
-        if (isHome(tool)) {
-          text = `kasvaa tässä +${growthOf(next, i)} asukasta/yö`;
-        } else if (tool === 'solar') {
-          const out = Math.round(solarOutput(sun, i));
-          const pct = Math.round(sun.lit[i] * 100);
-          text = out > 0 ? `tuottaa tässä ${out} sähköä · aurinkoa ${pct} % päivästä` : 'varjossa koko päivän: ei tuota sähköä';
-          gain = { text: `+${out} sähköä`, bad: out < 3 };
-        } else if (tool === 'mushroom') {
-          const out = mushroomOutput(sun, i);
-          const pct = Math.round(sun.shade[i] * 100);
-          text = `tuottaa tässä ${out} €/yö · varjoa ${pct} % päivästä`;
-          gain = { text: `+${out} €/yö`, bad: out < 8 };
-        } else if (tool === 'power') {
-          text = `+${PLANT_POWER} sähköä yölläkin · ylläpito ${PLANT_UPKEEP} €/yö`;
-          gain = { text: `+${PLANT_POWER} sähköä` };
-        } else if (tool === 'shop') {
-          const out = shopIncome(next, res, i);
-          text = `tuottaa tässä ${out} €/yö`;
-          gain = { text: `+${out} €/yö` };
-        } else if (tool === 'casino') {
-          const towers = grid.filter((g, j) => g === 'tower' && capOf(next, j) > capOf(grid, j)).length;
-          text = `+${CASINO_INCOME} €/yö · ${towers} kerrostaloa saa +${CASINO_CAP} asukasta`;
-          gain = { text: `+${CASINO_INCOME} €/yö` };
-        }
-        if (text) hint = { title, text: text + road };
-      }
+      const cap = capOf(grid, i);
+      let growth = `+${growthOf(grid, i)}/pv`;
+      if (!linked.has(i)) growth = 'ei tietä, asukkaita lähtee';
+      else if (res[i] >= cap) growth = 'täynnä';
+      else if (energy.use > energy.prod) growth = 'ei kasva: sähkö ei riitä';
+      return { hint: { title: toolById(here).name, text: `${res[i]}/${cap} asukasta · ${growth}` }, gain: null };
     }
-  }
+    const error = placeError(grid, hover.x, hover.y, tool, chapter, money);
+    if (error) return { hint: { error }, gain: null };
+    if (tool === 'demolish') return { hint: null, gain: null };
+
+    const next = [...grid];
+    next[i] = tool;
+    const nextLinked = connectedSet(next);
+    // Sähkö rakentamisen jälkeen: sama laskenta kuin HUDissa ja päivän vaihtuessa
+    const after = power(next, nextLinked, sunShares(next));
+    const def = toolById(tool);
+    const title = `${def.name} ${def.price} €`;
+    // Tietä tarvitseva rakennus ilman tietä ei tuota mitään: kerrotaan se lupausten sijaan
+    if (needsRoad(tool) && !nextLinked.has(i)) {
+      return { hint: { title, text: 'ei toimi ilman tietä raatihuoneelle' }, gain: { text: 'ei tietä', bad: true } };
+    }
+    const short = after.use > after.prod ? ' · sähkö ei riitä' : '';
+    let text = null;
+    let badge = null;
+    if (isHome(tool)) {
+      text = short ? 'ei kasva: sähkö ei riitä' : `kasvaa tässä +${growthOf(next, i)} asukasta/yö`;
+    } else if (tool === 'solar') {
+      // Todellinen muutos: uusi kenno voi myös varjostaa hieman viereistä kennoa
+      const out = after.prod - energy.prod;
+      const pct = Math.round(sun.lit[i] * 100);
+      text = out > 0 ? `tuottaa tässä ${out} sähköä · aurinkoa ${pct} % päivästä` : 'varjossa: ei tuota sähköä';
+      badge = { text: `+${out} sähköä`, bad: out < 3 };
+    } else if (tool === 'mushroom') {
+      const out = mushroomOutput(sun, i);
+      const pct = Math.round(sun.shade[i] * 100);
+      text = `tuottaa tässä ${out} €/yö · varjoa ${pct} % päivästä`;
+      badge = { text: `+${out} €/yö`, bad: out < 8 };
+    } else if (tool === 'power') {
+      const out = after.prod - energy.prod;
+      text = `+${out} sähköä yölläkin · ylläpito ${PLANT_UPKEEP} €/yö`;
+      badge = { text: `+${out} sähköä`, bad: out <= 0 };
+    } else if (tool === 'shop') {
+      const out = shopIncome(next, res, i);
+      text = `tuottaa tässä ${out} €/yö${short}`;
+      badge = { text: `+${out} €/yö` };
+    } else if (tool === 'casino') {
+      const towers = grid.filter((g, j) => g === 'tower' && capOf(next, j) > capOf(grid, j)).length;
+      text = `+${CASINO_INCOME} €/yö · ${towers} kerrostaloa saa +${CASINO_CAP} asukasta${short}`;
+      badge = { text: `+${CASINO_INCOME} €/yö` };
+    } else if (tool === 'cinema' && short) {
+      text = `${def.info}${short}`;
+    }
+    return { hint: text ? { title, text } : null, gain: badge };
+  }, [hover, grid, tool, chapter, money, res, linked, energy, sun]);
 
   // ── Tilanne vartijan repliikkejä varten ──
   // Tiivistetään merkkijonoksi, jotta valon tasainen liike ei käynnistä repliikkien
@@ -315,8 +330,8 @@ export default function Game({ onExit, onRestart, saved }) {
     // Irralliset rakennukset, jotka tarvitsisivat tien (valokenno ja puisto toimivat ilmankin)
     unlinked: grid.filter((g, i) => needsRoad(g) && !linked.has(i)).length,
     linkedHouse: grid.filter((g, i) => isHome(g) && linked.has(i)).length,
-    solarShaded: light.sun && light.alpha > 0.05 ? grid.filter((g, i) => g === 'solar' && shaded.has(i)).length : 0,
-    solarLit: light.sun && light.alpha > 0.05 ? grid.filter((g, i) => g === 'solar' && !shaded.has(i)).length : 0,
+    // Kennot, jotka ovat yli puolet päivästä varjossa (ei hetkellinen varjo, joka ohittaa kennon)
+    solarShaded: grid.filter((g, i) => g === 'solar' && (shares.lit.get(i) ?? 0) < 0.5).length,
     night: !light.sun && light.alpha > 0.1,
     day: city.day,
     poor: money < 20,
