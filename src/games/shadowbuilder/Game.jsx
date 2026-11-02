@@ -8,7 +8,7 @@ import ChapterScene from './ChapterScene.jsx';
 import Ending from './Ending.jsx';
 import Outro from './Outro.jsx';
 import MuteButton from './MuteButton.jsx';
-import { autoRot, CHAPTERS, connectedSet, isHome, needsRoad, placeError, rotatable, SIZE, toolById, TOOLS, unlocked } from './buildings.js';
+import { autoRot, CHAPTERS, connectedSet, GOAL, isHome, needsRoad, placeError, rotatable, SIZE, toolById, TOOLS, unlocked } from './buildings.js';
 import { castShadows, DAY, lightAt } from './shadows.js';
 import {
   build,
@@ -340,6 +340,8 @@ export default function Game({ onExit, onRestart, saved }) {
     dark,
     chapter,
     done: city.done,
+    // Asukkaita on tarpeeksi, mutta kaupunki on pimeänä: tavoite odottaa sähköä
+    goalDark: pop >= GOAL && dark,
     tool,
   });
   const stats = useMemo(() => JSON.parse(statsKey), [statsKey]);

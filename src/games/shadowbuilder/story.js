@@ -200,6 +200,12 @@ export const LINES = [
     text: 'Kasino tuo rahaa joka yö. Sen ympärillä kerrostaloihin mahtuu kaksikymmentä asukasta enemmän.',
   },
   {
+    id: 'goalDark',
+    mood: 'huolissaan',
+    when: (s) => s.goalDark,
+    text: 'Asukkaita on tarpeeksi, mutta kaupunki on pimeänä. Se herää vasta, kun sähkö riittää kaikille.',
+  },
+  {
     id: 'goal',
     mood: 'iloinen',
     when: (s) => s.done,

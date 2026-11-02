@@ -85,11 +85,14 @@ export function connectedSet(grid) {
       }
     }
   }
+  // Rakennukset tarkistetaan vain teitä ja raatihuonetta vasten (kopio ennen rakennusten
+  // lisäämistä), jotta yhteys ei ketjuunnu rakennuksesta toiseen ruutujen järjestyksen mukaan
+  const roads = new Set(linked);
   grid.forEach((type, i) => {
     if (!type || type === 'road' || type === 'hall' || type === 'grass') return;
     const x = i % SIZE;
     const y = Math.floor(i / SIZE);
-    if (NEIGHBOURS.some(([dx, dy]) => linked.has((y + dy) * SIZE + x + dx) && at(grid, x + dx, y + dy) !== undefined)) {
+    if (NEIGHBOURS.some(([dx, dy]) => at(grid, x + dx, y + dy) !== undefined && roads.has((y + dy) * SIZE + x + dx))) {
       linked.add(i);
     }
   });

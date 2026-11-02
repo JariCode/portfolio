@@ -196,7 +196,8 @@ export function endDay(city) {
     money: city.money + income,
     day: city.day + 1,
     chapter: Math.max(city.chapter, chapterOf(pop).n),
-    done: city.done || pop >= GOAL,
+    // Kaupunki herää vasta, kun asukkaita on tarpeeksi ja sähkö riittää kaikille samana yönä
+    done: city.done || (pop >= GOAL && powered),
     report: { day: city.day, income, prod, use, pop, blackout: !powered },
   };
 }
