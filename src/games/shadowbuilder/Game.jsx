@@ -47,7 +47,9 @@ const bubbleTime = (text) => 3800 + text.length * 55;
 
 // Kaupungin tila (economy.js): rakentaminen ja päivän laskenta puhtaina funktioina
 function reducer(city, action) {
-  if (action.type === 'build') return build(city, action.x, action.y, action.tool, action.rot);
+  // Valmiiseen kaupunkiin ei enää rakenneta: muuten keskiyön jälkeen (tai samalla hetkellä)
+  // rakennettu talo voisi viedä sähköt kaupungilta, joka juuri heräsi
+  if (action.type === 'build') return city.done ? city : build(city, action.x, action.y, action.tool, action.rot);
   if (action.type === 'endDay') return endDay(city);
   return city;
 }
@@ -167,11 +169,11 @@ export default function Game({ onExit, onRestart, saved }) {
   // ── Rakentaminen ──
   const place = useCallback(
     (x, y) => {
-      if (placeError(grid, x, y, tool, chapter, money)) return;
+      if (city.done || placeError(grid, x, y, tool, chapter, money)) return;
       dispatch({ type: 'build', x, y, tool, rot: rotatable(tool) ? rotMode : null });
       play(tool === 'demolish' ? 'demolish' : 'build', { rate: tool === 'road' || tool === 'grass' ? 1.4 : 1 });
     },
-    [grid, tool, chapter, money, rotMode],
+    [city.done, grid, tool, chapter, money, rotMode],
   );
 
   // Esikatselun kääntö: pelaajan valinta tai automaattisesti kohti tietä
@@ -341,7 +343,7 @@ export default function Game({ onExit, onRestart, saved }) {
     chapter,
     done: city.done,
     // Asukkaita on tarpeeksi, mutta kaupunki on pimeänä: tavoite odottaa sähköä
-    goalDark: pop >= GOAL && dark,
+    goalDark: !city.done && pop >= GOAL && dark,
     tool,
   });
   const stats = useMemo(() => JSON.parse(statsKey), [statsKey]);
