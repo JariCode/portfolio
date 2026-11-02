@@ -16,6 +16,7 @@ const SECTIONS = [
   { type: 'vihollinen', title: 'Vihollislaivastot' },
   { type: 'tehostin', title: 'Tehostimet' },
   { type: 'tileset', title: 'Tilesetit' },
+  { type: 'fontti', title: 'Fontti' },
   { type: 'musiikki', title: 'Musiikki' },
   { type: 'ääni', title: 'Äänet' },
 ];

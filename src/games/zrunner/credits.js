@@ -3,7 +3,7 @@
 // kirjata latauksen yhteydessä. Itse tiedostot ovat public/audio/zrunner/ ja
 // public/games/zrunner/ -kansioissa (eivät repossa).
 //
-// type:       'musiikki' | 'ääni' | 'tileset' | 'hahmo'
+// type:       'musiikki' | 'ääni' | 'tileset' | 'hahmo' | 'fontti'
 // name:       tiedoston tai paketin nimi lähteessä
 // author:     tekijän nimi tai nimimerkki
 // url:        vapaaehtoinen; sivu, jolta tiedosto ladattiin (Pixabay ei vaadi)
@@ -119,5 +119,13 @@ export const CREDITS = [
     license: 'Pixabay Content License',
     licenseUrl: 'https://pixabay.com/service/license-summary/',
     file: 'auto.mp3',
+  },
+  {
+    type: 'fontti',
+    name: 'Unbounded',
+    author: 'NORD ID (The Unbounded Project Authors)',
+    url: 'https://github.com/googlefonts/unbounded',
+    license: 'SIL Open Font License 1.1',
+    licenseUrl: 'https://openfontlicense.org/',
   },
 ];

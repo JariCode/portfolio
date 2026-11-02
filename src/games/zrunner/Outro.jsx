@@ -14,6 +14,7 @@ const SECTIONS = [
   { type: 'musiikki', title: 'Musiikki' },
   { type: 'ääni', title: 'Äänet' },
   { type: 'tileset', title: 'Grafiikka' },
+  { type: 'fontti', title: 'Fontti' },
 ];
 
 // Katulamput tien kummallakin puolella: viive porrastaa ne tasaisesti

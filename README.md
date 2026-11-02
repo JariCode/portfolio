@@ -99,7 +99,7 @@ Pystysuuntainen avaruusammuskelu kolmessa sektorissa: yksi alus lähtee kolmea r
 - **Pisteet:** kaadetut viholliset ja pomot, tehostimet sekä bonus jokaisesta rungon palkista, joka on jäljellä sektorin lopussa. Paras tulos tallennetaan ennätykseksi.
 - **Jatkaminen:** kun sektori on läpäisty, peliä voi jatkaa myöhemmin seuraavan sektorin alusta aloitusnäkymän Jatka-napista. Runko, pisteet, pommit ja ase säilyvät.
 - **Välianimaatiot:** alkuanimaatio, jossa vihollislaivasto saapuu ja alus lähtee hyperhyppyyn, ja hyperhyppy sektorista seuraavaan. Seuraava sektori latautuu jo hypyn aikana.
-- **Lopputekstit:** Star Wars -tyylinen rullaus kaukaisuuteen intron tähtitaivaan ja musiikin päällä. Tekijät luetaan tiedostosta `credits.js`.
+- **Lopputekstit:** kallistettu rullaus kaukaisuuteen intron tähtitaivaan ja musiikin päällä. Tekijät luetaan tiedostosta `credits.js`.
 - **Ohjaus:** nuolet tai WASD liikuttavat, välilyönti ampuu ja B pudottaa pommin. Puhelimella alusta ohjataan vetämällä sormella, ja ammunta ja pommi ovat napeissa. Kaksi sormea toimii yhtä aikaa.
 - **Rakenne:** kartat on piirretty Tiledissä kolmelle tasolle (Tausta, Esteet, Edusta). Viholliset, tehostimet ja pomo ovat listoina tiedostossa `sectors.js`, joten niitä ei merkitä karttaan. Tähtitausta piirretään koodilla.
 - **Ilme:** aluksen ohjaamon näyttö: kulmakiinnikkeet, tilarivit, mittarinäytön lukemat, Orbitron-fontti, syaani ja meripihka, viistetyt napit. Pikseligrafiikka näytetään terävänä kaksinkertaisena.
@@ -204,7 +204,7 @@ Musiikin ja äänten lähde on [Pixabay](https://pixabay.com/) ja lisenssi [Pixa
 
 ### Z-Runner
 
-Peli, tarina ja juoni sekä kartat ovat Jari Karrin. Taustat ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Tekijät: `src/games/zrunner/credits.js`, josta pelin lopputekstit luetaan.
+Peli, tarina ja juoni sekä kartat ovat Jari Karrin. Taustat ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Fontti on [Unbounded](https://github.com/googlefonts/unbounded) (NORD ID, [SIL Open Font License 1.1](https://openfontlicense.org/)). Tekijät: `src/games/zrunner/credits.js`, josta pelin lopputekstit luetaan.
 
 **Hahmot (sprite-arkit).** Lisenssi: [CraftPix File License](https://craftpix.net/file-licenses/). Kaupallinen käyttö ja muokkaus sallittu, tekijän mainintaa ei vaadita. Ruudut on kohdistettu, skaalattu ja koottu sprite-arkeiksi.
 
@@ -231,7 +231,7 @@ Peli, tarina ja juoni sekä kartat ovat Jari Karrin. Taustat ja animaatiot on pi
 
 ### Space Driver 2026
 
-Peli ja sektorien kartat ovat Jari Karrin. HUD ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Tekijät: `src/games/spacedriver/credits.js`.
+Peli ja sektorien kartat ovat Jari Karrin. HUD ja animaatiot on piirretty koodilla Clauden (Anthropic) kanssa. Fontti on [Orbitron](https://github.com/theleagueof/orbitron) (Matt McInerney, [SIL Open Font License 1.1](https://openfontlicense.org/)). Tekijät: `src/games/spacedriver/credits.js`.
 
 **Alukset ja tehostimet (sprite-arkit).** Lisenssi: [CC0](https://creativecommons.org/publicdomain/zero/1.0/), eli vapaa käyttö ilman ehtoja. Valitut tiedostot on nimetty uudelleen, muuten ne ovat sellaisenaan.
 

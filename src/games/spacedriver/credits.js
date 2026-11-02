@@ -3,7 +3,7 @@
 // kirjata latauksen yhteydessä. Itse tiedostot ovat public/audio/spacedriver/ ja
 // public/games/spacedriver/ -kansioissa (eivät repossa).
 //
-// type:       'alus' | 'vihollinen' | 'tehostin' | 'musiikki' | 'ääni' | 'tileset'
+// type:       'alus' | 'vihollinen' | 'tehostin' | 'musiikki' | 'ääni' | 'tileset' | 'fontti'
 // name:       tiedoston tai paketin nimi lähteessä
 // author:     tekijän nimi tai nimimerkki
 // url:        vapaaehtoinen; sivu, jolta tiedosto ladattiin (Pixabay ei vaadi)
@@ -170,5 +170,13 @@ export const CREDITS = [
     license: PIXABAY,
     licenseUrl: PIXABAY_URL,
     file: 'hyperhyppy.mp3',
+  },
+  {
+    type: 'fontti',
+    name: 'Orbitron',
+    author: 'Matt McInerney (The Orbitron Project Authors)',
+    url: 'https://github.com/theleagueof/orbitron',
+    license: 'SIL Open Font License 1.1',
+    licenseUrl: 'https://openfontlicense.org/',
   },
 ];
