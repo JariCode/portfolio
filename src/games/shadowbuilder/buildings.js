@@ -69,7 +69,7 @@ export function near(grid, x, y, r, types) {
 export const touches = (grid, x, y, types) => NEIGHBOURS.some(([dx, dy]) => types.includes(at(grid, x + dx, y + dy)));
 
 // Mitkä ruudut ovat yhteydessä raatihuoneeseen: tiet leveyshaulla raatihuoneelta, ja
-// rakennus on yhteydessä, jos sen vieressä on yhteydessä oleva tie tai raatihuone itse.
+// rakennus on yhteydessä, jos sen vieressä on yhteydessä oleva tie (pelkkä raatihuone ei riitä).
 export function connectedSet(grid) {
   const linked = new Set([HALL.y * SIZE + HALL.x]);
   const queue = [[HALL.x, HALL.y]];
@@ -85,9 +85,11 @@ export function connectedSet(grid) {
       }
     }
   }
-  // Rakennukset tarkistetaan vain teitä ja raatihuonetta vasten (kopio ennen rakennusten
+  // Rakennukset tarkistetaan vain teitä vasten (kopio ennen rakennusten
   // lisäämistä), jotta yhteys ei ketjuunnu rakennuksesta toiseen ruutujen järjestyksen mukaan
   const roads = new Set(linked);
+  // Raatihuone ei ole tie: sen vieressä oleva rakennus tarvitsee silti oman tien
+  roads.delete(HALL.y * SIZE + HALL.x);
   grid.forEach((type, i) => {
     if (!type || type === 'road' || type === 'hall' || type === 'grass') return;
     const x = i % SIZE;
@@ -164,8 +166,17 @@ export function placeError(grid, x, y, tool, chapter, money) {
   } else if (here !== null && !(here === 'grass' && tool !== 'grass')) {
     return 'Ruutu on varattu';
   }
+  // Rakennus vain sellaisen tien viereen, joka on yhteydessä raatihuoneelle. Raatihuoneen tai
+  // toisen rakennuksen vieressä oleminen ei riitä: yhteys ei ketjuunnu.
+  if (needsRoad(tool) && !roadNextTo(grid, x, y)) return 'Rakennetaan tien viereen';
   if (money < def.price) return 'Rahat eivät riitä';
   return null;
+}
+
+// Onko viereisessä ruudussa (ei vinottain) raatihuoneelle yhteydessä oleva tie
+function roadNextTo(grid, x, y) {
+  const linked = connectedSet(grid);
+  return NEIGHBOURS.some(([dx, dy]) => at(grid, x + dx, y + dy) === 'road' && linked.has((y + dy) * SIZE + x + dx));
 }
 
 export const canPlace = (grid, x, y, tool, chapter, money) => placeError(grid, x, y, tool, chapter, money) === null;
