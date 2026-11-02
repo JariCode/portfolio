@@ -87,9 +87,9 @@ export default function Hud({ chapter, pop, money, energy, day, t, report, pause
           <Icon name="pop" />
           {pop}
         </span>
-        <span className={`sb-stat${dark ? ' is-bad' : ''}`} title="Sähkö: tuotanto / kulutus">
+        <span className={`sb-stat${dark ? ' is-bad' : ''}`} title="Sähkö: kulutus / tuotanto">
           <Icon name="power" />
-          {energy.prod}/{energy.use}
+          {energy.use}/{energy.prod}
         </span>
         <span className="sb-stat sb-stat--day" title="Päivä" style={{ '--t': t }}>
           <Icon name={t < 0.5 ? 'sun' : 'moon'} />

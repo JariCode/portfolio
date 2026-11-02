@@ -152,9 +152,11 @@
 }
 
 .sb-tool-name {
-  font-size: max(8px, 1.45cqw);
-  letter-spacing: 0.04em;
+  /* Pisin nimi (Sienitarha, Kerrostalo) mahtuu napin leveyteen: koko seuraa napin kokoa */
+  max-width: 100%;
+  font-size: 1.2cqw;
   line-height: 1.1;
+  white-space: nowrap;
 }
 
 .sb-tool-key {
@@ -175,14 +177,19 @@
   opacity: 0.45;
 }
 
-.sb-tool.is-locked .sb-tool-icon,
-.sb-tool.is-locked .sb-tool-name {
+.sb-tool.is-locked .sb-tool-icon {
   opacity: 0.25;
+}
+
+/* Nimi jää luettavaksi lukon alle, jotta tietää, mikä rakennus avautuu */
+.sb-tool.is-locked .sb-tool-name {
+  opacity: 0.55;
 }
 
 .sb-tool-lock {
   position: absolute;
-  inset: 0;
+  /* Vain kuvakkeen alue: alareunaan jää tila nimelle, jotta tekstit eivät mene päällekkäin */
+  inset: 0 0 calc(1.2cqw * 1.1 + 0.5cqw);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -200,9 +207,20 @@
   stroke-width: 1.6;
 }
 
-/* Pieni näkymä (puhelin): nimet pois napeista, valitun nimi näkyy yläpuolella */
+/* Kapea näkymä: nimet olisivat liian pieniä luettaviksi, joten ne pois napeista.
+   Valitun nimi näkyy silti yläpuolella ja lukitun nimi title-vihjeessä. */
+@container (max-width: 640px) {
+  .sb-tool-name {
+    display: none;
+  }
+
+  .sb-tool-lock {
+    inset: 0;
+  }
+}
+
+/* Pieni näkymä (puhelin): myös näppäimet ja kääntönapin teksti pois */
 @container (max-width: 420px) {
-  .sb-tool-name,
   .sb-tool-key,
   .sb-tool-rotate span,
   .sb-tool-rotate kbd {
