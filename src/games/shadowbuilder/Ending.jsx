@@ -42,6 +42,7 @@ export default function Ending({ onDone }) {
 
       <div className="sb-end-guardian" aria-hidden="true">
         <Guardian mood="iloinen" />
+        <span className="sb-end-flare" />
         {MOTES.map(([x, delay, rise]) => (
           <span
             key={`${x}-${delay}`}
