@@ -12,7 +12,7 @@
 
 import { profile, socials } from './profile.js';
 import { PROJECTS, projectAction } from './projects.js';
-import { work, education, skills, languages, certificates, courses, hobbies } from './cv.js';
+import { work, education, languages, certificates, courses, hobbies } from './cv.js';
 import { GAMES } from './games.js';
 
 export const MAX_INPUT = 200;
@@ -21,6 +21,24 @@ export const MAX_INPUT = 200;
 export const GREETING =
   'Hei! Olen Jari-Bot. Kerron mielelläni Jarin osaamisesta, projekteista ja CV:stä. Mitä haluaisit tietää?';
 export const START_CHIPS = ['about', 'skills', 'projects', 'games', 'cv', 'contact'];
+
+// Kaikki aiheet siinä järjestyksessä, jossa niitä tarjotaan napeiksi
+const ALL_CHIPS = [
+  'about', 'skills', 'projects', 'wip', 'games', 'work', 'education', 'certs',
+  'languages', 'hobbies', 'location', 'job', 'cv', 'contact', 'site', 'privacy',
+];
+const CHIP_COUNT = 6;
+
+// Vastauksen alle näytettävät napit: ensin vastaukseen liittyvät aiheet, sitten aiheet,
+// joita ei ole vielä kysytty. Näin koko sisällön voi käydä läpi pelkillä napeilla.
+export function chipsFor(answer, asked) {
+  const pool = [...new Set([...(answer.chips ?? []), ...ALL_CHIPS])].filter(
+    (id) => id !== answer.topic && CHIP_LABELS[id],
+  );
+  const fresh = pool.filter((id) => !asked.has(id));
+  // Kun kaikki on kysytty, tarjotaan taas liittyvät aiheet
+  return (fresh.length ? fresh : pool).slice(0, CHIP_COUNT);
+}
 
 // Aihenappien tekstit
 export const CHIP_LABELS = {
@@ -32,10 +50,13 @@ export const CHIP_LABELS = {
   work: 'Työkokemus',
   education: 'Koulutus',
   certs: 'Sertifikaatit',
+  languages: 'Kielitaito',
   cv: 'CV',
   hobbies: 'Harrastukset',
   job: 'Onko Jari vapaana?',
   contact: 'Ota yhteyttä',
+  location: 'Missä Jari asuu?',
+  site: 'Miten tämä sivu on tehty?',
   privacy: 'Tietosuoja',
 };
 
@@ -95,6 +116,7 @@ export function safeHref(href) {
 const TOPICS = [
   { id: 'bot', words: ['botti', 'botit', 'kuka sinä', 'kuka sä', 'mikä sinä', 'mikä sä', 'tekoäly', 'ai botti', 'chatbot'] },
   { id: 'privacy', words: ['tietosuoj', 'eväst', 'seuran', 'yksityis', 'tallenn', 'gdpr', 'analytiik'] },
+  { id: 'site', words: ['tämä sivu', 'tämän sivun', 'sivusto', 'sivu tehty', 'millä tehty', 'miten tehty', 'tehty sivu', 'vite', 'tekniikka sivu'] },
   { id: 'wip', words: ['työn alla', 'kesken', 'tekeillä', 'tulossa', 'työnalla', 'teossa'] },
   { id: 'games', words: ['peli', 'pelej', 'pelaa', 'pelialue', 'zrunner', 'spacedriver', 'shadowbuilder', 'phaser'] },
   { id: 'certs', words: ['sertifik', 'serti', 'kurssi', 'kurssej', 'freecodecamp', 'credly', 'todistu'] },
@@ -176,13 +198,6 @@ const TECHS = [
 const list = (items) =>
   items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} ja ${items.at(-1)}`;
 
-// Suomenkielinen yleisnimi pienellä lauseen keskellä ("Tietoliikenteen perusteet"),
-// tuotenimet ennallaan ("React", "Robot Framework")
-const midSentence = (item) =>
-  /^[A-ZÄÖ][a-zäö]+ [a-zäö]/.test(item) && !/^Robot /.test(item)
-    ? item[0].toLowerCase() + item.slice(1)
-    : item;
-
 const projectLink = (p) => {
   const action = projectAction(p);
   return { label: `${action.label}: ${p.name}`, href: p.url, external: true };
@@ -232,7 +247,9 @@ const ANSWERS = {
   }),
 
   skills: () => ({
-    text: `Jari osaa ${list(skills.map(midSentence))}. Projekteissa on käytetty myös esimerkiksi MongoDB:tä, Firebasea, PHP:tä, OpenAI:n rajapintaa ja Phaser-pelimoottoria.`,
+    // Kirjoitettu käsin sujuvaksi kokonaisuudeksi (CV:n taitolista on cv.js:ssä).
+    // \n\n jakaa kappaleisiin (JariBotChat.css: white-space: pre-line).
+    text: 'Jari tekee web-sovelluksia sekä käyttöliittymän että palvelimen puolella. Käyttöliittymät syntyvät Reactilla tai Vanilla JavaScriptillä, HTML:llä ja CSS:llä, ja palvelinpuolella hän käyttää Node.js:ää ja PHP:tä. Tietokannoista tuttuja ovat MySQL, MongoDB ja Firebase, ja projekteissa on hyödynnetty myös OpenAI:n rajapintaa, Phaser-pelimoottoria ja WordPressiä.\n\nTestaukseen Jari käyttää Robot Frameworkia, hakukoneoptimointiin Screaming Frog SEO Spideria ja tietoturvaskannaukseen OWASP ZAPia. Grafiikat syntyvät Adobe Photoshopilla ja Illustratorilla, ja projektien trailerit on editoitu Adobe Premiere Prolla.\n\nOhjelmoinnin apuna Jari käyttää tekoälytyökaluja: ChatGPT, Claude, Codex, Claude Code ja GitHub Copilot. Lisäksi hän tuntee tietoliikenteen perusteet ja verkon aktiivilaitteet.',
     links: [{ label: 'Näytä CV', section: SECTION.cv }],
     chips: ['projects', 'certs', 'languages'],
   }),
@@ -324,6 +341,12 @@ const ANSWERS = {
     chips: ['job', 'privacy'],
   }),
 
+  site: () => ({
+    text: 'Jari on tehnyt tämän sivun itse Reactilla ja Vitellä. Animaatiot on tehty CSS:llä ja motion-kirjastolla, taustan partikkelit canvasilla ja pelit Phaser-pelimoottorilla sekä Reactilla ja SVG:llä. Minäkin olen piirretty SVG:llä, ja vastaukseni tulevat samoista tiedoista kuin sivu. Sivulla ei ole evästeitä eikä seurantaa, ja tietoturvaotsakkeet ovat kunnossa.',
+    links: [{ label: 'Pelialueelle', page: 'pelit' }],
+    chips: ['projects', 'games', 'privacy'],
+  }),
+
   privacy: () => ({
     text: 'Sivustolla ei ole evästeitä, analytiikkaa eikä seurantaa. Minäkään en tallenna enkä lähetä viestejäsi minnekään: keskustelu katoaa, kun suljet sivun. Pelit tallentavat ennätykset vain selaimeesi.',
     chips: START_CHIPS,
@@ -340,8 +363,11 @@ const FALLBACK = {
 };
 
 // Pääfunktio: kävijän kysymys → vastaus. Aihenapin painallus antaa suoraan aiheen id:n.
+// Aiheen vastaus, johon on merkitty aihe (napeista jätetään pois juuri kysytty)
+const answerTopic = (id) => ({ ...ANSWERS[id](), topic: id });
+
 export function reply(input, topicId) {
-  if (topicId && ANSWERS[topicId]) return ANSWERS[topicId]();
+  if (topicId && ANSWERS[topicId]) return answerTopic(topicId);
 
   const text = normalize(input);
   if (!text) return FALLBACK;
@@ -363,5 +389,5 @@ export function reply(input, topicId) {
     }
   }
 
-  return topic ? ANSWERS[topic]() : FALLBACK;
+  return topic ? answerTopic(topic) : FALLBACK;
 }

@@ -118,6 +118,8 @@
   font-size: 0.92rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
+  /* Pitkä vastaus voi olla useassa kappaleessa (\n\n jaribot.js:ssä) */
+  white-space: pre-line;
 }
 
 .jaribot-msg--user .jaribot-msg-text {

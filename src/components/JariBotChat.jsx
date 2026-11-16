@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CHIP_LABELS, GREETING, MAX_INPUT, START_CHIPS, cleanInput, reply, safeHref } from '../data/jaribot.js';
+import { CHIP_LABELS, GREETING, MAX_INPUT, START_CHIPS, chipsFor, cleanInput, reply, safeHref } from '../data/jaribot.js';
 import { linkHref } from '../data/nav.js';
 import './JariBotChat.css';
 
@@ -31,6 +31,8 @@ export default function JariBotChat({ page, onClose, onTalkingChange }) {
   const home = page !== 'pelit';
 
   const typingMsg = messages.find((m) => m.id === typing?.id);
+  // Jo kysytyt aiheet: niitä ei tarjota uudestaan napeiksi
+  const asked = new Set(messages.map((m) => m.topic).filter(Boolean));
   const isTyping = Boolean(typingMsg && typing.shown < typingMsg.text.length);
 
   // Kirjoitusanimaatio: merkkejä lisää askel kerrallaan
@@ -140,9 +142,9 @@ export default function JariBotChat({ page, onClose, onTalkingChange }) {
                 </div>
               )}
 
-              {done && last && m.chips?.length > 0 && (
+              {done && last && m.from === 'bot' && (
                 <div className="jaribot-chips">
-                  {m.chips.map((id) => (
+                  {chipsFor(m, asked).map((id) => (
                     <button key={id} type="button" className="jaribot-chip" onClick={() => ask(CHIP_LABELS[id], id)}>
                       {CHIP_LABELS[id]}
                     </button>

@@ -2,7 +2,7 @@
 /* Oikeassa alakulmassa kaikkien osioiden päällä, mutta navin mobiilivalikon (50) ja
    modaalien (100) alla, jotta ne peittävät botin. */
 .jaribot {
-  --jb-size: 92px;
+  --jb-size: 120px;
 
   position: fixed;
   right: max(14px, env(safe-area-inset-right));
@@ -96,7 +96,7 @@ body:has(.modal--game) .jaribot {
 /* Puhelin: pienempi hahmo, ettei se peitä sisältöä */
 @media (max-width: 600px) {
   .jaribot {
-    --jb-size: 68px;
+    --jb-size: 84px;
   }
 
   /* Kosketusnäytöllä ei hoveria, joten kuplaa ei näytetä */
