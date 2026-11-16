@@ -119,6 +119,14 @@ Kaupunginrakennus tyhjästä: kaupunki katosi yhtenä yönä varjoihin, ja varjo
 - **Rakenne:** React, SVG ja CSS ilman pelimoottoria. Talous on puhtaita funktioita (`economy.js`), joita sama koodi käyttää peliin ja tasapainon simulointiin. Kaikki grafiikka on piirretty koodilla isometrisessä projektiossa.
 - **Ilme:** violetti neon ja tumma lasi, kaksoisviivakehykset ja Cinzel-fontti.
 
+### Jari-Bot
+- Kelluva opas oikeassa alakulmassa sekä etusivulla että pelialueella: robottihahmo, jossa on tekijän piirteet. Piirretty SVG:llä, leijuu ja räpyttelee silmiään, ja hiiren alla hehku voimistuu ja viereen tulee puhekupla.
+- Klikkaus avaa keskusteluikkunan. Botti vastaa kysymyksiin osaamisesta, projekteista (myös yksittäisestä projektista nimellä tai tekniikan mukaan), peleistä, CV:stä, harrastuksista, työtilanteesta, yhteydenotosta ja tietosuojasta. Aihenapit ehdottavat jatkokysymyksiä, ja vastausten napit vievät oikeaan osioon tai pelialueelle.
+- Vastaus kirjoittuu näkyviin merkki kerrallaan, ja hahmon suu liikkuu samalla.
+- Sääntöpohjainen, ei tekoälyä: kysymyksen aihe tunnistetaan avainsanoista, ja vastaukset muodostetaan samoista `src/data/`-tiedostoista kuin sivu. Kun projekti tai CV muuttuu, botti tietää sen heti.
+- Puhelinnumeroa ja sähköpostia botti ei kerro, vaan ohjaa yhteydenottolomakkeeseen ja somekanaviin.
+- Keskusteluikkuna ladataan erillisenä palana vasta, kun botti avataan ensimmäisen kerran. Pelin ollessa auki botti piiloutuu.
+
 ### Muuta
 - Hiireen reagoiva partikkelitausta canvasilla
 - Navigaatio korostaa näkyvissä olevan osion tai sivun ja vie pelialueelta suoraan etusivun oikeaan osioon
@@ -140,8 +148,8 @@ public/          kopioidaan buildissa sellaisenaan dist-kansioon
   favicon.svg    sivuston kuvake
   robots.txt     ohjeet hakukoneille
 src/
-  data/          sisältö: esittely, projektit, CV, pelit ja navigaation linkit
-  components/    osiot, pelialue, modaali ja niiden tyylit
+  data/          sisältö: esittely, projektit, CV, pelit, navigaation linkit ja Jari-Botin vastaukset
+  components/    osiot, pelialue, modaali, Jari-Bot ja niiden tyylit
   pages/         pelialueen käynnistys ja sivun rakenne
   games/
     zrunner/     Z-Runner: pelikenttä (Phaser), välianimaatiot, äänet, kartat (maps/) ja tekijät
@@ -173,6 +181,7 @@ src/
 - Pelin animaatiot voi ohittaa näppäimistöllä (Ohita-nappi saa fokuksen)
 - Aloitusnäkymässä pääpainike (Jatka tai Aloita peli) saa fokuksen, ja tallennusten tyhjennyksessä fokus on Peru-napissa
 - Pääpainikkeiden kosketusalueet vähintään 44 × 44 px
+- Jari-Bot on oikea nappi, joka kertoo tilansa (auki tai kiinni). Keskusteluikkuna sulkeutuu Esc-näppäimellä ja palauttaa fokuksen hahmoon, ja ruudunlukija lukee uudet vastaukset
 
 ## Responsiivisuus
 
@@ -193,6 +202,7 @@ Asettelu on testattu desktopilla, tabletilla sekä puhelimella pysty- ja vaakati
 - Ei evästeitä, analytiikkaa eikä ulkoisia fontteja
 - Pelit toteutetaan kokonaan selaimessa: ei palvelinta, ei API-avaimia eikä ulkoisia lähteitä
 - Pelit tallentavat selaimen omaan muistiin (`localStorage`, avaimet muotoa `jaricode:<peli>:<nimi>`) vain ennätyksen ja keskeneräisen pelin jatkokohdan (Shadow Builderissa keskeneräisen kaupungin). Tallennus tehdään vasta pelatessa, ja pelin aloitus- tai loppuruudun Tyhjennä tallennukset -napilla ne saa poistettua. Äänten mykistys on vain muistissa, eikä sitä tallenneta.
+- **Jari-Bot:** kaikki tapahtuu selaimessa, eikä viestejä tallenneta eikä lähetetä minnekään. Kävijän teksti näytetään aina pelkkänä tekstinä (ei HTML:nä), sitä ei suoriteta eikä käytetä säännöllisenä lausekkeena, sen pituus on rajattu ja ohjausmerkit poistetaan. Botin linkit tulevat vain sivuston omasta datasta, ja ne tarkistetaan: sallittuja ovat sivuston omat osoitteet ja https-linkit.
 - YouTube-upotus ladataan vasta, kun kävijä käynnistää videon, ja se käyttää yksityisyyttä parantavaa tilaa
 - Repossa ei ole salaisuuksia
 

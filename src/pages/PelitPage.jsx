@@ -7,6 +7,7 @@ import Games from '../components/Games.jsx';
 import Footer from '../components/Footer.jsx';
 import Modal from '../components/Modal.jsx';
 import PrivacyPolicy from '../components/PrivacyPolicy.jsx';
+import JariBot from '../components/JariBot.jsx';
 
 export default function PelitPage() {
   // Footerin tietosuojalinkki toimii myös pelisivulla
@@ -20,6 +21,7 @@ export default function PelitPage() {
         <Games />
       </main>
       <Footer page="pelit" onOpenPrivacy={() => setPrivacyOpen(true)} />
+      <JariBot page="pelit" />
 
       <Modal
         open={privacyOpen}

@@ -1,0 +1,119 @@
+/* ═══ Kelluva Jari-Bot (JariBot.jsx) ═══ */
+/* Oikeassa alakulmassa kaikkien osioiden päällä, mutta navin mobiilivalikon (50) ja
+   modaalien (100) alla, jotta ne peittävät botin. */
+.jaribot {
+  --jb-size: 92px;
+
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 40;
+}
+
+/* Peli on auki: botti pois tieltä (pelin modaali piirretään bodyyn, ks. Modal.jsx) */
+body:has(.modal--game) .jaribot {
+  display: none;
+}
+
+.jaribot-button {
+  position: relative;
+  display: block;
+  width: var(--jb-size);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jaribot-button:focus-visible {
+  outline-offset: 0;
+  border-radius: 50%;
+}
+
+/* Leijuu hiljaa; hover ja fokus voimistavat hehkua ja kallistavat päätä */
+.jaribot-figure {
+  display: block;
+  filter: drop-shadow(0 0 6px rgb(41 224 255 / 0.45));
+  transition: filter 0.25s, transform 0.25s;
+  animation: jb-float 4s ease-in-out infinite;
+}
+
+.jaribot-button:hover .jaribot-figure,
+.jaribot-button:focus-visible .jaribot-figure,
+.jaribot.is-open .jaribot-figure {
+  filter: drop-shadow(0 0 10px rgb(41 224 255 / 0.8)) drop-shadow(0 0 22px rgb(255 61 200 / 0.45));
+}
+
+.jaribot-button:hover .jaribot-figure .jb-avatar,
+.jaribot-button:focus-visible .jaribot-figure .jb-avatar {
+  transform: rotate(-6deg);
+}
+
+.jaribot-figure .jb-avatar {
+  transition: transform 0.3s;
+  transform-origin: 50% 90%;
+}
+
+/* Puhekupla "Kysy minulta!": vain kun ikkuna on kiinni */
+.jaribot-bubble {
+  position: absolute;
+  right: calc(100% - 6px);
+  top: 18%;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--cyan);
+  border-radius: 999px 999px 4px 999px;
+  background: var(--ink-2);
+  box-shadow: 0 0 14px rgb(41 224 255 / 0.4);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(8px) scale(0.9);
+  transform-origin: right bottom;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+
+.jaribot-button:hover .jaribot-bubble,
+.jaribot-button:focus-visible .jaribot-bubble {
+  opacity: 1;
+  transform: none;
+}
+
+.jaribot.is-open .jaribot-bubble {
+  display: none;
+}
+
+@keyframes jb-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Puhelin: pienempi hahmo, ettei se peitä sisältöä */
+@media (max-width: 600px) {
+  .jaribot {
+    --jb-size: 68px;
+  }
+
+  /* Kosketusnäytöllä ei hoveria, joten kuplaa ei näytetä */
+  .jaribot-bubble {
+    display: none;
+  }
+}
+
+/* Tulostettaessa (CV) botti ei kuulu paperille */
+@media print {
+  .jaribot {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jaribot-figure {
+    animation: none;
+  }
+}

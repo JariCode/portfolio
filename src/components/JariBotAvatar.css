@@ -1,0 +1,151 @@
+/* ═══ Jari-Botin hahmo (JariBotAvatar.jsx) ═══ */
+/* Hahmon omat sävyt (parta, silmät, paita); neonvärit index.css:stä */
+.jb-avatar {
+  --jb-steel: #2a2148;
+  --jb-brow: #6c6380;
+  --jb-iris: #8a5a3a;
+  --jb-shirt: #2f3a2e;
+
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.jb-line,
+.jb-ear,
+.jb-neck {
+  fill: var(--jb-steel);
+  stroke: var(--violet);
+  stroke-width: 2;
+}
+
+.jb-head {
+  stroke: var(--cyan);
+  stroke-width: 3;
+}
+
+.jb-shine {
+  fill: none;
+  stroke: #fff;
+  stroke-opacity: 0.35;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.jb-stubble {
+  stroke: #8d84a8;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.jb-brow {
+  fill: none;
+  stroke: var(--jb-brow);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.jb-eye {
+  fill: var(--ink);
+  stroke: var(--cyan);
+  stroke-width: 2;
+}
+
+.jb-iris {
+  fill: var(--jb-iris);
+}
+
+.jb-spark {
+  fill: #fff;
+}
+
+.jb-nose {
+  fill: none;
+  stroke: var(--violet);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.jb-moustache {
+  fill: #4e465f;
+}
+
+.jb-mouth--smile {
+  fill: none;
+  stroke: var(--magenta);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.jb-mouth--open {
+  fill: var(--ink);
+  stroke: var(--magenta);
+  stroke-width: 2.5;
+  opacity: 0;
+}
+
+.jb-shirt {
+  fill: var(--jb-shirt);
+  stroke: var(--cyan);
+  stroke-width: 2;
+}
+
+.jb-shirt-text {
+  fill: var(--cyan);
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.jb-antenna {
+  fill: var(--magenta);
+  animation: jb-antenna 2.4s ease-in-out infinite;
+}
+
+/* Silmät räpsyvät muutaman sekunnin välein */
+.jb-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: jb-blink 5s infinite;
+}
+
+/* Puhe: suu auki ja kiinni vuorotellen. Vierekkäiset prosentit eivätkä steps(): ks. ohjeet,
+   steps(…, end) voi jäädä väärään tilaan */
+.jb-avatar.is-talking .jb-mouth--open {
+  animation: jb-talk-open 0.26s linear infinite;
+}
+
+.jb-avatar.is-talking .jb-mouth--smile {
+  animation: jb-talk-smile 0.26s linear infinite;
+}
+
+@keyframes jb-antenna {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes jb-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@keyframes jb-talk-open {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes jb-talk-smile {
+  0%, 49% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jb-antenna,
+  .jb-eyes,
+  .jb-avatar.is-talking .jb-mouth--open,
+  .jb-avatar.is-talking .jb-mouth--smile {
+    animation: none;
+  }
+}
