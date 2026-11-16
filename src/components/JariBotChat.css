@@ -4,7 +4,7 @@
 .jaribot-chat {
   position: absolute;
   right: 0;
-  bottom: calc(var(--jb-size) + 10px);
+  bottom: calc(var(--jb-size) * 1.15 + 16px);
   display: flex;
   flex-direction: column;
   width: min(370px, calc(100vw - 28px));
