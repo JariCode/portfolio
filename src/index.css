@@ -70,6 +70,24 @@ html {
     /* Vierityspalkin tila varataan aina, jotta navi ja sisältö eivät hyppää sivusuunnassa
      sivulla, joka mahtuu näytölle ilman vieritystä (pelialue) */
   scrollbar-gutter: stable;
+  /* Teeman mukainen vierityspalkki: syaani kahva tumman pohjan päällä (Chrome, Edge, Firefox) */
+  scrollbar-color: rgb(41 224 255 / 0.55) var(--ink);
+}
+
+/* Safari ei tue scrollbar-coloria, joten sille sama ilme webkit-säännöillä.
+   Vain sivun oma palkki (html), jotta muiden vierityslaatikoiden ilme ei muutu. */
+html::-webkit-scrollbar {
+  width: 10px;
+}
+
+html::-webkit-scrollbar-track {
+  background: var(--ink);
+}
+
+html::-webkit-scrollbar-thumb {
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: linear-gradient(var(--cyan), var(--magenta));
 }
 
 body {
