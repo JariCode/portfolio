@@ -10,6 +10,7 @@ import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
 import Modal from './components/Modal.jsx';
 import PrivacyPolicy from './components/PrivacyPolicy.jsx';
+import JariBot from './components/JariBot.jsx';
 
 export default function App() {
   // Tietosuojaseloste avataan sekä lomakkeen alta että footerista, joten tila on täällä
@@ -37,6 +38,7 @@ export default function App() {
         <Contact onOpenPrivacy={openPrivacy} />
       </main>
       <Footer onOpenPrivacy={openPrivacy} />
+      <JariBot />
 
       <Modal
         open={privacyOpen}
