@@ -95,8 +95,12 @@ body:has(.modal--game) .jaribot {
 
 /* Puhelin: pienempi hahmo, ettei se peitä sisältöä */
 @media (max-width: 600px) {
+  /* Lähemmäs alareunaa: puhelimella (varsinkin iPhonen Safarissa työkalurivin yllä)
+     14 px:n väli ja leijunta nostivat hahmon turhan korkealle */
   .jaribot {
     --jb-size: 84px;
+    right: 8px;
+    bottom: 2px;
   }
 
   /* Kosketusnäytöllä ei hoveria, joten kuplaa ei näytetä */
