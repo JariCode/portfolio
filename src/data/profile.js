@@ -3,7 +3,7 @@
 export const profile = {
   name: 'Jari Karri',
   brand: 'JariCode',
-  role: 'Web-ohjelmistokehittäjä',
+  role: 'Ohjelmistokehittäjä',
   location: 'Kerava',
   email: 'jari.karri@elisanet.fi',
   phone: '045 898 5655',
