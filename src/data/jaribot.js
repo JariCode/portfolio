@@ -1,6 +1,7 @@
 // Jari-Botin "aivot": tunnistaa kysymyksen aiheen avainsanoista ja muodostaa vastauksen
 // sivun omista tiedoista. Ei tekoälyä eikä verkkoa: kaikki tapahtuu selaimessa, ja kun
-// projektit tai CV muuttuvat, botti tietää muutoksen heti.
+// projektit, pelit tai CV muuttuvat, botti tietää muutoksen heti. Poikkeus: "Mitä Jari osaa?"
+// on kirjoitettu käsin (skills), joten uusi taito lisätään myös sinne.
 //
 // Turvallisuus:
 //  - Kävijän teksti käsitellään vain merkkijonona (includes), sitä ei koskaan suoriteta,
@@ -60,7 +61,7 @@ export const CHIP_LABELS = {
   privacy: 'Tietosuoja',
 };
 
-// Sisäiset linkit: osion id etusivulla. Botti muuttaa ne sivun mukaan (linkTo).
+// Sisäiset linkit: osion id etusivulla. JariBotChat muuttaa ne sivun mukaan (hrefOf).
 const SECTION = {
   about: 'esittely',
   projects: 'projektit',
@@ -128,7 +129,7 @@ const TOPICS = [
   { id: 'languages', words: ['kielitai', 'puhuu', 'englant', 'suomen kiel', 'kielet', 'kieliä'] },
   { id: 'skills', words: ['osaa', 'osaamin', 'taito', 'taitaa', 'tekniik', 'teknolog', 'ohjelmointikiel', 'stack', 'työkalu', 'react', 'node', 'javascript', 'html', 'css', 'mysql', 'robot framework', 'wordpress', 'frontend', 'backend', 'fullstack'] },
   { id: 'projects', words: ['projekt', 'sovellu', 'portfolio', 'tehnyt', 'tehdyt', 'töitä', 'näyt', 'demo', 'traileri', 'appi', 'äpp'] },
-  { id: 'hobbies', words: ['harrast', 'vapaa-aj', 'vapaaaj', 'koira', 'kamppailu', 'judo', 'valokuv', 'videokuv', 'musiik', 'elokuv', 'retkeil', 'liikun'] },
+  { id: 'hobbies', words: ['harrast', 'vapaaaj', 'koira', 'kamppailu', 'judo', 'valokuv', 'videokuv', 'musiik', 'elokuv', 'retkeil', 'liikun'] },
   { id: 'location', words: ['missä', 'asuu', 'sijain', 'kerava', 'paikkakun', 'kaupunki', 'etätyö', 'etänä'] },
   { id: 'about', words: ['kuka', 'kerro jari', 'kerro itse', 'esittel', 'tausta', 'jari karri', 'kuka on'] },
   { id: 'thanks', words: ['kiitos', 'kiitti', 'kiitoksia', 'thanks'] },

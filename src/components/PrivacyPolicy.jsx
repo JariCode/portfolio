@@ -1,7 +1,7 @@
 import { profile } from '../data/profile.js';
 import './PrivacyPolicy.css';
 
-const UPDATED = '26.10.2026'; // päivitä, kun sisältö muuttuu
+const UPDATED = '16.11.2026'; // päivitä, kun sisältö muuttuu
 
 // Lyhyt tietosuojaseloste: sivu kerää tietoja vain yhteydenottolomakkeella
 export default function PrivacyPolicy() {
@@ -15,7 +15,9 @@ export default function PrivacyPolicy() {
           <h3>Mitä tietoja kerätään</h3>
           <p>
             Vain ne tiedot, jotka itse annat yhteydenottolomakkeella: nimi, sähköpostiosoite ja viesti.
-            Viesti tulee sähköpostiini, eikä sivusto tallenna sitä mihinkään.
+            Viesti tulee sähköpostiini, eikä sivusto tallenna sitä mihinkään. Jari-Botille
+            kirjoittamiasi kysymyksiä ei tallenneta eikä lähetetä minnekään: botti toimii kokonaan
+            selaimessasi, ja keskustelu katoaa, kun suljet sivun.
           </p>
         </section>
 
