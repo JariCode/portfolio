@@ -275,11 +275,17 @@
   50%, 100% { opacity: 0; }
 }
 
-/* Puhelin: ikkuna lähes koko leveydelle */
-@media (max-width: 600px) {
+/* Puhelin: ikkuna lähes koko leveydelle ja keskelle. Kiinnitetään näkymän reunoihin eikä
+   100vw:hen, koska 100vw sisältää vierityspalkin leveyden ja siirtäisi ikkunaa sivuun.
+   Alareuna = botin paikka (JariBot.css, 2px) + hahmon korkeus + väli.
+   Ei matalalla näytöllä: vaakatilassa ikkuna on hahmon vieressä (alempana). */
+@media (max-width: 600px) and (min-height: 501px) {
   .jaribot-chat {
-    width: calc(100vw - 20px);
-    right: -4px;
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: calc(2px + var(--jb-size) * 1.15 + 16px);
+    width: auto;
   }
 }
 
