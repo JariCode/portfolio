@@ -93,6 +93,24 @@
   list-style: none;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* Ohut neonvierityspalkki (Chrome, Edge, Firefox) */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(41 224 255 / 0.55) transparent;
+}
+
+/* Safari ei tue scrollbar-coloria, joten sille sama ilme webkit-säännöillä */
+.jaribot-chat-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.jaribot-chat-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.jaribot-chat-list::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: linear-gradient(var(--cyan), var(--magenta));
+  box-shadow: 0 0 6px rgb(41 224 255 / 0.6);
 }
 
 .jaribot-msg {

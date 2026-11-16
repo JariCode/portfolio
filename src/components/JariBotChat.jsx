@@ -131,9 +131,7 @@ export default function JariBotChat({ page, onClose, onTalkingChange }) {
                       key={l.label}
                       className="jaribot-link"
                       href={l.url}
-                      {...(l.external
-                        ? { target: '_blank', rel: 'noopener noreferrer' }
-                        : { onClick: onClose })}
+                      {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                     >
                       {l.label}
                       {l.external && <span className="sr-only"> (avautuu uuteen välilehteen)</span>}
