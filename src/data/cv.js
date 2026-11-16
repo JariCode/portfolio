@@ -28,7 +28,7 @@ export const work = [
 
 // cv: false = näkyy vain sivun koulutusaikajanalla, ei tulostettavassa CV:ssä
 export const education = [
-  { time: '17.9.2026', title: 'Tieto- ja viestintätekniikan perustutkinto', text: 'Web-ohjelmistokehittäjä' },
+  { time: '17.9.2026', title: 'Tieto- ja viestintätekniikan perustutkinto', text: 'Ohjelmistokehittäjä' },
   { time: '22.3.2024', title: 'Luottamusmiesten jatkokurssi', text: 'Murikka-opisto', cv: false },
   { time: '29.9.2023', title: 'Luottamusmiesten peruskurssi', text: 'Murikka-opisto', cv: false },
   { time: '14.4.2016', title: 'Autoalan perustutkinto', text: 'Autonasentaja' },
