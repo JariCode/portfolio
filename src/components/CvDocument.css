@@ -82,6 +82,15 @@
   font-size: 0.88rem;
 }
 
+.cvd-profile {
+  margin-bottom: 1.8rem;
+}
+
+.cvd-profile p {
+  max-width: none;
+  color: var(--muted);
+}
+
 .cvd-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr);
@@ -112,6 +121,18 @@
   color: var(--magenta);
 }
 
+/* Kurssit pääpalstassa kahteen sarakkeeseen */
+.cvd-list--cols {
+  display: block;
+  columns: 2;
+  column-gap: 2rem;
+}
+
+.cvd-list--cols li {
+  break-inside: avoid;
+  margin-bottom: 0.3rem;
+}
+
 .cvd-entry + .cvd-entry {
   margin-top: 1rem;
 }
@@ -133,6 +154,10 @@
 }
 
 @media (max-width: 640px) {
+  .cvd-list--cols {
+    columns: 1;
+  }
+
   .cvd-header {
     flex-direction: column;
     align-items: flex-start;
@@ -210,28 +235,31 @@
   .cvd {
     padding: 0;
     color: #111;
-    font-size: 9.5pt;
-    line-height: 1.45;
+    font-size: 9pt;
+    line-height: 1.4;
   }
 
   .cvd-header {
     gap: 1.2rem;
-    padding-bottom: 0.9rem;
-    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.7rem;
   }
 
   .cvd-photo {
-    width: 85px;
-    height: 106px;
+    width: 72px;
+    height: 90px;
   }
 
   .cvd-body {
     gap: 1.6rem;
   }
 
-  .cvd-side,
+  .cvd-side {
+    gap: 0.7rem;
+  }
+
   .cvd-main {
-    gap: 1rem;
+    gap: 0.7rem;
   }
 
   .cvd-heading {
@@ -239,15 +267,24 @@
   }
 
   .cvd-list {
-    gap: 0.1rem;
+    gap: 0;
+  }
+
+  .cvd-list--cols li {
+    margin-bottom: 0;
   }
 
   .cvd-entry + .cvd-entry {
-    margin-top: 0.5rem;
+    margin-top: 0.3rem;
+  }
+
+  .cvd-profile {
+    margin-bottom: 0.7rem;
   }
 
   .cvd a,
   .cvd-contact,
+  .cvd-profile p,
   .cvd-main p,
   .cvd-entry p {
     color: #222;

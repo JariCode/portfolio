@@ -46,6 +46,12 @@ export default function CvDocument() {
           </div>
         </header>
 
+        {/* Profiili koko leveydeltä otsikon alla */}
+        <section className="cvd-profile">
+          <h4 className="cvd-heading">Profiili</h4>
+          <p>{cvProfile}</p>
+        </section>
+
         <div className="cvd-body">
           <aside className="cvd-side">
             <section>
@@ -87,23 +93,9 @@ export default function CvDocument() {
                 ))}
               </ul>
             </section>
-
-            <section>
-              <h4 className="cvd-heading">Kurssit</h4>
-              <ul className="cvd-list">
-                {courses.map((c) => (
-                  <li key={c}>{c}</li>
-                ))}
-              </ul>
-            </section>
           </aside>
 
           <div className="cvd-main">
-            <section>
-              <h4 className="cvd-heading">Profiili</h4>
-              <p>{cvProfile}</p>
-            </section>
-
             <section>
               <h4 className="cvd-heading">Työkokemus</h4>
               <Entries items={work} />
@@ -113,6 +105,15 @@ export default function CvDocument() {
               <h4 className="cvd-heading">Koulutus</h4>
               {/* Vain CV:hen kuuluvat koulutukset (cv: false jätetään pois) */}
               <Entries items={education.filter((e) => e.cv !== false)} />
+            </section>
+
+            <section>
+              <h4 className="cvd-heading">Kurssit</h4>
+              <ul className="cvd-list cvd-list--cols">
+                {courses.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
             </section>
 
             <section>
