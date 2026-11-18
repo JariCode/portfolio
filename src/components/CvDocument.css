@@ -137,6 +137,17 @@
   margin-top: 1rem;
 }
 
+/* Koulutus kahteen sarakkeeseen (uusin vasemmalla ylhäällä), kuten kurssit */
+.cvd-entries--cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 2rem;
+}
+
+.cvd-entries--cols .cvd-entry + .cvd-entry {
+  margin-top: 0;
+}
+
 .cvd-entry h4 {
   font-family: var(--font-body);
   font-size: 1rem;
@@ -156,6 +167,10 @@
 @media (max-width: 640px) {
   .cvd-list--cols {
     columns: 1;
+  }
+
+  .cvd-entries--cols {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .cvd-header {
@@ -235,8 +250,8 @@
   .cvd {
     padding: 0;
     color: #111;
-    font-size: 9pt;
-    line-height: 1.4;
+    font-size: 9.5pt;
+    line-height: 1.45;
   }
 
   .cvd-header {
@@ -259,7 +274,7 @@
   }
 
   .cvd-main {
-    gap: 0.7rem;
+    gap: 0.9rem;
   }
 
   .cvd-heading {
@@ -275,7 +290,11 @@
   }
 
   .cvd-entry + .cvd-entry {
-    margin-top: 0.3rem;
+    margin-top: 0.45rem;
+  }
+
+  .cvd-entries--cols {
+    gap: 0.3rem 1.5rem;
   }
 
   .cvd-profile {

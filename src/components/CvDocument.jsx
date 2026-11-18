@@ -103,8 +103,10 @@ export default function CvDocument() {
 
             <section>
               <h4 className="cvd-heading">Koulutus</h4>
-              {/* Vain CV:hen kuuluvat koulutukset (cv: false jätetään pois) */}
-              <Entries items={education.filter((e) => e.cv !== false)} />
+              {/* Vain CV:hen kuuluvat koulutukset (cv: false jätetään pois), kahdessa sarakkeessa */}
+              <div className="cvd-entries--cols">
+                <Entries items={education.filter((e) => e.cv !== false)} />
+              </div>
             </section>
 
             <section>
