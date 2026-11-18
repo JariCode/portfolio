@@ -37,8 +37,10 @@ export const education = [
 ];
 
 export const skills = [
-  'HTML', 'CSS', 'JavaScript', 'React', 'Node.js', 'WordPress', 'MySQL',
-  'Robot Framework', 'Tietoliikenteen perusteet', 'Verkon aktiivilaitteet',
+  'HTML, CSS', 'JavaScript', 'React', 'Node.js', 'WordPress', 'MySQL', 'MongoDB Atlas',
+  'REST API:t', 'Robot Framework', 'Screaming Frog SEO Spider', 'OWASP ZAP',
+  'Tietoliikenteen perusteet', 'Verkon aktiivilaitteet', 'Figma', 'draw.io',
+  'Adobe Photoshop', 'Adobe Illustrator', 'Adobe Premiere Pro',
 ];
 
 export const languages = ['Suomi – äidinkieli', 'Englanti – hyvä'];
