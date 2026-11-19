@@ -24,6 +24,10 @@ export const work = [
     title: 'Sekatyömies',
     text: 'Hirviaita-, koirapuisto- ja varastorakennuskeikkoja armeijan jälkeen ennen ensimmäistä vakituista työpaikkaa.',
   },
+  {
+    title: 'TV-avustaja',
+    text: 'TV-avustajana muun muassa sarjoissa Koukussa ja Black Widows.'
+}
 ];
 
 // cv: false = näkyy vain sivun koulutusaikajanalla, ei tulostettavassa CV:ssä
