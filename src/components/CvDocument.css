@@ -206,10 +206,13 @@
     background: #fff !important;
   }
 
+  /* width: auto, koska iPhone laskee 100vw:n puhelimen näytöstä eikä paperista,
+     jolloin CV jäi kapeaksi ja venyi kahdelle sivulle */
   .modal-backdrop:has(.modal--doc) {
     position: static;
     inset: auto;
     display: block;
+    width: auto;
     height: auto;
     min-height: 0;
     padding: 0;
@@ -335,5 +338,13 @@
   .cvd-entry,
   .cvd section {
     break-inside: avoid; /* merkintä ei katkea kahdelle sivulle */
+  }
+}
+
+/* Puhelimet tulostavat isommalla mittakaavalla ja omilla marginaaleillaan:
+   pienennetään vain kosketuslaitteilla, työpöydän tuloste pysyy ennallaan */
+@media print and (pointer: coarse) {
+  .cvd {
+    zoom: 0.75;
   }
 }
