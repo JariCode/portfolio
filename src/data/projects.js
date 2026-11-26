@@ -17,6 +17,7 @@ export const PROJECTS = [
   { name: 'Nimeoniter',        desc: 'Pelillistetty tehtävienhallintasovellus.',          tech: ['React', 'Node.js', 'OpenAI'],     tags: ['React'], status: 'wip',  url: 'https://youtu.be/Imdgt3M-HI0?si=LDDxJaavs10G2sGU', img: 'img/nimeoniter.webp' },
   { name: 'Kreniter Mind',     desc: 'Projektien, tehtävien ja muistiinpanojen työtila.', tech: ['React', 'Node.js', 'OpenAI'],     tags: ['React'], status: 'wip',  url: 'https://youtu.be/Q8WitiBMVgw?si=qgQhBrtHrA1xFotg', img: 'img/kreniter-mind.webp' },
   { name: 'Selviytymiskori', desc: 'Puhelimeen asennettava ostoslistasovellus.',          tech: ['React', 'PWA'], tags: ['React'], status: 'done', url: 'https://selviytymiskori.jaricode.fi/', img: 'img/selviytymiskori.png', fit: 'contain' },
+  { name: 'Lemmyn Lenkit',     desc: 'Kuvapäiväkirja koiran kanssa tehdyistä lenkeistä.', tech: ['WordPress', 'Kartta'],           tags: [],        status: 'done', url: 'https://lemmynlenkit.jaricode.fi/',                img: 'img/lemmynlenkit.webp' },
 ];
 
 // Suodatinnapit: id vertautuu tags-kenttään, paitsi 'all' ja 'wip'

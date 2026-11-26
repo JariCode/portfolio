@@ -193,6 +193,7 @@ const TECHS = [
   { key: 'mysql', label: 'MySQL:ää', match: (p) => p.tech.includes('MySQL') },
   { key: 'mongo', label: 'MongoDB:tä', match: (p) => p.tech.some((t) => t.startsWith('MongoDB') || t === 'MERN') },
   { key: 'firebase', label: 'Firebasea', match: (p) => p.tech.includes('Firebase') },
+  { key: 'wordpress', label: 'WordPressiä', match: (p) => p.tech.includes('WordPress') },
 ];
 
 // Listaa nimet luontevasti: "A, B ja C"
