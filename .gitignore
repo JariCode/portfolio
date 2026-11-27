@@ -28,8 +28,22 @@ Thumbs.db
 *.sln
 *.sw?
 
+# Windowsin "ladattu internetistä" -merkinnät, syntyvät kun tiedostoja kopioidaan WSL:ään
+*:Zone.Identifier
+
 # Tiledin henkilökohtaiset ikkuna-asetukset (.tiled-project kuuluu repoon)
 *.tiled-session
+
+# Claude Coden asetukset ja ohjeet ovat vain omalla koneella
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+
+# Playwright-testien tulokset, raportit ja kuvakaappaukset
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
 
 # public-kansion kuvat, videot sekä pelien äänet, tilesetit ja hahmot (audio/, games/)
 # eivät kuulu versionhallintaan: osa on omia, osan lisenssi kieltää jakamisen sellaisenaan.
